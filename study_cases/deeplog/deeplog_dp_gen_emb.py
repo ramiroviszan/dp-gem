@@ -1,7 +1,4 @@
-
-from keras.layers import Embedding, LSTM, Dense, TimeDistributed, Flatten, Lambda
-from keras.models import Sequential, load_model
-from keras.optimizers import Adam
+from keras.models import load_model
 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -11,55 +8,56 @@ import plot_utils
 from data_utils import load_dataset_for_cbow, shuffle_dataset, unison_shuffled_copies, load_test, write_file
 from data_utils import stack_datasets, generate_batch_for_cbow, dataset_vocab, dataset_longest_seq, to_onehot
 
+from nn_trainer import NNTrainer
+from study_cases.deeplog.models import create_model
+
+
 class DeepLogDPGen:
 
-    def __init__(self, experiment, iteration, datasets_params, model_fullpath, train_params, pre_proba_matrix_fullpath, generation_params, to_privatize_output_fullpath):
+    def __init__(self, experiment, iteration, datasets_params, network_fullpath, network_params, pre_proba_matrix_fullpath, generation_params, to_privatize_output_fullpath):
+        self.experiment = experiment
+        self.iteration = iteration
+
         self.datasets_params = datasets_params
-        self.model_fullpath = model_fullpath.format(exp_name=experiment)
-        self.train_params = train_params
+        self.network_fullpath = network_fullpath.format(exp_name=experiment)
+        self.network_params = network_params
+
         self.pre_proba_matrix_fullpath = pre_proba_matrix_fullpath.format(exp_name=experiment)
         self.epsilon, _ = generation_params.values()
         self.to_privatize_output_fullpath = to_privatize_output_fullpath.format(exp_name=experiment)
+
         self._get_model()
         self._get_pre_proba_matrix()
         self._load_data_to_privatize()
 
     def _get_model(self):
         try:
-            self.model = load_model(self.model_fullpath)
+            self.model = load_model(self.network_fullpath)
         except:
-            print("\nModel", self.model_fullpath, "not found. Training started...")
-            self.model = self._train_model(*self.train_params.values())
+            print("\nModel", self.network_fullpath, "not found. Training started...")
+            self.model = self._train_model(*self.network_params.values())
 
         self.embedding = self.model.layers[0].get_weights()[0]
         self.vocab_size = self.embedding.shape[0]
 
-    def _train_model(self, context_size, emb_size, vocab_size, train_sessions):
+    def _train_model(self, model_type, vocab_size, emb_size, context_size, train_sessions):
+
+        t_sets = self.datasets_params['train']
         train = np.array([])
-        for dataset_fullpath, to_read in self.datasets_params['train']:
-            dataset = load_dataset_for_cbow(dataset_fullpath, to_read)
-            train = stack_datasets(train, dataset, 1)
+        for dataset_name in t_sets:
+            t_set = t_sets[dataset_name]
+            path = t_set["fullpath"].format(exp_name=self.experiment, iteration=self.iteration)
+            temp =  load_dataset_for_cbow(path, amount_to_load=t_set["to_read"])
+            train = stack_datasets(train, temp, 1)
         train = shuffle_dataset(train)
         
-        x_batch, y_batch = generate_batch_for_cbow(train, window_size = int(context_size*0.5))
-        y_batch_oh = to_onehot(y_batch, vocab_size)
+        train_x, train_y = generate_batch_for_cbow(train, window_size = int(context_size*0.5))
+        train_y_oh = to_onehot(train_y, vocab_size)
 
-        model = Sequential()
-        model.add(Embedding(input_dim=vocab_size, output_dim=emb_size, input_length=context_size, mask_zero=False))
-        model.add(Flatten())
-        model.add(Dense(vocab_size, activation='softmax', kernel_regularizer='l2'))
+        model = create_model(model_type, [vocab_size, emb_size, context_size])
+        trainer = NNTrainer()
+        model = trainer.train(model, self.network_fullpath, train_x, train_y_oh, train_sessions)
 
-        for key in train_sessions.keys():
-            print("\nTrain Session:", key)
-            session_info = train_sessions[key]
-            epochs, batch_size, lr = session_info.values()
-
-            model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=lr))
-
-            history = model.fit(x_batch, y_batch_oh, epochs = epochs, batch_size = batch_size, validation_split=0.2, verbose=1)
-            #plot_utils.plot(history)
-        
-        model.save(self.model_fullpath)
         return model
 
     def _get_pre_proba_matrix(self):
@@ -91,14 +89,17 @@ class DeepLogDPGen:
         np.save(self.pre_proba_matrix_fullpath, pre_proba_matrix, allow_pickle=True)
         return pre_proba_matrix
 
-    def _load_data_to_privatize(self):
+    def _load_data_to_privatize(self):        
+        t_sets = self.datasets_params['to_privatize']
         self.datasets_to_privatize = {}
-        for dataset_name, dataset_fullpath, to_read in self.datasets_params['to_privatize']:
-            dataset = np.array(load_test(dataset_fullpath, to_read))
-            self.datasets_to_privatize[dataset_name] = shuffle_dataset(dataset)
+        for dataset_name in t_sets:
+            t_set = t_sets[dataset_name]
+            path = t_set["fullpath"].format(exp_name=self.experiment)
+            temp = np.array(load_test(path, amount_to_load=t_set["to_read"]))
+            self.datasets_to_privatize[dataset_name] = shuffle_dataset(temp)
 
     def generate(self, iteration):
-        for dataset_name in self.datasets_to_privatize.keys():
+        for dataset_name in self.datasets_to_privatize:
             self._generate_synthetic(iteration, dataset_name, self.datasets_to_privatize[dataset_name])
 
     def _generate_synthetic(self, iteration, dataset_name, dataset):

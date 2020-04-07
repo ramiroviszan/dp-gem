@@ -19,6 +19,12 @@ data_path = ''
 
 
 def stack_datasets(first, second, axis=0, verbose=0):
+    if len(first) == 0:
+        return second
+
+    if len(second) == 0:
+        return first
+
     if axis == 0:
         if verbose > 0:
             print("Vertical stacking")
@@ -170,7 +176,7 @@ def generate_batch_for_cbow(data, window_size = 2):
 
 
 def write_file(dataset, filename_out):
-    file = open(data_path + str(filename_out) + '.txt','w')
+    file = open(data_path + str(filename_out),'w')
     for element in dataset:
         file.write(' '.join(map(str, np.array(element) + 1)))
         file.write('\n')
