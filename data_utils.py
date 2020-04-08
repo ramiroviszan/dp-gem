@@ -133,6 +133,7 @@ def load_dataset_for_lm(filename, window_size=-1, amount_to_load = -1):
 def load_test(filename, amount_to_load = 0):
     dataset = []
     with open(data_path + str(filename),  'r') as f:
+        print(len(f.readlines()))
         for index, line in enumerate(f.readlines()):
             if amount_to_load > 0 and index == amount_to_load:
                 break

@@ -4,6 +4,9 @@ import os
 import copy
 from os import listdir
 
+import random
+import numpy as np
+import time
 
 def discover_experiments():
     files_in_folder = [(name.split(".py")[0], "study_cases." + name.split(".py")[0]) for name in listdir("study_cases") if name.endswith(".py") and name != '__init__.py']
@@ -23,34 +26,78 @@ def main():
         exp = experiments[key]
         exp_path = create_exp_folder(key)
 
-        run_interations = exp['run_iterations']
+        if 'random_seed' in exp:
+            seed = exp['random_seed']
+            print('\n\n'Setting randoms to: seed)
+            np.random.seed(seed)
+            random.seed(seed)
+        else:
+            seed = int(time.time())
+            np.random.seed(seed)
+            random.seed(seed)
+            print('Warning, no random_seed in ' + key + '. Executing with: ' + seed)
+
+
+        print('\n\nData Preparation')
+        if 'data_preparation' in exp:
+            data_preparation = exp('data_preparation')   
+            data_skip = data_preparation.get('skip', True) #By default will skip
+            if data_skip:
+                print('\nSkipping Data Preparation')
+            else:
+                preparation_params = list(data_preparation.values())[1:] #[1:] removes skip param
+                preparation = hot_new(exp_path, 0, *preparation_params)
+                preparation.run()
 
         print('\n\nControl Tests')
-        for i in range(0, run_interations['control_test']):
-            print('\nControl Test Iteration:', i)
-            params = copy.deepcopy(exp['control_test'])
-            control_test = hot_new(exp_path, i, *params.values())
-            control_test.run_test()
+        if 'control_test' in exp:
+            control_test = exp['control_test']
+            control_iters = control_test.get('run_iterations', 0)
+            if control_iters == 0:
+                print('\nSkipping Control Test')
+            else:
+                for i in range(0, control_iters):
+                    print('\nControl Test Iteration:', i)
+                    control_params = list(control_test.values())[1:] #[1:] removes run_iterations param
+                    control = hot_new(exp_path, i, *control_params)
+                    control.run_test()
+        else:
+            print('\nWarning, no control_test found in ' + key + '. Skipping.)
 
         print('\n\nGenerator')
-        dp_gen_params = copy.deepcopy(exp['dp_gen'])
-        utility_test_params = copy.deepcopy(dp_gen_params['utility_test'])
-        dp_gen_params.pop('utility_test', None)
-        dp_gen = hot_new(exp_path, 0, *dp_gen_params.values())
-        for i in range(0, run_interations['dp_gen']):
-            print('\nGenerator Test Iteration:', i)
-            dp_gen.generate(i)
-            utility_params = copy.deepcopy(utility_test_params)
-            utility_test = hot_new(exp_path, i, *utility_params.values())
-            utility_test.run_test()
-
+        if 'dp_gen' in exp:  
+            dp_gen = exp['control_test']
+            gen_iters = dp_gen.get('run_iterations', 0)
+            utility_test = dp_gen('utility_test')   
+            utility_skip = utility_test.get('skip', False) #By default won't skip
+            if gen_iters == 0:
+                print('\nSkipping Generation')
+            else if gen_iters > 0:
+                gen_params = list(dp_gen.values())[1:-1]#1:-1 remove run_iterations and utility_tests from gen_params
+                gen = hot_new(exp_path, 0, *gen_params)
+                for i in range(0, gen_iters):
+                    print('\nGenerator Test Iteration:', i)
+                    gen.generate(i)
+                    if utility_skip:
+                        print('\nSkipping Utility Test', i)
+                    else:
+                        utility_params = list(utility_test.values())[1:] #[1:] removes skip param
+                        utility = hot_new(exp_path, i, *utility_params.values())
+                        utility.run_test()
+            else if gen_iters < 0:
+                print('\nSkipping Generation. Running Utility Test only:', abs(gen_iters), 'iterations with previously generated files! Hope they exist :)')
+                for i in range(0, abs(gen_iters)):
+                    utility_params = list(utility_test.values())[1:] #[1:] removes skip param
+                    utility = hot_new(exp_path, i, *utility_params.values())
+                    utility.run_test()
+        else:
+            print('\nWarning, no dp_gen found in ' + key + '. Skipping.)
 
 def hot_new(experiment, iteration, module_name, class_name, params):
     module = __import__(module_name, globals(), locals(), [class_name], 0)
     class_ = getattr(module, class_name)
     instance = class_(experiment, iteration, *params.values())
     return instance
-
 
 def create_exp_folder(key):
     exp_path = "experiments/" + str(key)
