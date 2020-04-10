@@ -25,13 +25,6 @@ def create_control_model(vocab_size):
 
 def create_utility_model(vocab_size):
     model = Sequential()
-    model.add(LSTM(128, return_sequences=True, input_shape=(None, 1,)))
-    model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
-
-    return model
-
-def create_utility_model2():
-    model = Sequential()
     model.add(LSTM(512, return_sequences=True, input_shape=(None, 1,)))
     model.add(LSTM(256, return_sequences=True))
     model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
