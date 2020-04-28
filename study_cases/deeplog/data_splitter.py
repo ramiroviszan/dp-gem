@@ -27,7 +27,7 @@ class DataSplitter:
         train, test = train_test_split(all_data, test_size=float(train_test_ratio))
         if train_val_ratio == 1.0:
             val = train
-            train = np.array([])
+            train = []
         else:
             train, val = train_test_split(train, test_size=float(train_val_ratio))
 
@@ -37,8 +37,7 @@ class DataSplitter:
 
 
     def _tweak_data(self, all_data):
-        all_data = all_data - 1 
-        all_data = np.array([np.append(seq, 1) for seq in all_data]) 
+        all_data = np.array([np.append(seq - 1, 0) for seq in all_data]) #-1 to optimize vocab and add 0 at the end for image ending
         return all_data
 
 

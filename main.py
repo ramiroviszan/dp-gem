@@ -8,101 +8,145 @@ import keras.backend as K
 
 from os import listdir
 
+
+def main():
+    experiments = discover_experiments()
+    for exp_name, exp in experiments.items():
+        skip = exp.get('skip', False)
+        if skip:
+            print('Skipping experiment:', exp_name)
+        else:
+            print('\n\n\n\nExperiment:', exp_name)
+            exp_path = create_exp_folder(exp_name)
+            set_random(exp)
+
+            print('\n\n\n\nData Preparation')
+            data_preparation_desc = exp.get('data_preparation', None)
+            run_data_preparation(data_preparation_desc, exp_name, exp_path)
+
+            print('\n\n\n\nControl Tests')
+            control_test_desc = exp.get('control_test', None)
+            run_control_tests(control_test_desc, exp_name, exp_path)
+
+            print('\n\n\n\nGenerator')
+            dp_gen_desc = exp.get('dp_gen', None)
+            run_generator(dp_gen_desc, exp_name, exp_path)
+
 def discover_experiments():
-    files_in_folder = [(name.split(".py")[0], "study_cases." + name.split(".py")[0]) for name in listdir("study_cases") if name.endswith(".py") and name != '__init__.py']
+    files_in_folder = [(name.split('.py')[0], 'experiments.' + name.split('.py')[0]) for name in listdir('experiments') if name.endswith('.py') and name != '__init__.py']
     experiments = {}
     for name, exp in files_in_folder:
         module = __import__(exp, globals(), locals(), ['experiment'], 0)
         experiments[name] = getattr(module, 'experiment')
     return experiments
 
-def main():
+def create_exp_folder(key):
+    exp_path = 'results/' + str(key)
+    try:
+        os.mkdir('results')
+    except OSError:
+        print('Directory creation failed: /results')
+    else:
+        print('Successfully created directory: /results')
 
-    experiments = discover_experiments()
+    try:
+        os.mkdir(exp_path)
+    except OSError:
+        print('Directory creation failed:', exp_path)
+    else:
+        print('Successfully created directory:', exp_path)
 
-    for key in experiments:
-        print('\n\nExperiment:', key)
-        exp = experiments[key]
-        exp_path = create_exp_folder(key)
+    return exp_path
 
-        if 'random_seed' in exp:
-            seed = exp['random_seed']
-            print('\n\nSetting randoms to:', seed)
-            np.random.seed(seed)
-            random.seed(seed)
+def set_random(exp):
+    random_seed = exp.get('random_seed', int(time.time()))
+    print('\n\n\n\nSetting random seed to:', random_seed)
+    np.random.seed(random_seed)
+    random.seed(random_seed)
+
+def run_data_preparation(data_preparation_desc, exp_name, exp_path):
+    if data_preparation_desc != None:
+        data_skip = data_preparation_desc.get('skip', True) #By default will skip
+        if data_skip:
+            print('\n\nSkipping Data Preparation')
         else:
-            seed = int(time.time())
-            np.random.seed(seed)
-            random.seed(seed)
-            print('Warning, no random_seed in ' + key + '. Executing with: ' + seed)
+            preparation_params = list(data_preparation_desc.values())[1:] #[1:] removes skip param
+            preparation = hot_new(exp_path, *preparation_params)
+            preparation.run()
+    else:
+        print('\n\nWarning, no data_preparation found in', exp_name, '- Skipping.')
 
-
-        print('\n\nData Preparation')
-        if 'data_preparation' in exp:
-            data_preparation = exp['data_preparation']
-            data_skip = data_preparation.get('skip', True) #By default will skip
-            if data_skip:
-                print('\nSkipping Data Preparation')
-            else:
-                preparation_params = list(data_preparation.values())[1:] #[1:] removes skip param
-                preparation = hot_new(exp_path, *preparation_params)
-                preparation.run()
-
-        print('\n\nControl Tests')
-        if 'control_test' in exp:
-            control_test = exp['control_test']
-            control_iters = control_test.get('run_iterations', 0)
-            if control_iters == 0:
-                print('\nSkipping Control Test')
-            else:
-                for i in range(0, control_iters):
-                    print('\nControl Test Iteration:', i)
-                    control_test_copy = copy.deepcopy(control_test)
-                    control_params = list(control_test_copy.values())[1:] #[1:] removes run_iterations param
-                    control = hot_new((exp_path, 0, i), *control_params)
-                    control.run_test()
+def run_control_tests(control_test_desc, exp_name, exp_path):
+    if control_test_desc != None:
+        control_iters = control_test_desc.get('run_iterations', 0)
+        if control_iters == 0:
+            print('\n\nSkipping Control Test')
         else:
-            print('\nWarning, no control_test found in', key, '- Skipping.')
+            for i in range(0, control_iters):
+                print('\n\nControl Test Iteration:', i)
+                control_test_copy = copy.deepcopy(control_test_desc)
+                control_params = list(control_test_copy.values())[1:] #[1:] removes run_iterations param
+                control = hot_new((exp_path, 0, i), *control_params)
+                control.run_test()
+    else:
+        print('\n\nWarning, no control_test found in', exp_name, '- Skipping.')
 
-        print('\n\nGenerator')
-        if 'dp_gen' in exp:  
-            dp_gen = exp['dp_gen']
-            gen_iters = dp_gen.get('run_iterations', 0)
-            epsilon_tries = dp_gen.get('epsilon_tries', [])
-            print('Epsilon tries:', epsilon_tries)
-            if len(epsilon_tries) == 0:
-                print('\nWarning, no epsilon_tries found in', key, '- Skipping Generator and Utility tests.')
-            else:
-                utility_test = dp_gen['utility_test']   
-                utility_skip = utility_test.get('skip', False) #By default won't skip
-                if gen_iters == 0:
-                    print('\nSkipping Generation')
-                elif gen_iters > 0:
-                    gen_params = list(dp_gen.values())[2:-1]#1:-1 remove run_iterations, epsilons and utility_tests from gen_params
-                    gen = hot_new(exp_path, *gen_params)
-                    for epsilon in epsilon_tries:
-                        for i in range(0, gen_iters):
-                            print('\nGenerator Test eps=', epsilon, 'iter=', i)
-                            gen.generate(epsilon, i)
-                            if utility_skip:
-                                print('\nSkipping Utility Test', i)
-                            else:
-                                print('\nUtility Test eps=', epsilon, 'iter=', i)
-                                utility_test_copy = copy.deepcopy(utility_test)
-                                utility_params = list(utility_test_copy.values())[1:] #[1:] removes skip param
-                                utility = hot_new((exp_path, epsilon, i), *utility_params)
-                                utility.run_test()
-                elif gen_iters < 0:
-                    print('\nSkipping Generation. Running Utility Test only:', abs(gen_iters), 'iterations with previously generated files! Hope they exist :)')
-                    for epsilon in epsilon_tries:
-                        for i in range(0, abs(gen_iters)):
-                            print('\nUtility Test eps=', epsilon, 'iter=', i)
-                            utility_test_copy = copy.deepcopy(utility_test)
-                            utility_params = list(utility_test_copy.values())[1:] #[1:] removes skip param
-                            utility = hot_new((exp_path, epsilon, i), *utility_params)
-                            utility.run_test()
+def run_generator(dp_gen_desc, exp_name, exp_path):
+    if dp_gen_desc != None:
+        epsilon_tries = dp_gen_desc.get('epsilon_tries', [])
+        print('\n\nEpsilon tries:', epsilon_tries)
+        gen_iters = dp_gen_desc.get('run_iterations', 0)
+        print('\nRun Iterations:', gen_iters)
+
+        mode = dp_gen_desc.get('mode', None)
+        if mode == 'all' or mode == 'tests_only':
+            utility_tests_desc = dp_gen_desc.get('utility_tests', None)
+
+        if len(epsilon_tries) == 0:
+            print('\n\nWarning: No epsilon_tries found in', exp_name, '- Skipping.')
+        elif gen_iters == 0:
+            print('\n\nWarning: Skipping Generation, run_iterations is 0 or missing key in', exp_name, '-Skipping.')
+        elif mode == 'all':
+            print('\n\nGenerator and tests.')
+            gen_params = list(dp_gen_desc.values())[3:-1]#1:-1 remove run_iterations, epsilons, mode and utility_tests from dp_gen_desc
+            gen = hot_new(exp_path, *gen_params)
+            for epsilon in epsilon_tries:
+                for i in range(0, gen_iters):
+                    print('\n\nGenerator with eps =', epsilon, 'iter =', i, 'from epsilons =', epsilon_tries, 'total iters =', gen_iters)
+                    gen.generate(epsilon, i)
+                    run_tests(utility_tests_desc, epsilon, i, exp_name, exp_path)
+        elif mode == 'gen_only':
+            print('\n\nGenerator only: skipping tests.')
+            gen_params = list(dp_gen_desc.values())[3:-1]#1:-1 remove run_iterations, epsilons, mode and utility_tests from dp_gen_desc
+            gen = hot_new(exp_path, *gen_params)
+            for epsilon in epsilon_tries:
+                for i in range(0, gen_iters):
+                    print('\n\nGenerator with eps =', epsilon, 'iter =', i, 'from epsilons =', epsilon_tries, 'total iters =', gen_iters)
+                    gen.generate(epsilon, i)
+        elif mode == 'tests_only':
+            print('\n\nTests only: running iterations with previously generated files! Hope they exist :). Skipping Generator.')
+            for epsilon in epsilon_tries:
+                for i in range(0, gen_iters):
+                    run_tests(utility_tests_desc, epsilon, i, exp_name, exp_path)
         else:
-            print('\nWarning, no dp_gen found in', key, '- Skipping.')
+            print('\n\nWarning: No (mode = all, gen_only, tests_only) found in:', exp_name, '- Skipping.')
+    else:
+        print('\n\nWarning: No dp_gen_desc found in', exp_name, '- Skipping.')
+            
+def run_tests(tests_desc, epsilon, i, exp_name, exp_path):
+    if tests_desc != None:
+        tests_desc = copy.deepcopy(tests_desc)
+        for test_name, test_desc in tests_desc.items():
+            skip = test_desc.get('skip', False) #By default won't skip
+            if skip:
+                print('\n\nSkipping Test:', test_name, 'with eps =', epsilon, 'iter =', i)
+            else:
+                print('\n\nTest:', test_name, 'with eps =', epsilon, 'iter =', i)
+                test_params = list(test_desc.values())[1:] #[1:] removes skip param
+                test = hot_new((exp_path, epsilon, i), *test_params)
+                test.run_test()
+    else:
+        print('Warning: no utility_tests found in', exp_name, 'but still trying to run in mode= all or tests_only.')
 
 def hot_new(experiment_info, module_name, class_name, params):
     module = __import__(module_name, globals(), locals(), [class_name], 0)
@@ -110,27 +154,8 @@ def hot_new(experiment_info, module_name, class_name, params):
     instance = class_(experiment_info, *params.values())
     return instance
 
-def create_exp_folder(key):
-    exp_path = "results/" + str(key)
-    try:
-        os.mkdir("results")
-    except OSError:
-        print("Creation of the directory 'results' failed")
-    else:
-        print("Successfully created the directory 'results'")
-
-    try:
-        os.mkdir(exp_path)
-    except OSError:
-        print("Creation of the directory %s failed" % exp_path)
-    else:
-        print("Successfully created the directory %s " % exp_path)
-
-    return exp_path
-
 
 if __name__ == '__main__':
-
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     sess = tf.Session(config=config)

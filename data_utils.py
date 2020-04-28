@@ -11,23 +11,34 @@ def stack_datasets(first, second, axis=0, verbose=0):
     if len(second) == 0:
         return first
 
-    if axis == 0:
-        if verbose > 0:
-            print("Vertical stacking")
-        return np.vstack((first, second))
+    if type(first) ==  list:
+        return first + second
     else:
-        if verbose > 0:
-            print("Horizontal stacking")
-        return np.hstack((first, second))
+        if axis == 0:
+            if verbose > 0:
+                print("Vertical stacking")
+            return np.vstack((first, second))
+        else:
+            if verbose > 0:
+                print("Horizontal stacking")
+            return np.hstack((first, second))
 
 def shuffle_dataset(a):
     p = np.random.permutation(len(a))
-    return a[p]
+    if type(a) == list:
+        return [a[i] for i in p]
+    else:
+        return a[p]
 
 def unison_shuffled_copies(a, b):
     assert len(a) == len(b)
     p = np.random.permutation(len(a))
-    return a[p], b[p]
+
+    if type(a) == list or type(b) == list:
+        return [a[i] for i in p], [b[i] for i in p]
+    else:
+        return a[p], b[p]
+
 
 def dataset_vocab(data):
     present_vocab = np.array(list(set().union(*data)))
@@ -43,19 +54,21 @@ def to_onehot(data, vocab_size):
     return to_categorical(data, num_classes=vocab_size)
 
 def load_file(original_path, to_read = 0, _dtype=None, shuffle=True):
-   
     with open(str(original_path), 'r') as f:
+        sample = list(f)
+        if to_read <= 0:
+            to_read = len(sample)
+
         if shuffle:
             if to_read > 0:
-                sample = random.sample(list(f), to_read)  
+                sample = random.sample(sample, to_read)  
             else:
-                sample = list(f)
                 random.shuffle(sample)
         else:
-            sample = list(f)[0: to_read]  
+            sample = sample[0: to_read]  
 
     splits = [np.array(s.split(), dtype=_dtype) for s in sample]    
-    return np.array(splits)
+    return splits
     
 def write_file(dataset, filename_out):
     file = open(str(filename_out), 'w')

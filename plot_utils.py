@@ -45,10 +45,10 @@ def plot_probas_vs_threshold(plots_fullpath, probas, y, thresholds):
         ax2.set_ylabel('Proba')
         
         ax3 = plt.subplot(3,1,3) 
-        ax3.axis([0, len(probas), 0, 1])
+        ax3.axis([0, len(probas), -150, 150])
         ax3.scatter(x=np.arange(len(probas)), y=probas, c=colors)
         for ts in thresholds:
             ax3.hlines(y=ts, xmin=0, xmax=len(probas))
         ax3.set_ylabel('Proba')
-
+        #plt.show()
         plt.savefig(plot_name)

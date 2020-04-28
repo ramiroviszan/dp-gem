@@ -1,3 +1,4 @@
+import keras.backend as K
 from keras.models import Sequential, load_model
 from keras.layers import Embedding, LSTM, Dense, TimeDistributed, Flatten, Lambda
 
@@ -30,7 +31,7 @@ def create_utility_model(vocab_size):
     model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
     return model
 
-def create_dp_gen_model(vocab_size, emb_size, context_size):
+def create_dp_gen_emb_flat_model(vocab_size, emb_size, context_size):
     model = Sequential()
     model.add(Embedding(input_dim=vocab_size, output_dim=emb_size, input_length=context_size, mask_zero=False))
     model.add(Flatten())
@@ -38,9 +39,35 @@ def create_dp_gen_model(vocab_size, emb_size, context_size):
 
     return model
 
+def create_dp_gen_emb_avg_model(vocab_size, emb_size, context_size):
+    model = Sequential()
+    model.add(Embedding(input_dim=vocab_size, output_dim=emb_size, input_length=context_size, mask_zero=True))
+    model.add(Lambda(lambda x: K.mean(x, axis=1), output_shape=(emb_size,)))
+    model.add(Dense(vocab_size, activation='softmax', kernel_regularizer='l2'))
+
+    return model
+
+def create_dp_gen_emb_lm_model(vocab_size, emb_size, context_size):
+    model = Sequential()
+    model.add(Embedding(input_dim=vocab_size, output_dim=emb_size, input_length=context_size, mask_zero=False))
+    model.add(LSTM(128, return_sequences=True))
+    model.add(LSTM(128))
+    model.add(Dense(128, activation='relu'))
+    model.add(Dense(vocab_size, activation='softmax'))
+    return model
+
+def create_dp_gen_emb_classifier_model(vocab_size, emb_size, context_size):
+    model = Sequential()
+    model.add(Embedding(input_dim=vocab_size, output_dim=emb_size, input_length=context_size, mask_zero=False))
+    model.add(LSTM(128, return_sequences=True))
+    model.add(LSTM(128))
+    model.add(Dense(128, activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))
+    return model
 
 models = {
     'control': create_control_model,
     'utility': create_utility_model,
-    'gen': create_dp_gen_model
+    'gen': create_dp_gen_emb_flat_model,
+    'gen_avg': create_dp_gen_emb_avg_model
 }
