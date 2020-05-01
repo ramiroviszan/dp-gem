@@ -105,10 +105,10 @@ experiment = {
     },
     'dp_gen': {
         'run_iterations': 1,
-        'epsilon_tries': [10, 20, 30, 40, 100], #for each epsilon will generate 'run_iterations' privatizations
+        'epsilon_tries': [10, 20, 30, 40, 50, 100], #for each epsilon will generate 'run_iterations' privatizations
         'mode': 'all', #all, gen_only, tests_only, skip
-        'module_name': 'study_cases.deeplog.dp_gen_exponential_emb',
-        'class_name': 'DPGenExponentialEmbedding',
+        'module_name': 'study_cases.deeplog.dp_gen_exponential_lm_emb',
+        'class_name': 'DPGenExponentialLMEmbedding',
         'params': {
             'datasets_params': {
                 'train': {
@@ -160,10 +160,10 @@ experiment = {
             },
             'network_fullpath': '{exp_name}/deeplog_dp_gen_emb.h5',
             'network_params': {
-                'model_type': 'gen',
+                'model_type': 'gen_lm',
                 'vocab_size': 29,
                 'emb_size': 4,
-                'context_size': 10,
+                'window_size': 10,
                 'train_sessions': {
                     'first': {
                         'epochs': 100,
@@ -259,7 +259,7 @@ experiment = {
                 }
             },
             'similarity':{
-                'skip': False, #the iterations are given by dp_gen iterations
+                'skip': True, #the iterations are given by dp_gen iterations
                 'module_name': 'study_cases.deeplog.data_similarity',
                 'class_name': 'DataSimilarity',
                 'params': {

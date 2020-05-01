@@ -3,6 +3,7 @@ import random
 import numpy as np
 
 from keras.utils import to_categorical 
+from keras.preprocessing.sequence import pad_sequences
 
 def stack_datasets(first, second, axis=0, verbose=0):
     if len(first) == 0:
@@ -39,7 +40,6 @@ def unison_shuffled_copies(a, b):
     else:
         return a[p], b[p]
 
-
 def dataset_vocab(data):
     present_vocab = np.array(list(set().union(*data)))
     present_vocab_count = len(present_vocab)
@@ -52,6 +52,9 @@ def dataset_longest_seq(data):
 
 def to_onehot(data, vocab_size):
     return to_categorical(data, num_classes=vocab_size)
+
+def pad_dataset(data, max_length, padding='post'):
+    return list(pad_sequences(data, maxlen=max_length, padding=padding))
 
 def load_file(original_path, to_read = 0, _dtype=None, shuffle=True):
     with open(str(original_path), 'r') as f:

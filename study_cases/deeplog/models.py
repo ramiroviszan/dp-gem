@@ -47,20 +47,19 @@ def create_dp_gen_emb_avg_model(vocab_size, emb_size, context_size):
 
     return model
 
-def create_dp_gen_emb_lm_model(vocab_size, emb_size, context_size):
+def create_dp_gen_emb_lm_model(vocab_size, emb_size, window_size):
     model = Sequential()
-    model.add(Embedding(input_dim=vocab_size, output_dim=emb_size, input_length=context_size, mask_zero=False))
-    model.add(LSTM(128, return_sequences=True))
-    model.add(LSTM(128))
-    model.add(Dense(128, activation='relu'))
-    model.add(Dense(vocab_size, activation='softmax'))
+    model.add(Embedding(vocab_size, emb_size, input_length=window_size))
+    model.add(LSTM(256, return_sequences=True))
+    model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
     return model
 
-def create_dp_gen_emb_classifier_model(vocab_size, emb_size, context_size):
+def create_dp_gen_emb_classifier_model(vocab_size, emb_size, max_length):
     model = Sequential()
-    model.add(Embedding(input_dim=vocab_size, output_dim=emb_size, input_length=context_size, mask_zero=False))
-    model.add(LSTM(128, return_sequences=True))
-    model.add(LSTM(128))
+    model.add(Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True))
+    model.add(Lambda(lambda x: K.mean(x, axis=1), output_shape=(emb_size,)))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(265, activation='relu'))
     model.add(Dense(128, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
     return model
@@ -69,5 +68,7 @@ models = {
     'control': create_control_model,
     'utility': create_utility_model,
     'gen': create_dp_gen_emb_flat_model,
-    'gen_avg': create_dp_gen_emb_avg_model
+    'gen_avg': create_dp_gen_emb_avg_model,
+    'gen_lm': create_dp_gen_emb_lm_model,
+    'gen_class': create_dp_gen_emb_classifier_model
 }

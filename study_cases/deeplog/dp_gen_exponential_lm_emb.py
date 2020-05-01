@@ -10,8 +10,7 @@ import study_cases.deeplog.models as models
 import study_cases.deeplog.deeplog_data_utils as d_utils
 from nn_trainer import NNTrainer
 
-
-class DPGenExponentialEmbedding:
+class DPGenExponentialLMEmbedding:
 
     def __init__(self, experiment, datasets_params, network_fullpath, network_params, pre_proba_matrix_fullpath, to_privatize_output_fullpath):
         self.exp_name = experiment
@@ -40,23 +39,23 @@ class DPGenExponentialEmbedding:
         self.embedding = self.model.layers[0].get_weights()[0]
         self.vocab_size = self.embedding.shape[0]
 
-    def _train_model(self, model_type, vocab_size, emb_size, context_size, train_sessions):
+    def _train_model(self, model_type, vocab_size, emb_size, window_size, train_sessions):
 
         t_sets = self.datasets_params['train']
-        train = []# np.array([])
-        for dataset_name, t_set in t_sets.items():
+        train_x = np.array([])
+        train_y = np.array([])
+        for dataset_name in t_sets:
+            t_set = t_sets[dataset_name]
             path = t_set["fullpath"].format(exp_name=self.exp_name)
-            #temp =  d_utils.load_dataset_for_cbow(path, amount_to_load=t_set["to_read"])
-            temp = data_utils.load_file(path, to_read=t_set["to_read"], _dtype=int) 
-            train = data_utils.stack_datasets(train, temp)
-        train = data_utils.shuffle_dataset(train)
+            temp_x, temp_y =  d_utils.load_dataset_for_lm(path, window_size=window_size, amount_to_load=t_set["to_read"])
+            train_x = data_utils.stack_datasets(train_x, temp_x, axis=0)
+            train_y = data_utils.stack_datasets(train_y, temp_y, axis=0)
+        train_x, train_y = data_utils.unison_shuffled_copies(train_x, train_y)
 
-        train_x, train_y = d_utils.generate_batch_for_cbow(train, context_size=context_size)
         train_y_oh = data_utils.to_onehot(train_y, vocab_size)
 
+        model = models.create_model(model_type, [vocab_size, emb_size, window_size])
         trainer = NNTrainer()
-        model = models.create_model(
-            model_type, [vocab_size, emb_size, context_size])
         model = trainer.train(model, self.network_fullpath, train_x, train_y_oh, train_sessions)
 
         return model
