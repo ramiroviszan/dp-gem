@@ -17,9 +17,27 @@ def create_control_model(vocab_size):
     ####...In this case X for train must be (batch, window_size, vocab_size)
     #OR input_shape(length=None or window_size, input_dim=1,)...
     ###...if X is a vector of integer symbols [4 1 4].
-    ###...In this chase X for train must be (batch, window_size, 1) and np.expand_dims(train_x, axis=3) is needed
+    ###...In this chase X for train must be (batch, window_size, 1) and np.expand_dims(train_x, axis=2) is needed
     model = Sequential()
     model.add(LSTM(128, return_sequences=True, input_shape=(None, 1,)))
+    model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
+
+    return model
+
+def create_control_model_fixed_window(window_size, vocab_size):
+    #The LSTM input layer must be 3D.
+    #The meaning of the 3 input dimensions are: samples, time steps, and features.
+    #The LSTM input layer is defined by the input_shape argument on the first hidden layer.
+    #The input_shape argument takes a tuple of two values that define the number of time steps and features.
+    #The number of samples is assumed to be 1 or more.
+    #Either input_shape(length=None or window_size for fixed length, input_dim=vocab_size,)...
+    ####...if symbols in each x of X is a onehot vector [[0 0 0 1] [1 0 0 0] [0 0 0 1]]
+    ####...In this case X for train must be (batch, window_size, vocab_size)
+    #OR input_shape(length=None or window_size, input_dim=1,)...
+    ###...if X is a vector of integer symbols [4 1 4].
+    ###...In this chase X for train must be (batch, window_size, 1) and np.expand_dims(train_x, axis=2) is needed
+    model = Sequential()
+    model.add(LSTM(128, return_sequences=True, input_shape=(window_size, 1,)))
     model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
 
     return model
@@ -66,6 +84,7 @@ def create_dp_gen_emb_classifier_model(vocab_size, emb_size, max_length):
 
 models = {
     'control': create_control_model,
+    'control_fixed_window': create_control_model_fixed_window,
     'utility': create_utility_model,
     'gen': create_dp_gen_emb_flat_model,
     'gen_avg': create_dp_gen_emb_avg_model,

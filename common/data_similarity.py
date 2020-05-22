@@ -1,10 +1,8 @@
 import numpy as np
 from sklearn.metrics.pairwise import pairwise_distances
 
-import plot_utils
-import data_utils
-import study_cases.deeplog.deeplog_data_utils as d_utils
-from csv_result import CSVResult
+import common.data_utils as data_utils
+from common.csv_result import CSVResult
 
 
 class DataSimilarity:

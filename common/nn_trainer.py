@@ -1,6 +1,7 @@
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
-import plot_utils
+
+import common.plot_utils as plot_utils
 
 class NNTrainer:
 

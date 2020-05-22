@@ -1,10 +1,10 @@
 experiment = {
-    'skip': False,
+    'skip': True,
     'random_seed': 27,
     'data_preparation': {
         'skip': True,
-        'module_name': 'study_cases.deeplog.data_splitter',
-        'class_name': 'DataSplitter',
+        'module_name': 'study_cases.deeplog.deeplog_data_splitter',
+        'class_name': 'DeepLogDataSplitter',
         'params': {
             'datasets': {
                 'normal': {

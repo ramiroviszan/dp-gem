@@ -1,9 +1,9 @@
 experiment = {
-    'skip': True,
+    'skip': False,
     'random_seed': 27,
     'data_preparation': {
-        'skip': False,
-        'module_name': 'study_cases.deeplog.deeplog_data_splitter',
+        'skip': True,
+        'module_name': 'study_cases.deeplog.deeplog_final_token',
         'class_name': 'DeepLogDataSplitter',
         'params': {
             'datasets': {
@@ -33,8 +33,8 @@ experiment = {
         }
     },
     'control_test': {
-        'run_iterations': 0,
-        'module_name': 'study_cases.deeplog.language_model_classifier',
+        'run_iterations': 1,
+        'module_name': 'study_cases.deeplog.lm_classifier',
         'class_name': 'LMClassifier',
         'params': {
             'datasets_params': {
@@ -71,9 +71,9 @@ experiment = {
             },
             'network_fullpath': '{exp_name}/deeplog_control.h5',
             'network_params': {
-                'model_type': 'control',
+                'model_type': 'control_fixed_window',
                 'window_size': 10,
-                'vocab_size': 29,
+                'vocab_size': 31,#this value considers padding, 30 without
                 'train_sessions': {
                     'first': {
                         'epochs': 100,
@@ -106,19 +106,21 @@ experiment = {
     'dp_gen': {
         'run_iterations': 1,
         'epsilon_tries': [10, 20, 30, 40, 100], #for each epsilon will generate 'run_iterations' privatizations
-        'mode': 'all', #all, gen_only, tests_only, skip
-        'module_name': 'study_cases.deeplog.dp_gen_exponential_emb',
-        'class_name': 'DPGenExponentialEmbedding',
+        'mode': 'skip', #all, gen_only, tests_only, skip
+        'module_name': 'study_cases.deeplog.dp_gen_exponential_class_emb',
+        'class_name': 'DPGenExponentialClassifierEmbedding',
         'params': {
             'datasets_params': {
                 'train': {
                     'normal': {
                         'fullpath': '{exp_name}/normal_train.txt',
-                        'to_read': 0
+                        'to_read': 0, 
+                        'class': 1
                     },
                     'abnormal': {
                         'fullpath': '{exp_name}/abnormal_train.txt',
-                        'to_read': 0
+                        'to_read': 0,
+                        'class': 0
                     }
                 },
                 'val': {
@@ -160,26 +162,25 @@ experiment = {
             },
             'network_fullpath': '{exp_name}/deeplog_dp_gen_emb.h5',
             'network_params': {
-                'model_type': 'gen',
+                'model_type': 'gen_class',
                 'vocab_size': 29,
-                'emb_size': 4,
-                'context_size': 10,
+                'emb_size': 8,
                 'train_sessions': {
                     'first': {
-                        'epochs': 100,
+                        'epochs': 500,
                         'batch_size': 500,
                         'lr': 0.0001,
-                        'loss': 'categorical_crossentropy',
+                        'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
                         'patience': 10
                     },
                     'second': {
-                        'epochs': 50,
+                        'epochs': 500,
                         'batch_size': 100,
-                        'lr': 0.0001,
-                        'loss': 'categorical_crossentropy',
+                        'lr': 0.00001,
+                        'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 10
+                        'patience': 5
                     }
                 }
             },

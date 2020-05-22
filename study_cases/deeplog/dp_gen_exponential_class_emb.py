@@ -55,7 +55,7 @@ class DPGenExponentialClassifierEmbedding:
         train_x, train_y = data_utils.unison_shuffled_copies(train_x, train_y)
 
         max_length, _ = data_utils.dataset_longest_seq(train_x)
-        train_x = np.array(data_utils.pad_dataset(train_x, max_length))
+        train_x = np.array(data_utils.pad_dataset(train_x, max_length, 'post'))
 
         model = models.create_model(model_type, [vocab_size, emb_size, max_length])
         trainer = NNTrainer()
@@ -121,7 +121,7 @@ class DPGenExponentialClassifierEmbedding:
                 else:
                     #print("Proba:", i, "-", pre_proba_matrix[i], "\n")
                     #seq_proba = self.model.predict(self.predict([seq[:index]]))
-                    proba_vector = softmax(* epsilon * self.pre_proba_matrix[symbol])
+                    proba_vector = softmax(epsilon * self.pre_proba_matrix[symbol])
                     private_symbol = np.random.choice(np.arange(0, self.vocab_size), p=proba_vector)
                 private_seq.append(private_symbol)
             fake_data.append(private_seq)
