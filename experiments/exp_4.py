@@ -10,6 +10,8 @@ experiment = {
                 'normal': {
                     'original': 'data/deeplog/all_normal.txt',
                     'to_read': 4000,
+                    'dtype': int,
+                    'max_len': 50,
                     'train_output_fullpath': '{exp_name}/normal_train.txt',
                     'val_output_fullpath': '{exp_name}/normal_val.txt',
                     'test_output_fullpath': '{exp_name}/normal_test.txt',
@@ -21,6 +23,8 @@ experiment = {
                 'abnormal': {
                     'original': 'data/deeplog/all_abnormal.txt',
                     'to_read': 4000,
+                    'dtype': int,
+                    'max_len': 50,
                     'train_output_fullpath': '{exp_name}/abnormal_train.txt',
                     'val_output_fullpath': '{exp_name}/abnormal_val.txt',
                     'test_output_fullpath': '{exp_name}/abnormal_test.txt',
@@ -33,7 +37,7 @@ experiment = {
         }
     },
     'control_test': {
-        'run_iterations': 1,
+        'run_iterations': 0,
         'module_name': 'study_cases.deeplog.lm_classifier',
         'class_name': 'LMClassifier',
         'params': {
@@ -69,7 +73,7 @@ experiment = {
                     }
                 }
             },
-            'network_fullpath': '{exp_name}/deeplog_control.h5',
+            'network_fullpath': '{exp_name}/control.h5',
             'network_params': {
                 'model_type': 'control_fixed_window',
                 'window_size': 10,
@@ -81,7 +85,8 @@ experiment = {
                         'lr': 0.001,
                         'loss': 'categorical_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 10
+                        'patience': 10,
+                        'save_model': False
                     },
                     'second': {
                         'epochs': 50,
@@ -89,7 +94,8 @@ experiment = {
                         'lr': 0.001,
                         'loss': 'categorical_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 10
+                        'patience': 10,
+                        'save_model': True
                     }
                 }
             },
@@ -105,10 +111,10 @@ experiment = {
     },
     'dp_gen': {
         'run_iterations': 1,
-        'epsilon_tries': [10, 20, 30, 40, 100], #for each epsilon will generate 'run_iterations' privatizations
-        'mode': 'skip', #all, gen_only, tests_only, skip
-        'module_name': 'study_cases.deeplog.dp_gen_exponential_class_emb',
-        'class_name': 'DPGenExponentialClassifierEmbedding',
+        'epsilon_trials': [20, 30, 40, 50, 100], #for each epsilon will generate 'run_iterations' privatizations
+        'mode': 'tests_only', #all, gen_only, tests_only, skip
+        'module_name': 'study_cases.deeplog.dp_gen_autoencoder',
+        'class_name': 'DPGen',
         'params': {
             'datasets_params': {
                 'train': {
@@ -160,19 +166,20 @@ experiment = {
                     }
                 }
             },
-            'network_fullpath': '{exp_name}/deeplog_dp_gen_emb.h5',
+            'network_fullpath': '{exp_name}/gen.h5',
             'network_params': {
-                'model_type': 'gen_class',
-                'vocab_size': 29,
-                'emb_size': 8,
+                'model_type': 'gen_autoencoder',
+                'vocab_size': 31,
+                'window_size': 50,
                 'train_sessions': {
                     'first': {
-                        'epochs': 500,
+                        'epochs': 1000,
                         'batch_size': 500,
                         'lr': 0.0001,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 10
+                        'patience': 10,
+                        'save_model': False
                     },
                     'second': {
                         'epochs': 500,
@@ -180,7 +187,8 @@ experiment = {
                         'lr': 0.00001,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 5
+                        'patience': 5,
+                        'save_model': True
                     }
                 }
             },
@@ -189,8 +197,8 @@ experiment = {
         },
         'utility_tests': {
             'classifier': {
-                'skip': False, #the iterations are given by dp_gen iterations
-                'module_name': 'study_cases.deeplog.language_model_classifier',
+                'skip': True, #the iterations are given by dp_gen iterations
+                'module_name': 'study_cases.deeplog.lm_classifier',
                 'class_name': 'LMClassifier',
                 'params': {
                     'datasets_params': {
@@ -227,9 +235,9 @@ experiment = {
                     },
                     'network_fullpath': '{exp_name}/deeplog_utility_eps_{epsilon}_{iteration}.h5',
                     'network_params': {
-                        'model_type': 'utility',
+                        'model_type': 'control_fixed_window',
                         'window_size': 10,
-                        'vocab_size': 29,
+                        'vocab_size': 31,
                         'train_sessions': {
                             'first': {
                                 'epochs': 100,
@@ -237,7 +245,8 @@ experiment = {
                                 'lr': 0.001,
                                 'loss': 'categorical_crossentropy',
                                 'validation_split': 0.3,
-                                'patience': 10
+                                'patience': 10,
+                                'save_model': False
                             },
                             'second': {
                                 'epochs': 50,
@@ -245,7 +254,8 @@ experiment = {
                                 'lr': 0.001,
                                 'loss': 'categorical_crossentropy',
                                 'validation_split': 0.3,
-                                'patience': 10
+                                'patience': 10,
+                                'save_model': True
                             }
                         }
                     },
@@ -261,7 +271,7 @@ experiment = {
             },
             'similarity':{
                 'skip': False, #the iterations are given by dp_gen iterations
-                'module_name': 'study_cases.deeplog.data_similarity',
+                'module_name': 'common.data_similarity',
                 'class_name': 'DataSimilarity',
                 'params': {
                     'metrics': ['hamming', 'hamming_wise', 'cosine'],
@@ -269,12 +279,14 @@ experiment = {
                         'normal': {
                             'orig_fullpath': '{exp_name}/normal_test.txt',
                             'privatized_fullpath': '{exp_name}/fake_normal_test_eps_{epsilon}_{iteration}.txt',
-                            'to_read': 0
+                            'to_read': 0,
+                            'dtype': int
                         },
                         'abnormal':{
                             'orig_fullpath': '{exp_name}/abnormal_test.txt',
                             'privatized_fullpath': '{exp_name}/fake_abnormal_test_eps_{epsilon}_{iteration}.txt',
-                            'to_read': 0
+                            'to_read': 0,
+                            'dtype': int
                         }
                     },
                     'results_fullpath': '{exp_name}/utility_similarity_test_results.csv'

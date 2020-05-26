@@ -4,11 +4,11 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.special import softmax
 
-import plot_utils
-import data_utils
+import common.plot_utils as plot_utils
+import common.data_utils as data_utils
 import study_cases.deeplog.models as models
 import study_cases.deeplog.deeplog_data_utils as d_utils
-from nn_trainer import NNTrainer
+from common.nn_trainer import NNTrainer
 
 class DPGenExponentialLMEmbedding:
 
@@ -101,7 +101,7 @@ class DPGenExponentialLMEmbedding:
             t_set = t_sets[dataset_name]
             path = t_set["fullpath"].format(exp_name=self.exp_name)
             self.datasets_to_privatize[dataset_name] = data_utils.load_file(
-                path, to_read=t_set["to_read"], _dtype=int, shuffle=False)
+                path, to_read=t_set["to_read"], shuffle=False, _dtype=int)
 
     def generate(self, epsilon, iteration):
         for dataset_name, dataset in self.datasets_to_privatize.items():

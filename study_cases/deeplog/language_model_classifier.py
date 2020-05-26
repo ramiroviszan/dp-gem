@@ -93,7 +93,7 @@ class LMClassifier:
         set_y = []
         for dataset_name, t_set in t_sets.items():
             path = t_set["fullpath"].format(exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
-            temp_x = data_utils.load_file(path, to_read=t_set["to_read"], _dtype=int, shuffle=False)
+            temp_x = data_utils.load_file(path, to_read=t_set["to_read"], shuffle=False, _dtype=int)
             temp_y = [t_set['class']]*len(temp_x) #np.ones(len(temp_x)) * t_set['class']
             set_x = data_utils.stack_datasets(set_x, temp_x, 1)
             set_y = data_utils.stack_datasets(set_y, temp_y, 1)

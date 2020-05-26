@@ -81,7 +81,8 @@ experiment = {
                         'lr': 0.001,
                         'loss': 'categorical_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 10
+                        'patience': 10,
+                        'save_model': False
                     },
                     'second': {
                         'epochs': 50,
@@ -89,7 +90,8 @@ experiment = {
                         'lr': 0.001,
                         'loss': 'categorical_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 10
+                        'patience': 10,
+                        'save_model': True
                     }
                 }
             },
@@ -105,7 +107,7 @@ experiment = {
     },
     'dp_gen': {
         'run_iterations': 1,
-        'epsilon_tries': [10, 20, 30, 40, 100], #for each epsilon will generate 'run_iterations' privatizations
+        'epsilon_trials': [10, 20, 30, 40, 100], #for each epsilon will generate 'run_iterations' privatizations
         'mode': 'tests_only', #all, gen_only, tests_only, skip
         'module_name': 'study_cases.deeplog.dp_gen_exponential_class_emb',
         'class_name': 'DPGenExponentialClassifierEmbedding',
@@ -172,7 +174,8 @@ experiment = {
                         'lr': 0.0001,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 10
+                        'patience': 10,
+                        'save_model': False
                     },
                     'second': {
                         'epochs': 500,
@@ -180,7 +183,8 @@ experiment = {
                         'lr': 0.00001,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 5
+                        'patience': 5,
+                        'save_model': True
                     }
                 }
             },
@@ -237,7 +241,8 @@ experiment = {
                                 'lr': 0.001,
                                 'loss': 'categorical_crossentropy',
                                 'validation_split': 0.3,
-                                'patience': 10
+                                'patience': 10,
+                                'save_model': False
                             },
                             'second': {
                                 'epochs': 50,
@@ -245,7 +250,8 @@ experiment = {
                                 'lr': 0.001,
                                 'loss': 'categorical_crossentropy',
                                 'validation_split': 0.3,
-                                'patience': 10
+                                'patience': 10,
+                                'save_model': True
                             }
                         }
                     },

@@ -10,7 +10,7 @@ import study_cases.deeplog.models as models
 import study_cases.deeplog.deeplog_data_utils as d_utils
 from common.nn_trainer import NNTrainer
 
-class DPGenExponentialClassifierEmbedding:
+class DPGen:
 
     def __init__(self, experiment, datasets_params, network_fullpath, network_params, pre_proba_matrix_fullpath, to_privatize_output_fullpath):
         self.exp_name = experiment
@@ -25,7 +25,7 @@ class DPGenExponentialClassifierEmbedding:
             exp_name=self.exp_name)
 
         self._get_model()
-        self._get_pre_proba_matrix()
+        #self._get_pre_proba_matrix()
         self._load_data_to_privatize()
 
     def _get_model(self):
@@ -36,30 +36,50 @@ class DPGenExponentialClassifierEmbedding:
                   "not found. Training started...")
             self.model = self._train_model(*self.network_params.values())
 
+        self.max_len = self.model.layers[0].input_shape[1]
         self.embedding = self.model.layers[0].get_weights()[0]
         self.vocab_size = self.embedding.shape[0]
+        return
 
-    def _train_model(self, model_type, vocab_size, emb_size, train_sessions):
 
-        t_sets = self.datasets_params['train']
-        train_x = []
-        train_y = []
-        for dataset_name in t_sets:
-            t_set = t_sets[dataset_name]
-            path = t_set["fullpath"].format(exp_name=self.exp_name)
-            temp_x = data_utils.load_file(path, to_read=t_set["to_read"], shuffle=False, _dtype=int)
-            temp_y = [t_set['class']]*len(temp_x)
-            train_x = data_utils.stack_datasets(train_x, temp_x, 1)
-            train_y = data_utils.stack_datasets(train_y, temp_y, 1)
 
-        train_x, train_y = data_utils.unison_shuffled_copies(train_x, train_y)
+        print(max_len)
+        all_val = data_utils.load_multiple_files(self.datasets_params['val'], shuffle=True, _dtype=int, max_len=self.max_len, exp_name=self.exp_name)
+        val_x = np.array(data_utils.pad_dataset(all_val, self.max_len, 'pre'))
+        #val_x = np.expand_dims(val_x, axis=2)
+        probas  = self.model.predict(val_x)
+        y_hat = np.argmax(probas, axis=2)
+        import sys
+        np.set_printoptions(threshold=sys.maxsize)
+        for i, x in enumerate(val_x):
+            print(x)
+            print(y_hat[i])
+            print("\n")
+            #print(preds[i][len(x)-5:len(x)])
+        print(np.mean(np.sum(y_hat == val_x, axis= 1))/50)
+      
+        #self.embedding = self.model.layers[0].get_weights()[0]
+        #self.vocab_size = self.embedding.shape[0]
 
-        max_length, _ = data_utils.dataset_longest_seq(train_x)
-        train_x = np.array(data_utils.pad_dataset(train_x, max_length, 'post'))
+    def _train_model(self, model_type, vocab_size, window_size, train_sessions):
 
-        model = models.create_model(model_type, [vocab_size, emb_size, max_length])
+        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, _dtype=int, max_len=window_size, exp_name=self.exp_name)
+        
+        if window_size == 0:
+            max_len, _ = data_utils.dataset_longest_seq(all_data)
+            window_size = max_len
+
+        train_x = np.array(data_utils.pad_dataset(all_data, window_size, 'pre'))
+        #train_x = data_utils.pad_dataset(all_data, window_size, 'pre')
+        train_y_oh = data_utils.to_onehot(train_x, vocab_size)
+        #train_x = np.expand_dims(train_x, axis=2)
+
+        model = models.create_model(model_type, [window_size, vocab_size, int(vocab_size**(1/4))])
+        #model = models.create_model(model_type, [window_size, vocab_size])
+
         trainer = NNTrainer()
-        model = trainer.train(model, self.network_fullpath, train_x, train_y, train_sessions)
+        model = trainer.train(model, self.network_fullpath, train_x, train_y_oh, train_sessions)
+
         return model
 
     def _get_pre_proba_matrix(self):
@@ -99,11 +119,10 @@ class DPGenExponentialClassifierEmbedding:
     def _load_data_to_privatize(self):
         t_sets = self.datasets_params['to_privatize']
         self.datasets_to_privatize = {}
-        for dataset_name in t_sets:
-            t_set = t_sets[dataset_name]
-            path = t_set["fullpath"].format(exp_name=self.exp_name)
+        for dataset_name, dataset in t_sets.items():
+            path = dataset["fullpath"].format(exp_name=self.exp_name)
             self.datasets_to_privatize[dataset_name] = data_utils.load_file(
-                path, to_read=t_set["to_read"], shuffle=False, _dtype=int)
+                path, to_read=dataset["to_read"], shuffle=False, _dtype=int, max_len=self.max_len)
 
     def generate(self, epsilon, iteration):
         for dataset_name, dataset in self.datasets_to_privatize.items():
@@ -111,19 +130,23 @@ class DPGenExponentialClassifierEmbedding:
             self._generate_synthetic(epsilon, iteration, dataset_name, dataset)
 
     def _generate_synthetic(self, epsilon, iteration, dataset_name, dataset):
+        seq_x = np.array(data_utils.pad_dataset(dataset, self.max_len, 'pre'))
+        probas = self.model.predict(seq_x) * epsilon * 0.5
+
         fake_data = []
-        for seq in dataset:
+        for seq_i, seq in enumerate(seq_x):
             private_seq = []
             last_index = len(seq) - 1
-            for index, symbol in enumerate(seq):
-                if index == last_index: #do not privatize end token
-                    private_symbol = symbol
-                else:
-                    #print("Proba:", i, "-", pre_proba_matrix[i], "\n")
-                    #seq_proba = self.model.predict(self.predict([seq[:index]]))
-                    proba_vector = softmax(epsilon * self.pre_proba_matrix[symbol])
-                    private_symbol = np.random.choice(np.arange(0, self.vocab_size), p=proba_vector)
-                private_seq.append(private_symbol)
+            padding = 0
+            for index, real_symbol in enumerate(seq):
+                if real_symbol != 0:#do not include padding
+                    if index == last_index:#do not privatize end token
+                        private_symbol = real_symbol
+                    else:
+                        #print("Proba:", i, "-", pre_proba_matrix[i], "\n")
+                        proba_vector = softmax(probas[seq_i][index])
+                        private_symbol = np.random.choice(np.arange(0, self.vocab_size), p=proba_vector)
+                    private_seq.append(private_symbol)
             fake_data.append(private_seq)
             #print("\nOriginal:", seq, "\nPrivate:", np.array(private_seq))
 

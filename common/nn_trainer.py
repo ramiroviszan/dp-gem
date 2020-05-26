@@ -10,12 +10,13 @@ class NNTrainer:
         for key in train_sessions.keys():
             print("\nTrain Session:", key)
             session_info = train_sessions[key]
-            epochs, batch_size, lr, loss, val_split, patience = session_info.values()
+            epochs, batch_size, lr, loss, val_split, patience, save_model = session_info.values()
             earlystopper = EarlyStopping(monitor='val_loss', patience=patience, verbose=1, restore_best_weights=True)
             model.compile(loss=loss, optimizer= Adam(lr=lr))
             history = model.fit(train_x, train_y, epochs = epochs, batch_size = batch_size,
                                 validation_split=val_split,callbacks=[earlystopper], verbose=1)
             plot_utils.plot(history, None, save_path + "_session_" + key)
+            if save_model:
+                model.save(save_path)
 
-        model.save(save_path)
         return model

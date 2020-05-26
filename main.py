@@ -93,8 +93,8 @@ def run_control_tests(control_test_desc, exp_name, exp_path):
 
 def run_generator(dp_gen_desc, exp_name, exp_path):
     if dp_gen_desc != None:
-        epsilon_tries = dp_gen_desc.get('epsilon_tries', [])
-        print('\n\nEpsilon tries:', epsilon_tries)
+        epsilon_trials = dp_gen_desc.get('epsilon_trials', [])
+        print('\n\nEpsilon tries:', epsilon_trials)
         gen_iters = dp_gen_desc.get('run_iterations', 0)
         print('\nRun Iterations:', gen_iters)
 
@@ -102,30 +102,30 @@ def run_generator(dp_gen_desc, exp_name, exp_path):
         if mode == 'all' or mode == 'tests_only':
             utility_tests_desc = dp_gen_desc.get('utility_tests', None)
 
-        if len(epsilon_tries) == 0:
-            print('\n\nWarning: No epsilon_tries found in', exp_name, '- Skipping.')
+        if len(epsilon_trials) == 0:
+            print('\n\nWarning: No epsilon_trials found in', exp_name, '- Skipping.')
         elif gen_iters == 0:
             print('\n\nWarning: Skipping Generation, run_iterations is 0 or missing key in', exp_name, '-Skipping.')
         elif mode == 'all':
             print('\n\nGenerator and tests.')
             gen_params = list(dp_gen_desc.values())[3:-1]#1:-1 remove run_iterations, epsilons, mode and utility_tests from dp_gen_desc
             gen = hot_new(exp_path, *gen_params)
-            for epsilon in epsilon_tries:
+            for epsilon in epsilon_trials:
                 for i in range(0, gen_iters):
-                    print('\n\nGenerator with eps =', epsilon, 'iter =', i, 'from epsilons =', epsilon_tries, 'total iters =', gen_iters)
+                    print('\n\nGenerator with eps =', epsilon, 'iter =', i, 'from epsilons =', epsilon_trials, 'total iters =', gen_iters)
                     gen.generate(epsilon, i)
                     run_tests(utility_tests_desc, epsilon, i, exp_name, exp_path)
         elif mode == 'gen_only':
             print('\n\nGenerator only: skipping tests.')
             gen_params = list(dp_gen_desc.values())[3:-1]#1:-1 remove run_iterations, epsilons, mode and utility_tests from dp_gen_desc
             gen = hot_new(exp_path, *gen_params)
-            for epsilon in epsilon_tries:
+            for epsilon in epsilon_trials:
                 for i in range(0, gen_iters):
-                    print('\n\nGenerator with eps =', epsilon, 'iter =', i, 'from epsilons =', epsilon_tries, 'total iters =', gen_iters)
+                    print('\n\nGenerator with eps =', epsilon, 'iter =', i, 'from epsilons =', epsilon_trials, 'total iters =', gen_iters)
                     gen.generate(epsilon, i)
         elif mode == 'tests_only':
             print('\n\nTests only: running iterations with previously generated files! Hope they exist :). Skipping Generator.')
-            for epsilon in epsilon_tries:
+            for epsilon in epsilon_trials:
                 for i in range(0, gen_iters):
                     run_tests(utility_tests_desc, epsilon, i, exp_name, exp_path)
         else:

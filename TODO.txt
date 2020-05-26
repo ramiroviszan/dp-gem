@@ -1,3 +1,2 @@
 Implementar val_test after embedding training (save this result?)
 Implementar classification report save to csv
-Implementar otros tests de utilidad: E cos_similarty(x, xgen), E mse(x, xgen)

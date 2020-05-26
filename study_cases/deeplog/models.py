@@ -1,6 +1,6 @@
 import keras.backend as K
 from keras.models import Sequential, load_model
-from keras.layers import Embedding, LSTM, Dense, TimeDistributed, Flatten, Lambda
+from keras.layers import Embedding, LSTM, Dense, TimeDistributed, Flatten, Lambda, RepeatVector
 
 
 def create_model(key, params):
@@ -82,6 +82,23 @@ def create_dp_gen_emb_classifier_model(vocab_size, emb_size, max_length):
     model.add(Dense(1, activation='sigmoid'))
     return model
 
+def create_dp_gen_autoencoder_no_emb_model(max_length, vocab_size):
+    model = Sequential()
+    model.add(LSTM(128, return_state=False, return_sequences=False, input_shape=(max_length, 1,)))
+    model.add(RepeatVector(max_length))
+    model.add(LSTM(128, return_sequences=True))
+    model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
+    return model
+
+def create_dp_gen_autoencoder_model(max_length, vocab_size, emb_size):
+    model = Sequential()
+    model.add(Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True))
+    model.add(LSTM(1024, return_state=False, return_sequences=False))
+    model.add(RepeatVector(max_length))
+    model.add(LSTM(1024, return_sequences=True))
+    model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
+    return model
+
 models = {
     'control': create_control_model,
     'control_fixed_window': create_control_model_fixed_window,
@@ -89,5 +106,6 @@ models = {
     'gen': create_dp_gen_emb_flat_model,
     'gen_avg': create_dp_gen_emb_avg_model,
     'gen_lm': create_dp_gen_emb_lm_model,
-    'gen_class': create_dp_gen_emb_classifier_model
+    'gen_class': create_dp_gen_emb_classifier_model,
+    'gen_autoencoder': create_dp_gen_autoencoder_model
 }

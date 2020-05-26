@@ -149,25 +149,33 @@ def combine_datasets(datasets):
     return list(chain.from_iterable(datasets))
 
 
-def load_file(original_path, to_read=0, shuffle=True, _dtype=None):
+def load_file(original_path, to_read=0, shuffle=False, _dtype=None, max_len = 0):
+    # Reads a file from path, shuffles if needed,
+    # Filters out max_len seqs (if max_len = 0, then reads all)
+    # Takes a sample of size to_read (if to_read = 0, then uses all of above) 
+    # Applies a split to each file line
+    # Return a list of arrays of _dtype, one array for each file line
     with open(str(original_path), 'r') as f:
         sample = list(f)
+
+        if shuffle:
+            random.shuffle(sample)
+        
+
+        sample = [np.array(s.split(), dtype=_dtype) for s in sample]
+
+        if max_len > 0:
+            sample = [x for x in sample if len(x) <= max_len]
+
         if to_read <= 0:
             to_read = len(sample)
 
-        if shuffle:
-            if to_read > 0:
-                sample = random.sample(sample, to_read)
-            else:
-                random.shuffle(sample)
-        else:
-            sample = sample[0: to_read]
+        sample = sample[0: to_read]
 
-    splits = [np.array(s.split(), dtype=_dtype) for s in sample]
-    return splits
+    return sample
 
 
-def load_multiple_files(files_dict, shuffle, _dtype=int, **path_params):
+def load_multiple_files(files_dict, shuffle=False, _dtype=int, max_len=0,  **path_params):
     #Input:
     #files_dict = {
     # 'data1' : {
@@ -185,7 +193,7 @@ def load_multiple_files(files_dict, shuffle, _dtype=int, **path_params):
     for dataset in files_dict.values():
         print(dataset)
         path = dataset["fullpath"].format(**path_params)
-        data = load_file(path, to_read=dataset["to_read"], shuffle=False, _dtype=_dtype)
+        data = load_file(path, to_read=dataset["to_read"], shuffle=shuffle, _dtype=_dtype, max_len=max_len)
         all_data.append(data)
     all_data = combine_datasets(all_data)
     if shuffle:
@@ -193,7 +201,7 @@ def load_multiple_files(files_dict, shuffle, _dtype=int, **path_params):
     return all_data
 
 
-def load_multiple_files_with_class(files_dict, shuffle=False, _dtype=int, **path_params):
+def load_multiple_files_with_class(files_dict, shuffle=False, _dtype=int, max_len=0, **path_params):
     #Input:
     #files_dict = {
     # 'data1' : {
@@ -210,7 +218,7 @@ def load_multiple_files_with_class(files_dict, shuffle=False, _dtype=int, **path
     all_y = []
     for dataset in files_dict.values():
         path = dataset["fullpath"].format(**path_params)
-        x = load_file(path, to_read=dataset["to_read"], shuffle=False, _dtype=_dtype)
+        x = load_file(path, to_read=dataset["to_read"], shuffle=shuffle, _dtype=_dtype, max_len=max_len)
         y = [dataset['class']]*len(x)
         all_x.append(x)
         all_y.append(y)

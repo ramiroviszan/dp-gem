@@ -44,13 +44,12 @@ class DataSimilarity:
             self.result_line[metric_name].append(all_mean)
             self.results.save_results(self.result_line[metric_name])
 
-    def _load_test(self, first_fullpath, second_fullpath, to_read):
-
+    def _load_test(self, first_fullpath, second_fullpath, to_read, dtype):
         first_fullpath = first_fullpath.format(exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
         second_fullpath = second_fullpath.format(exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
         
-        first = data_utils.load_file(first_fullpath, to_read, _dtype=int, shuffle=False)
-        second= data_utils.load_file(second_fullpath, to_read, _dtype=int, shuffle=False)
+        first = data_utils.load_file(first_fullpath, to_read, shuffle=False, _dtype=dtype)
+        second= data_utils.load_file(second_fullpath, to_read, shuffle=False, _dtype=dtype)
 
         return first, second
         
