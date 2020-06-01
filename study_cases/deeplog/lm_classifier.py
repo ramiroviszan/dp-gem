@@ -40,7 +40,7 @@ class LMClassifier:
 
     def _train_model(self, model_type, window_size, vocab_size, train_sessions):
         
-        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, _dtype=int, max_len=0, exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
+        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
 
         if window_size == 0:
             max_len, _ = data_utils.dataset_longest_seq(all_data)
@@ -63,7 +63,7 @@ class LMClassifier:
 
     def _run(self, use_top_k, roc_thresholds, custom_thresholds, recalulate_probas, probas_fullpath):
 
-        val_x, val_y = data_utils.load_multiple_files_with_class(self.datasets_params['val'], shuffle=False, _dtype=int, max_len=0, exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
+        val_x, val_y = data_utils.load_multiple_files_with_class(self.datasets_params['val'], shuffle=False, dtype=int, exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
         val_fullpath = probas_fullpath.format(dataset_type = 'val')
         val_probas = self._get_dataset_proba(val_fullpath, val_x, recalulate_probas, use_top_k)
 
@@ -78,7 +78,7 @@ class LMClassifier:
         plot_utils.plot_probas_vs_threshold(val_fullpath, val_probas, val_y, thresholds)
         self._try_different_thresholds(val_probas, val_y, thresholds, self.val_results, use_top_k)
 
-        test_x, test_y = data_utils.load_multiple_files_with_class(self.datasets_params['test'], shuffle=False, _dtype=int, max_len=0, exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
+        test_x, test_y = data_utils.load_multiple_files_with_class(self.datasets_params['test'], shuffle=False, dtype=int, exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
         test_fullpath = probas_fullpath.format(dataset_type = 'test')
         test_probas = self._get_dataset_proba(test_fullpath, test_x, recalulate_probas, use_top_k)
         plot_utils.plot_probas_vs_threshold(test_fullpath, test_probas, test_y, thresholds)

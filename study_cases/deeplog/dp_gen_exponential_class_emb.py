@@ -47,7 +47,7 @@ class DPGenExponentialClassifierEmbedding:
         for dataset_name in t_sets:
             t_set = t_sets[dataset_name]
             path = t_set["fullpath"].format(exp_name=self.exp_name)
-            temp_x = data_utils.load_file(path, to_read=t_set["to_read"], shuffle=False, _dtype=int)
+            temp_x = data_utils.load_file(path, to_read=t_set["to_read"], shuffle=False, dtype=int, split_token='')
             temp_y = [t_set['class']]*len(temp_x)
             train_x = data_utils.stack_datasets(train_x, temp_x, 1)
             train_y = data_utils.stack_datasets(train_y, temp_y, 1)
@@ -103,7 +103,7 @@ class DPGenExponentialClassifierEmbedding:
             t_set = t_sets[dataset_name]
             path = t_set["fullpath"].format(exp_name=self.exp_name)
             self.datasets_to_privatize[dataset_name] = data_utils.load_file(
-                path, to_read=t_set["to_read"], shuffle=False, _dtype=int)
+                path, to_read=t_set["to_read"], shuffle=False, dtype=int, split_token='')
 
     def generate(self, epsilon, iteration):
         for dataset_name, dataset in self.datasets_to_privatize.items():

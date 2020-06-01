@@ -66,103 +66,103 @@ def pad_dataset(data, max_length, padding):
 
 
 def generate_windows_from_dataset(data, window_size, padding):
+    """_
     #Input:
-    # data  = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
-    # ws = get_windows_from_dataset(data, 4, 'pre')
-    # display(data)
-    # display(ws)
+    \ndata  = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
+    \nws = get_windows_from_dataset(data, 4, 'pre')
+    
     #Output:
-    # [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
-    #
-    # [array([0, 0, 0, 1]),
-    #  array([0, 0, 1, 2]),
-    #  ...
-    #  array([2, 3, 4, 5]),
-    #  array([0, 0, 0, 1]),
-    #  array([0, 0, 1, 2]),
-    #  ...
-    #  array([3, 4, 5, 6])]
+    \ndata = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
+    \nws = [array([0, 0, 0, 1]),
+     array([0, 0, 1, 2]),
+     ...
+     array([2, 3, 4, 5]),
+     array([0, 0, 0, 1]),
+     array([0, 0, 1, 2]),
+     ...
+     array([3, 4, 5, 6])]"""
     prefixes = get_dataset_prefixes(data)
     return pad_dataset(prefixes, window_size, padding)
 
 def get_dataset_prefixes(sequences):
+    """_
     #Input:
-    # data  = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
-    # prefixes = get_dataset_prefixes(data)
-    # display(data)
-    # display(prefixes)
+    \ndata  = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
+    \nprefixes = get_dataset_prefixes(data)
+    
     #Output:
-    # [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
-    #
-    # [[1],
-    #  [1, 2],
-    #  ...
-    #  [1, 2, 3, 4, 5],
-    #  [1],
-    #  [1, 2],
-    #  ...
-    #  [1, 2, 3, 4, 5, 6]]
+    \ndata = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
+    \nprefixes = [[1],
+     [1, 2],
+     ...
+     [1, 2, 3, 4, 5],
+     [1],
+     [1, 2],
+     ...
+     [1, 2, 3, 4, 5, 6]]"""
     return list(chain.from_iterable([get_seq_prefixes(seq) for seq in sequences]))
 
 
 def get_seq_prefixes(seq):
+    """_
     #Input:
-    # data  = [1, 2, 3, 4, 5]
-    # p = get_seq_prefixes(data)
-    # display(data)
-    # display(p)
+    \ndata  = [1, 2, 3, 4, 5]
+    \np = get_seq_prefixes(data)
     #Output:
-    # [1, 2, 3, 4, 5]
-    # [[1], [1, 2], [1, 2, 3], [1, 2, 3, 4], [1, 2, 3, 4, 5]]
+    \ndata = [1, 2, 3, 4, 5]
+    \np = [[1], [1, 2], [1, 2, 3], [1, 2, 3, 4], [1, 2, 3, 4, 5]]"""
     return [seq[:i+1] for i in range(0, len(seq))]
 
 
 def shift_windows(data):
-    #Ex1:
+    """_
+    \n### Ex1:
     #Input:
-    # data = [[1, 2, 3, 4],[5, 6, 7, 8], [9, 10, 11, 12]]
-    # X, Y = shift_windows(data)
-    # display(X)
-    # display(Y)
-    #Output
-    # X= [[1, 2, 3, 4], [5, 6, 7, 8]]
-    # Y= [[5, 6, 7, 8], [9, 10, 11, 12]]
-    #
-    #Ex2:
+    \ndata = [[1, 2, 3, 4],[5, 6, 7, 8], [9, 10, 11, 12]]
+    \nX, Y = shift_windows(data)
+    #Output:
+    \nX= [[1, 2, 3, 4], [5, 6, 7, 8]]
+    \nY= [[5, 6, 7, 8], [9, 10, 11, 12]]
+    
+    \n### Ex2:
     #Input:
-    # data = get_windows_from_dataset([[1, 2, 3]], 4, 'pre')
-    # #data: => [[0, 0, 0, 1], [0, 0, 1, 2], [0, 1, 2, 3]]
-    # X, Y = shift_windows(data)
-    # display(X)
-    # display(Y)
-    #Output
-    # X= [[0, 0, 0, 1], [0, 0, 1, 2]]
-    # Y= [[0, 0, 1, 2], [0, 1, 2, 3]]
+    \ndata = get_windows_from_dataset([[1, 2, 3]], 4, 'pre')
+    #data: => [[0, 0, 0, 1], [0, 0, 1, 2], [0, 1, 2, 3]]
+    \nX, Y = shift_windows(data)
+    #Output:
+    \nX= [[0, 0, 0, 1], [0, 0, 1, 2]]
+    \nY= [[0, 0, 1, 2], [0, 1, 2, 3]]"""
     return data[:len(data)-1], data[1:len(data)]
 
 
 def combine_datasets(datasets):
+    """_
     #Input:
-    # [[1,2], [3,4,5]]
+    \n[[1,2], [3,4,5]]
     #Output:
-    #[1,2,3,4,5]
+    \n[1,2,3,4,5]"""
     return list(chain.from_iterable(datasets))
 
 
-def load_file(original_path, to_read=0, shuffle=False, _dtype=None, max_len = 0):
-    # Reads a file from path, shuffles if needed,
-    # Filters out max_len seqs (if max_len = 0, then reads all)
-    # Takes a sample of size to_read (if to_read = 0, then uses all of above) 
-    # Applies a split to each file line
-    # Return a list of arrays of _dtype, one array for each file line
-    with open(str(original_path), 'r') as f:
+def load_file(fullpath, to_read=0, shuffle=False, max_len=0, dtype=None, split_token='', encoding='utf-8', errors='strict'):
+    """_
+    #Reads a file from path, shuffles if needed,
+    \nFilters out max_len seqs (if max_len = 0, then reads all)
+    \nTakes a sample of size to_read (if to_read = 0, then uses all of above) 
+    \nApplies a split to each file line
+    #Returns a list of arrays of dtype, one array for each file line if split_token is != None
+    #Returns a list of strings one for each file line otherwise"""
+    with open(str(fullpath), 'r', encoding=encoding, errors=errors) as f:
         sample = list(f)
 
         if shuffle:
             random.shuffle(sample)
         
-
-        sample = [np.array(s.split(), dtype=_dtype) for s in sample]
+        if split_token != None:
+            if split_token == '':
+                sample = [np.array(s.split(), dtype=dtype) for s in sample]
+            else:
+                sample = [np.array(s.split(split_token), dtype=dtype) for s in sample] 
 
         if max_len > 0:
             sample = [x for x in sample if len(x) <= max_len]
@@ -175,25 +175,26 @@ def load_file(original_path, to_read=0, shuffle=False, _dtype=None, max_len = 0)
     return sample
 
 
-def load_multiple_files(files_dict, shuffle=False, _dtype=int, max_len=0,  **path_params):
+def load_multiple_files(files_dict, shuffle=False, max_len=0, dtype=None, split_token='', encoding='ascii', errors='strict', **path_params):
+    """_
     #Input:
-    #files_dict = {
-    # 'data1' : {
-    #   'fullpath': 'hola.txt', 'to_read': 20
-    # },
-    # 'data2' : {
-    #   'fullpath': 'chau.txt', 'to_read': 10
-    # }
-    #}
-    #**path_params= exp_name='exp_1', epsilon=2, iteration=1...
+    \nfiles_dict = {
+        'data1' : {
+            'fullpath': 'hola.txt', 'to_read': 20
+        },
+        'data2' : {
+            'fullpath': 'chau.txt', 'to_read': 10
+        }
+    },
+    \n**path_params= exp_name='exp_1', epsilon=2, iteration=1...
     #Output:
-    #[[1,2,3], [1,2]...]
+    \n[[1,2,3], [1,2]...]"""
 
     all_data = []
     for dataset in files_dict.values():
         print(dataset)
         path = dataset["fullpath"].format(**path_params)
-        data = load_file(path, to_read=dataset["to_read"], shuffle=shuffle, _dtype=_dtype, max_len=max_len)
+        data = load_file(path, to_read=dataset["to_read"], shuffle=shuffle, max_len=max_len, dtype=dtype, split_token=split_token, encoding=encoding, errors=errors)
         all_data.append(data)
     all_data = combine_datasets(all_data)
     if shuffle:
@@ -201,24 +202,25 @@ def load_multiple_files(files_dict, shuffle=False, _dtype=int, max_len=0,  **pat
     return all_data
 
 
-def load_multiple_files_with_class(files_dict, shuffle=False, _dtype=int, max_len=0, **path_params):
+def load_multiple_files_with_class(files_dict, shuffle=False, max_len=0, dtype=None, split_token='', encoding='ascii', errors='strict', **path_params):
+    """_
     #Input:
-    #files_dict = {
-    # 'data1' : {
-    #   'fullpath': 'hola.txt', 'to_read': 20, 'class': 0
-    # },
-    # 'data2' : {
-    #   'fullpath': 'chau.txt', 'to_read': 10, 'class': 1
-    # }
-    #}
-    #**path_params= exp_name='exp_1', epsilon=2, iteration=1...
+    \nfiles_dict = {
+        'data1' : {
+            'fullpath': 'hola.txt', 'to_read': 20, 'class': 0
+        },
+        'data2' : {
+            'fullpath': 'chau.txt', 'to_read': 10, 'class': 1
+        }
+    },
+    \n**path_params= exp_name='exp_1', epsilon=2, iteration=1...
     #Output:
-    #[[1,2,3], [1,2]...], [0, 1,...]
+    \n[[1,2,3], [1,2]...], [0, 1,...]"""
     all_x = []
     all_y = []
     for dataset in files_dict.values():
         path = dataset["fullpath"].format(**path_params)
-        x = load_file(path, to_read=dataset["to_read"], shuffle=shuffle, _dtype=_dtype, max_len=max_len)
+        x = load_file(path, to_read=dataset["to_read"], shuffle=shuffle, max_len=max_len, dtype=dtype, split_token=split_token, encoding=encoding, errors=errors)
         y = [dataset['class']]*len(x)
         all_x.append(x)
         all_y.append(y)
@@ -231,9 +233,8 @@ def load_multiple_files_with_class(files_dict, shuffle=False, _dtype=int, max_le
     
     return all_x, all_y
 
-def write_file(dataset, filename_out):
-    file = open(str(filename_out), 'w')
-    for element in dataset:
-        file.write(' '.join(map(str, np.array(element))))
-        file.write('\n')
-    file.close()
+def write_file(dataset, filename_out, split_token=' ', encoding='utf-8', errors='strict'):
+    with open(str(filename_out), 'w', encoding=encoding, errors=errors) as file:
+        for element in dataset:
+            file.write(split_token.join(map(str, np.array(element))))
+            file.write('\n')

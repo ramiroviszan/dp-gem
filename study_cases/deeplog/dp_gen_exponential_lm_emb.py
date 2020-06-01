@@ -101,7 +101,7 @@ class DPGenExponentialLMEmbedding:
             t_set = t_sets[dataset_name]
             path = t_set["fullpath"].format(exp_name=self.exp_name)
             self.datasets_to_privatize[dataset_name] = data_utils.load_file(
-                path, to_read=t_set["to_read"], shuffle=False, _dtype=int)
+                path, to_read=t_set["to_read"], shuffle=False, dtype=int, split_token='')
 
     def generate(self, epsilon, iteration):
         for dataset_name, dataset in self.datasets_to_privatize.items():

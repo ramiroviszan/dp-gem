@@ -14,14 +14,13 @@ class DataSplitter:
     def run(self):
         loaded = dict()
         for dataset_name, dataset_desc in self.datasets.items():
-            loaded[dataset_name] = data_utils.load_file(
-                dataset_desc['original'], dataset_desc['to_read'], shuffle=True, _dtype=dataset_desc['dtype'], max_len=dataset_desc['max_len'])
+            loaded[dataset_name] = data_utils.load_file(*dataset_desc['original'].values())
 
         loaded = self.tweak_data_before_split(loaded)
 
         for dataset_name, dataset_desc in self.datasets.items():
             self._split_dataset(loaded[dataset_name],
-                                *list(dataset_desc.values())[4:])  # 2 removes 'original', 'to_read', 'dtype', 'max_len'
+                                *list(dataset_desc.values())[1:])  #1=removes 'original'
 
     def tweak_data_before_split(self, data):
         return data

@@ -1,5 +1,5 @@
 experiment = {
-    'skip': False,
+    'skip': True,
     'random_seed': 27,
     'data_preparation': {
         'skip': True,
@@ -8,10 +8,16 @@ experiment = {
         'params': {
             'datasets': {
                 'normal': {
-                    'original': 'data/deeplog/all_normal.txt',
-                    'to_read': 4000,
-                    'dtype': int,
-                    'max_len': 50,
+                    'original': {
+                        'fullpath': 'data/deeplog/all_normal.txt',
+                        'to_read': 4000,
+                        'shuffle': True,
+                        'max_len': 50,
+                        'dtype': int,
+                        'split_token': '',
+                        'encoding': 'ascii',
+                        'errors': 'strict'
+                    },
                     'train_output_fullpath': '{exp_name}/normal_train.txt',
                     'val_output_fullpath': '{exp_name}/normal_val.txt',
                     'test_output_fullpath': '{exp_name}/normal_test.txt',
@@ -21,10 +27,16 @@ experiment = {
                     }
                 },
                 'abnormal': {
-                    'original': 'data/deeplog/all_abnormal.txt',
-                    'to_read': 4000,
-                    'dtype': int,
-                    'max_len': 50,
+                    'original': {
+                        'fullpath': 'data/deeplog/all_abnormal.txt',
+                        'to_read': 4000,
+                        'shuffle': True,
+                        'max_len': 50,
+                        'dtype': int,
+                        'split_token': '',
+                        'encoding': 'ascii',
+                        'errors': 'strict'
+                    },
                     'train_output_fullpath': '{exp_name}/abnormal_train.txt',
                     'val_output_fullpath': '{exp_name}/abnormal_val.txt',
                     'test_output_fullpath': '{exp_name}/abnormal_test.txt',

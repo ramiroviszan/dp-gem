@@ -3,12 +3,12 @@ import numpy as np
 from keras.models import load_model
 from sklearn.metrics import confusion_matrix, accuracy_score, roc_curve
 
-import plot_utils
-import data_utils
+import common.plot_utils as data_utils
+import common.data_utils as data_utils
 import study_cases.deeplog.deeplog_data_utils as d_utils
 import study_cases.deeplog.models as models
-from nn_trainer import NNTrainer
-from csv_result import CSVResult
+from common.nn_trainer import NNTrainer
+from common.csv_result import CSVResult
 
 
 class LMClassifier:
@@ -93,7 +93,7 @@ class LMClassifier:
         set_y = []
         for dataset_name, t_set in t_sets.items():
             path = t_set["fullpath"].format(exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
-            temp_x = data_utils.load_file(path, to_read=t_set["to_read"], shuffle=False, _dtype=int)
+            temp_x = data_utils.load_file(path, to_read=t_set["to_read"], shuffle=False, dtype=int, split_token='')
             temp_y = [t_set['class']]*len(temp_x) #np.ones(len(temp_x)) * t_set['class']
             set_x = data_utils.stack_datasets(set_x, temp_x, 1)
             set_y = data_utils.stack_datasets(set_y, temp_y, 1)

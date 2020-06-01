@@ -48,8 +48,8 @@ class DataSimilarity:
         first_fullpath = first_fullpath.format(exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
         second_fullpath = second_fullpath.format(exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
         
-        first = data_utils.load_file(first_fullpath, to_read, shuffle=False, _dtype=dtype)
-        second= data_utils.load_file(second_fullpath, to_read, shuffle=False, _dtype=dtype)
+        first = data_utils.load_file(first_fullpath, to_read, shuffle=False, dtype=dtype)
+        second= data_utils.load_file(second_fullpath, to_read, shuffle=False, dtype=dtype)
 
         return first, second
         
