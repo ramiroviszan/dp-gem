@@ -10,7 +10,7 @@ import study_cases.deeplog.models as models
 import study_cases.deeplog.deeplog_data_utils as d_utils
 from common.nn_trainer import NNTrainer
 
-class DPGenExponentialLMEmbedding:
+class DPGen:
 
     def __init__(self, experiment, datasets_params, network_fullpath, network_params, pre_proba_matrix_fullpath, to_privatize_output_fullpath):
         self.exp_name = experiment

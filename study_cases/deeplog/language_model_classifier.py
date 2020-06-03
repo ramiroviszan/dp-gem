@@ -3,7 +3,7 @@ import numpy as np
 from keras.models import load_model
 from sklearn.metrics import confusion_matrix, accuracy_score, roc_curve
 
-import common.plot_utils as data_utils
+import common.plot_utils as plot_utils
 import common.data_utils as data_utils
 import study_cases.deeplog.deeplog_data_utils as d_utils
 import study_cases.deeplog.models as models

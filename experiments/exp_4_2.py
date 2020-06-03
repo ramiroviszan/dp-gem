@@ -1,15 +1,23 @@
 experiment = {
-    'skip': True,
+    'skip': False,
     'random_seed': 27,
     'data_preparation': {
         'skip': True,
-        'module_name': 'study_cases.deeplog.deeplog_data_splitter',
+        'module_name': 'study_cases.deeplog.deeplog_final_token',
         'class_name': 'DeepLogDataSplitter',
         'params': {
             'datasets': {
                 'normal': {
-                    'original': 'data/deeplog/all_normal.txt',
-                    'to_read': 4000,
+                    'original': {
+                        'fullpath': 'data/deeplog/all_normal.txt',
+                        'to_read': 4000,
+                        'shuffle': True,
+                        'max_len': 50,
+                        'dtype': int,
+                        'split_token': '',
+                        'encoding': 'ascii',
+                        'errors': 'strict'
+                    },
                     'train_output_fullpath': '{exp_name}/normal_train.txt',
                     'val_output_fullpath': '{exp_name}/normal_val.txt',
                     'test_output_fullpath': '{exp_name}/normal_test.txt',
@@ -19,8 +27,16 @@ experiment = {
                     }
                 },
                 'abnormal': {
-                    'original': 'data/deeplog/all_abnormal.txt',
-                    'to_read': 4000,
+                    'original': {
+                        'fullpath': 'data/deeplog/all_abnormal.txt',
+                        'to_read': 4000,
+                        'shuffle': True,
+                        'max_len': 50,
+                        'dtype': int,
+                        'split_token': '',
+                        'encoding': 'ascii',
+                        'errors': 'strict'
+                    },
                     'train_output_fullpath': '{exp_name}/abnormal_train.txt',
                     'val_output_fullpath': '{exp_name}/abnormal_val.txt',
                     'test_output_fullpath': '{exp_name}/abnormal_test.txt',
@@ -34,7 +50,7 @@ experiment = {
     },
     'control_test': {
         'run_iterations': 0,
-        'module_name': 'study_cases.deeplog.language_model_classifier',
+        'module_name': 'study_cases.deeplog.lm_classifier',
         'class_name': 'LMClassifier',
         'params': {
             'datasets_params': {
@@ -69,11 +85,11 @@ experiment = {
                     }
                 }
             },
-            'network_fullpath': '{exp_name}/deeplog_control.h5',
+            'network_fullpath': '{exp_name}/control.h5',
             'network_params': {
-                'model_type': 'control',
+                'model_type': 'control_fixed_window',
                 'window_size': 10,
-                'vocab_size': 29,
+                'vocab_size': 31,#this value considers padding, 30 without
                 'train_sessions': {
                     'first': {
                         'epochs': 100,
@@ -107,10 +123,10 @@ experiment = {
     },
     'dp_gen': {
         'run_iterations': 1,
-        'epsilon_trials': [10, 20, 30, 40, 100], #for each epsilon will generate 'run_iterations' privatizations
-        'mode': 'tests_only', #all, gen_only, tests_only, skip
-        'module_name': 'study_cases.deeplog.dp_gen_exponential_class_emb',
-        'class_name': 'DPGenExponentialClassifierEmbedding',
+        'epsilon_trials': ['no_dp', 20, 30, 40, 50, 60, 100], #for each epsilon will generate 'run_iterations' privatizations
+        'mode': 'all', #all, gen_only, tests_only, skip
+        'module_name': 'study_cases.deeplog.dp_gen_autoencoder',
+        'class_name': 'DPGen',
         'params': {
             'datasets_params': {
                 'train': {
@@ -162,14 +178,14 @@ experiment = {
                     }
                 }
             },
-            'network_fullpath': '{exp_name}/deeplog_dp_gen_emb.h5',
+            'network_fullpath': '{exp_name}/gen.h5',
             'network_params': {
-                'model_type': 'gen_class',
-                'vocab_size': 29,
-                'emb_size': 8,
+                'model_type': 'gen_autoencoder',
+                'vocab_size': 31,
+                'window_size': 50,
                 'train_sessions': {
                     'first': {
-                        'epochs': 500,
+                        'epochs': 1000,
                         'batch_size': 500,
                         'lr': 0.0001,
                         'loss': 'binary_crossentropy',
@@ -178,7 +194,7 @@ experiment = {
                         'save_model': False
                     },
                     'second': {
-                        'epochs': 500,
+                        'epochs': 1000,
                         'batch_size': 100,
                         'lr': 0.00001,
                         'loss': 'binary_crossentropy',
@@ -194,7 +210,7 @@ experiment = {
         'utility_tests': {
             'classifier': {
                 'skip': False, #the iterations are given by dp_gen iterations
-                'module_name': 'study_cases.deeplog.language_model_classifier',
+                'module_name': 'study_cases.deeplog.lm_classifier',
                 'class_name': 'LMClassifier',
                 'params': {
                     'datasets_params': {
@@ -231,9 +247,9 @@ experiment = {
                     },
                     'network_fullpath': '{exp_name}/deeplog_utility_eps_{epsilon}_{iteration}.h5',
                     'network_params': {
-                        'model_type': 'utility',
+                        'model_type': 'control_fixed_window',
                         'window_size': 10,
-                        'vocab_size': 29,
+                        'vocab_size': 31,
                         'train_sessions': {
                             'first': {
                                 'epochs': 100,
@@ -267,7 +283,7 @@ experiment = {
             },
             'similarity':{
                 'skip': False, #the iterations are given by dp_gen iterations
-                'module_name': 'study_cases.deeplog.data_similarity',
+                'module_name': 'common.data_similarity',
                 'class_name': 'DataSimilarity',
                 'params': {
                     'metrics': ['hamming', 'hamming_wise', 'cosine'],
@@ -275,12 +291,14 @@ experiment = {
                         'normal': {
                             'orig_fullpath': '{exp_name}/normal_test.txt',
                             'privatized_fullpath': '{exp_name}/fake_normal_test_eps_{epsilon}_{iteration}.txt',
-                            'to_read': 0
+                            'to_read': 0,
+                            'dtype': int
                         },
                         'abnormal':{
                             'orig_fullpath': '{exp_name}/abnormal_test.txt',
                             'privatized_fullpath': '{exp_name}/fake_abnormal_test_eps_{epsilon}_{iteration}.txt',
-                            'to_read': 0
+                            'to_read': 0,
+                            'dtype': int
                         }
                     },
                     'results_fullpath': '{exp_name}/utility_similarity_test_results.csv'

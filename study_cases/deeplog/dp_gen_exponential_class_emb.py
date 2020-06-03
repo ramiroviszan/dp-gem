@@ -10,7 +10,7 @@ import study_cases.deeplog.models as models
 import study_cases.deeplog.deeplog_data_utils as d_utils
 from common.nn_trainer import NNTrainer
 
-class DPGenExponentialClassifierEmbedding:
+class DPGen:
 
     def __init__(self, experiment, datasets_params, network_fullpath, network_params, pre_proba_matrix_fullpath, to_privatize_output_fullpath):
         self.exp_name = experiment
@@ -41,23 +41,26 @@ class DPGenExponentialClassifierEmbedding:
 
     def _train_model(self, model_type, vocab_size, emb_size, train_sessions):
 
-        t_sets = self.datasets_params['train']
-        train_x = []
-        train_y = []
-        for dataset_name in t_sets:
-            t_set = t_sets[dataset_name]
-            path = t_set["fullpath"].format(exp_name=self.exp_name)
-            temp_x = data_utils.load_file(path, to_read=t_set["to_read"], shuffle=False, dtype=int, split_token='')
-            temp_y = [t_set['class']]*len(temp_x)
-            train_x = data_utils.stack_datasets(train_x, temp_x, 1)
-            train_y = data_utils.stack_datasets(train_y, temp_y, 1)
+        # t_sets = self.datasets_params['train']
+        # train_x = []
+        # train_x = []
+        # for dataset_name in t_sets:
+        #     t_set = t_sets[dataset_name]
+        #     path = t_set["fullpath"].format(exp_name=self.exp_name)
+        #     temp_x = data_utils.load_file(path, to_read=t_set["to_read"], shuffle=False, dtype=int)
+        #     temp_y = [t_set['class']]*len(temp_x)
+        #     train_x = data_utils.stack_datasets(train_x, temp_x, 1)
+        #     train_y = data_utils.stack_datasets(train_y, temp_y, 1)
 
-        train_x, train_y = data_utils.unison_shuffled_copies(train_x, train_y)
+        # train_x, train_y = data_utils.unison_shuffled_copies(train_x, train_y)
 
-        max_length, _ = data_utils.dataset_longest_seq(train_x)
-        train_x = np.array(data_utils.pad_dataset(train_x, max_length, 'post'))
+        train_x, train_y = data_utils.load_multiple_files_with_class(self.datasets_params['train'], shuffle=True, dtype=int, exp_name=self.exp_name)
 
-        model = models.create_model(model_type, [vocab_size, emb_size, max_length])
+        max_len, _ = data_utils.dataset_longest_seq(train_x)
+        # train_x = np.array(data_utils.pad_dataset(train_x, max_len, 'post'))
+        train_x = np.array(data_utils.pad_dataset(train_x, max_len, 'pre'))
+
+        model = models.create_model(model_type, [vocab_size, emb_size, max_len])
         trainer = NNTrainer()
         model = trainer.train(model, self.network_fullpath, train_x, train_y, train_sessions)
         return model
@@ -103,7 +106,7 @@ class DPGenExponentialClassifierEmbedding:
             t_set = t_sets[dataset_name]
             path = t_set["fullpath"].format(exp_name=self.exp_name)
             self.datasets_to_privatize[dataset_name] = data_utils.load_file(
-                path, to_read=t_set["to_read"], shuffle=False, dtype=int, split_token='')
+                path, to_read=t_set["to_read"], shuffle=False, dtype=int)
 
     def generate(self, epsilon, iteration):
         for dataset_name, dataset in self.datasets_to_privatize.items():

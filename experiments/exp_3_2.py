@@ -123,9 +123,9 @@ experiment = {
     },
     'dp_gen': {
         'run_iterations': 1,
-        'epsilon_trials': [20, 30, 40, 50, 100], #for each epsilon will generate 'run_iterations' privatizations
-        'mode': 'tests_only', #all, gen_only, tests_only, skip
-        'module_name': 'study_cases.deeplog.dp_gen_autoencoder',
+        'epsilon_trials': [20, 30, 40, 50, 60, 100], #for each epsilon will generate 'run_iterations' privatizations
+        'mode': 'all', #all, gen_only, tests_only, skip
+        'module_name': 'study_cases.deeplog.dp_gen_exponential_class_emb',
         'class_name': 'DPGen',
         'params': {
             'datasets_params': {
@@ -180,12 +180,12 @@ experiment = {
             },
             'network_fullpath': '{exp_name}/gen.h5',
             'network_params': {
-                'model_type': 'gen_autoencoder',
+                'model_type': 'gen_class',
                 'vocab_size': 31,
-                'window_size': 50,
+                'emb_size': 8,
                 'train_sessions': {
                     'first': {
-                        'epochs': 1000,
+                        'epochs': 500,
                         'batch_size': 500,
                         'lr': 0.0001,
                         'loss': 'binary_crossentropy',
@@ -209,7 +209,7 @@ experiment = {
         },
         'utility_tests': {
             'classifier': {
-                'skip': True, #the iterations are given by dp_gen iterations
+                'skip': False, #the iterations are given by dp_gen iterations
                 'module_name': 'study_cases.deeplog.lm_classifier',
                 'class_name': 'LMClassifier',
                 'params': {
