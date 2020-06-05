@@ -65,7 +65,7 @@ def pad_dataset(data, max_length, padding):
     return list(pad_sequences(data, maxlen=max_length, padding=padding))
 
 
-def generate_windows_from_dataset(data, window_size, padding):
+def generate_windows_from_dataset(data, window_size):
     """_
     #Input:
     \ndata  = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
@@ -82,7 +82,7 @@ def generate_windows_from_dataset(data, window_size, padding):
      ...
      array([3, 4, 5, 6])]"""
     prefixes = get_dataset_prefixes(data)
-    return pad_dataset(prefixes, window_size, padding)
+    return pad_dataset(prefixes, window_size, 'pre')
 
 def get_dataset_prefixes(sequences):
     """_

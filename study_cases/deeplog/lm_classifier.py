@@ -46,7 +46,7 @@ class LMClassifier:
             max_len, _ = data_utils.dataset_longest_seq(all_data)
             window_size = max_len
             
-        train_x = data_utils.generate_windows_from_dataset(all_data, window_size, 'pre')
+        train_x = data_utils.generate_windows_from_dataset(all_data, window_size)
         train_x, train_y = data_utils.shift_windows(train_x)
 
         train_x = np.expand_dims(train_x, axis=2)
@@ -137,7 +137,7 @@ class LMClassifier:
             print("Evaluating sequence...")
             print(seq)
 
-        padded_prefixes = data_utils.generate_windows_from_dataset([seq], window_size, 'pre')
+        padded_prefixes = data_utils.generate_windows_from_dataset([seq], window_size)
         padded_prefixes = np.expand_dims(padded_prefixes, axis=2)
         yhat = self.model.predict(padded_prefixes, verbose=0)
         
