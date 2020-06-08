@@ -2,7 +2,7 @@ experiment = {
     'skip': False,
     'random_seed': 27,
     'data_preparation': {
-        'skip': True,
+        'skip': False,
         'module_name': 'study_cases.deeplog.deeplog_final_token',
         'class_name': 'DeepLogDataSplitter',
         'params': {
@@ -49,7 +49,7 @@ experiment = {
         }
     },
     'control_test': {
-        'run_iterations': 0,
+        'run_iterations': 1,
         'module_name': 'study_cases.deeplog.lm_classifier',
         'class_name': 'LMClassifier',
         'params': {
@@ -59,7 +59,7 @@ experiment = {
                         'fullpath': '{exp_name}/normal_train.txt',
                         'to_read': 0
                     }
-                },   
+                },
                 'val': {
                     'normal': {
                         'fullpath': '{exp_name}/normal_val.txt',
@@ -89,7 +89,7 @@ experiment = {
             'network_params': {
                 'model_type': 'control_fixed_window',
                 'window_size': 10,
-                'vocab_size': 31,#this value considers padding, 30 without
+                'vocab_size': 31,  # this value considers padding, 30 without
                 'train_sessions': {
                     'first': {
                         'epochs': 100,
@@ -112,19 +112,26 @@ experiment = {
                 }
             },
             'classifier_params': {
-                'use_top_k': 0,#if top == 0 threasholds will be evaluated
+                'use_top_k': 0,  # if top == 0 threasholds will be evaluated
                 'roc_thresholds': True,
                 'custom_thresholds': [],
                 'recalulate_probas': False,
                 'probas_fullpath': '{exp_name}/control_probas_{{dataset_type}}_topk_{topk}.npy',
-            }, 
+            },
             'results_fullpath': '{exp_name}/control_{dataset_type}_results.csv'
         }
     },
     'dp_gen': {
-        'run_iterations': 1,
-        'epsilon_trials': ['no_dp', 20, 30, 40, 50, 60, 100], #for each epsilon will generate 'run_iterations' privatizations
-        'mode': 'all', #all, gen_only, tests_only, skip
+        'run_iterations': 1,#for each trial bellow will generate 'run_iterations' privatizations
+        'trials': [
+            {'eps': 'no_dp', 'maxdelta':0},#no dp
+            {'eps': 20, 'maxdelta':1},
+            {'eps': 30, 'maxdelta':1},
+            {'eps': 40, 'maxdelta':1},
+            {'eps': 50, 'maxdelta':1},
+            {'eps': 60, 'maxdelta':1},
+            {'eps': 100, 'maxdelta':1}],
+        'mode': 'all',  # all, gen_only, tests_only, skip
         'module_name': 'study_cases.deeplog.dp_gen_autoencoder',
         'class_name': 'DPGen',
         'params': {
@@ -132,7 +139,7 @@ experiment = {
                 'train': {
                     'normal': {
                         'fullpath': '{exp_name}/normal_train.txt',
-                        'to_read': 0, 
+                        'to_read': 0,
                         'class': 1
                     },
                     'abnormal': {
@@ -183,6 +190,7 @@ experiment = {
                 'model_type': 'gen_autoencoder',
                 'vocab_size': 31,
                 'window_size': 50,
+                'emb_size': 4,
                 'train_sessions': {
                     'first': {
                         'epochs': 1000,
@@ -204,48 +212,47 @@ experiment = {
                     }
                 }
             },
-            'pre_proba_matrix_fullpath': '{exp_name}/pre_proba_matrix.npy',
-            'to_privatize_output_fullpath': '{exp_name}/fake_{{to_privatize_name}}_eps_{{epsilon}}_{{iteration}}.txt'
+            'to_privatize_output_fullpath': '{exp_name}/fake_{{to_privatize_name}}_{{eps}}_{{iteration}}.txt'
         },
         'utility_tests': {
             'classifier': {
-                'skip': False, #the iterations are given by dp_gen iterations
+                'skip': False,  # the iterations are given by dp_gen iterations
                 'module_name': 'study_cases.deeplog.lm_classifier',
                 'class_name': 'LMClassifier',
                 'params': {
                     'datasets_params': {
                         'train': {
                             'normal': {
-                                'fullpath': '{exp_name}/fake_normal_train_eps_{epsilon}_{iteration}.txt',
+                                'fullpath': '{exp_name}/fake_normal_train_{eps}_{iteration}.txt',
                                 'to_read': 0
                             }
                         },
                         'val': {
                             'normal': {
-                                'fullpath': '{exp_name}/fake_normal_val_eps_{epsilon}_{iteration}.txt',
+                                'fullpath': '{exp_name}/fake_normal_val_{eps}_{iteration}.txt',
                                 'to_read': 0,
                                 'class': 1
                             },
                             'abnormal': {
-                                'fullpath': '{exp_name}/fake_abnormal_val_eps_{epsilon}_{iteration}.txt',
+                                'fullpath': '{exp_name}/fake_abnormal_val_{eps}_{iteration}.txt',
                                 'to_read': 0,
                                 'class': 0
                             }
-                        },      
+                        },
                         'test': {
                             'normal': {
-                                'fullpath': '{exp_name}/fake_normal_test_eps_{epsilon}_{iteration}.txt',
+                                'fullpath': '{exp_name}/fake_normal_test_{eps}_{iteration}.txt',
                                 'to_read': 0,
                                 'class': 1
                             },
                             'abnormal': {
-                                'fullpath': '{exp_name}/fake_abnormal_test_eps_{epsilon}_{iteration}.txt',
+                                'fullpath': '{exp_name}/fake_abnormal_test_{eps}_{iteration}.txt',
                                 'to_read': 0,
                                 'class': 0
                             }
                         }
                     },
-                    'network_fullpath': '{exp_name}/deeplog_utility_eps_{epsilon}_{iteration}.h5',
+                    'network_fullpath': '{exp_name}/deeplog_utility_{eps}_{iteration}.h5',
                     'network_params': {
                         'model_type': 'control_fixed_window',
                         'window_size': 10,
@@ -272,17 +279,17 @@ experiment = {
                         }
                     },
                     'classifier_params': {
-                        'use_top_k': 0,#if top == 0 threasholds will be evaluated
+                        'use_top_k': 0,  # if top == 0 threasholds will be evaluated
                         'roc_thresholds': True,
                         'custom_thresholds': [],
                         'recalulate_probas': False,
-                        'probas_fullpath': '{exp_name}/utility_probas_{{dataset_type}}_topk_{topk}_eps_{epsilon}_{iteration}.npy',
-                    }, 
+                        'probas_fullpath': '{exp_name}/utility_probas_{{dataset_type}}_topk_{topk}_{eps}_{iteration}.npy',
+                    },
                     'results_fullpath': '{exp_name}/utility_classifier_{dataset_type}_results.csv'
                 }
             },
-            'similarity':{
-                'skip': False, #the iterations are given by dp_gen iterations
+            'similarity': {
+                'skip': False,  # the iterations are given by dp_gen iterations
                 'module_name': 'common.data_similarity',
                 'class_name': 'DataSimilarity',
                 'params': {
@@ -290,13 +297,13 @@ experiment = {
                     'datasets_params': {
                         'normal': {
                             'orig_fullpath': '{exp_name}/normal_test.txt',
-                            'privatized_fullpath': '{exp_name}/fake_normal_test_eps_{epsilon}_{iteration}.txt',
+                            'privatized_fullpath': '{exp_name}/fake_normal_test_{eps}_{iteration}.txt',
                             'to_read': 0,
                             'dtype': int
                         },
-                        'abnormal':{
+                        'abnormal': {
                             'orig_fullpath': '{exp_name}/abnormal_test.txt',
-                            'privatized_fullpath': '{exp_name}/fake_abnormal_test_eps_{epsilon}_{iteration}.txt',
+                            'privatized_fullpath': '{exp_name}/fake_abnormal_test_{eps}_{iteration}.txt',
                             'to_read': 0,
                             'dtype': int
                         }

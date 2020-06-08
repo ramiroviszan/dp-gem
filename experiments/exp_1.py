@@ -107,7 +107,7 @@ experiment = {
     },
     'dp_gen': {
         'run_iterations': 1,
-        'epsilon_trials': [10, 20, 30, 40, 100], #for each epsilon will generate 'run_iterations' privatizations
+        'trials': [10, 20, 30, 40, 100], #for each epsilon will generate 'run_iterations' privatizations
         'mode': 'all', #all, gen_only, tests_only, skip
         'module_name': 'study_cases.deeplog.dp_gen_exponential_emb',
         'class_name': 'DPGenExponentialEmbedding',

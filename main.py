@@ -86,15 +86,15 @@ def run_control_tests(control_test_desc, exp_name, exp_path):
                 print('\n\nControl Test Iteration:', i)
                 control_test_copy = copy.deepcopy(control_test_desc)
                 control_params = list(control_test_copy.values())[1:] #[1:] removes run_iterations param
-                control = hot_new((exp_path, 0, i), *control_params)
+                control = hot_new((exp_path, {}, i), *control_params)
                 control.run_test()
     else:
         print('\n\nWarning, no control_test found in', exp_name, '- Skipping.')
 
 def run_generator(dp_gen_desc, exp_name, exp_path):
     if dp_gen_desc != None:
-        epsilon_trials = dp_gen_desc.get('epsilon_trials', [])
-        print('\n\nEpsilon tries:', epsilon_trials)
+        trials = dp_gen_desc.get('trials', [])
+        print('\n\nTrials:', trials)
         gen_iters = dp_gen_desc.get('run_iterations', 0)
         print('\nRun Iterations:', gen_iters)
 
@@ -102,48 +102,48 @@ def run_generator(dp_gen_desc, exp_name, exp_path):
         if mode == 'all' or mode == 'tests_only':
             utility_tests_desc = dp_gen_desc.get('utility_tests', None)
 
-        if len(epsilon_trials) == 0:
-            print('\n\nWarning: No epsilon_trials found in', exp_name, '- Skipping.')
+        if len(trials) == 0:
+            print('\n\nWarning: No trials found in', exp_name, '- Skipping.')
         elif gen_iters == 0:
             print('\n\nWarning: Skipping Generation, run_iterations is 0 or missing key in', exp_name, '-Skipping.')
         elif mode == 'all':
             print('\n\nGenerator and tests.')
-            gen_params = list(dp_gen_desc.values())[3:-1]#1:-1 remove run_iterations, epsilons, mode and utility_tests from dp_gen_desc
+            gen_params = list(dp_gen_desc.values())[3:-1]#1:-1 remove run_iterations, trials, mode and utility_tests from dp_gen_desc
             gen = hot_new(exp_path, *gen_params)
-            for epsilon in epsilon_trials:
+            for trial in trials:
                 for i in range(0, gen_iters):
-                    print('\n\nGenerator with eps =', epsilon, 'iter =', i, 'from epsilons =', epsilon_trials, 'total iters =', gen_iters)
-                    gen.generate(epsilon, i)
-                    run_tests(utility_tests_desc, epsilon, i, exp_name, exp_path)
+                    print('\n\nGenerator with trial =', trial, 'iter =', i, 'total iters =', gen_iters)
+                    gen.generate(trial, i)
+                    run_tests(utility_tests_desc, trial, i, exp_name, exp_path)
         elif mode == 'gen_only':
             print('\n\nGenerator only: skipping tests.')
-            gen_params = list(dp_gen_desc.values())[3:-1]#1:-1 remove run_iterations, epsilons, mode and utility_tests from dp_gen_desc
+            gen_params = list(dp_gen_desc.values())[3:-1]#1:-1 remove run_iterations, trials, mode and utility_tests from dp_gen_desc
             gen = hot_new(exp_path, *gen_params)
-            for epsilon in epsilon_trials:
+            for trial in trials:
                 for i in range(0, gen_iters):
-                    print('\n\nGenerator with eps =', epsilon, 'iter =', i, 'from epsilons =', epsilon_trials, 'total iters =', gen_iters)
-                    gen.generate(epsilon, i)
+                    print('\n\nGenerator with trial =', trial, 'iter =', i, 'total iters =', gen_iters)
+                    gen.generate(trial, i)
         elif mode == 'tests_only':
             print('\n\nTests only: running iterations with previously generated files! Hope they exist :). Skipping Generator.')
-            for epsilon in epsilon_trials:
+            for trial in trials:
                 for i in range(0, gen_iters):
-                    run_tests(utility_tests_desc, epsilon, i, exp_name, exp_path)
+                    run_tests(utility_tests_desc, trial, i, exp_name, exp_path)
         else:
             print('\n\nWarning: No (mode = all, gen_only, tests_only) found in:', exp_name, '- Skipping.')
     else:
         print('\n\nWarning: No dp_gen_desc found in', exp_name, '- Skipping.')
             
-def run_tests(tests_desc, epsilon, i, exp_name, exp_path):
+def run_tests(tests_desc, trial, i, exp_name, exp_path):
     if tests_desc != None:
         tests_desc = copy.deepcopy(tests_desc)
         for test_name, test_desc in tests_desc.items():
             skip = test_desc.get('skip', False) #By default won't skip
             if skip:
-                print('\n\nSkipping Test:', test_name, 'with eps =', epsilon, 'iter =', i)
+                print('\n\nSkipping Test:', test_name, 'with trial =', trial, 'iter =', i)
             else:
-                print('\n\nTest:', test_name, 'with eps =', epsilon, 'iter =', i)
+                print('\n\nTest:', test_name, 'with trial =', trial, 'iter =', i)
                 test_params = list(test_desc.values())[1:] #[1:] removes skip param
-                test = hot_new((exp_path, epsilon, i), *test_params)
+                test = hot_new((exp_path, trial, i), *test_params)
                 test.run_test()
     else:
         print('Warning: no utility_tests found in', exp_name, 'but still trying to run in mode= all or tests_only.')

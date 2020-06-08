@@ -14,16 +14,17 @@ from common.csv_result import CSVResult
 class LMClassifier:
 
     def __init__(self, experiment, datasets_params, network_fullpath, network_params, classifier_params, results_fullpath):
-        self.exp_name, self.epsilon, self.iteration = experiment
+        self.exp_name, self.trial, self.iteration = experiment
 
         self.datasets_params = datasets_params
-        self.network_fullpath = network_fullpath.format(exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
+        self.network_fullpath = network_fullpath.format(exp_name=self.exp_name, iteration=self.iteration, **self.trial)
         self.network_params = network_params
 
         self.classifier_params = classifier_params
-        self.classifier_params['probas_fullpath'] = self.classifier_params['probas_fullpath'].format(exp_name=self.exp_name, topk=self.classifier_params['use_top_k'], epsilon=self.epsilon, iteration =self.iteration)
+        self.classifier_params['probas_fullpath'] = self.classifier_params['probas_fullpath'].format(exp_name=self.exp_name, topk=self.classifier_params['use_top_k'], iteration=self.iteration, **self.trial)
 
-        results_header = ['eps', 'iter', 'use_top_k', 'threshold', 'tn', 'fp', 'fn', 'tp', 'acc']
+        result_header = list(self.trial.keys())
+        results_header = result_header + ['iter', 'use_top_k', 'threshold', 'tn', 'fp', 'fn', 'tp', 'acc']
         val_results_fullpath = results_fullpath.format(exp_name=self.exp_name, dataset_type='val')
         test_results_fullpath = results_fullpath.format(exp_name=self.exp_name, dataset_type='test')
         self.val_results = CSVResult(val_results_fullpath, results_header)
@@ -40,7 +41,7 @@ class LMClassifier:
 
     def _train_model(self, model_type, window_size, vocab_size, train_sessions):
         
-        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
+        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, exp_name=self.exp_name, iteration=self.iteration, **self.trial)
 
         if window_size == 0:
             max_len, _ = data_utils.dataset_longest_seq(all_data)
@@ -63,7 +64,7 @@ class LMClassifier:
 
     def _run(self, use_top_k, roc_thresholds, custom_thresholds, recalulate_probas, probas_fullpath):
 
-        val_x, val_y = data_utils.load_multiple_files_with_class(self.datasets_params['val'], shuffle=False, dtype=int, exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
+        val_x, val_y = data_utils.load_multiple_files_with_class(self.datasets_params['val'], shuffle=False, dtype=int, exp_name=self.exp_name, iteration=self.iteration, **self.trial)
         val_fullpath = probas_fullpath.format(dataset_type = 'val')
         val_probas = self._get_dataset_proba(val_fullpath, val_x, recalulate_probas, use_top_k)
 
@@ -78,7 +79,7 @@ class LMClassifier:
         plot_utils.plot_probas_vs_threshold(val_fullpath, val_probas, val_y, thresholds)
         self._try_different_thresholds(val_probas, val_y, thresholds, self.val_results, use_top_k)
 
-        test_x, test_y = data_utils.load_multiple_files_with_class(self.datasets_params['test'], shuffle=False, dtype=int, exp_name=self.exp_name, epsilon=self.epsilon, iteration=self.iteration)
+        test_x, test_y = data_utils.load_multiple_files_with_class(self.datasets_params['test'], shuffle=False, dtype=int, exp_name=self.exp_name, iteration=self.iteration, **self.trial)
         test_fullpath = probas_fullpath.format(dataset_type = 'test')
         test_probas = self._get_dataset_proba(test_fullpath, test_x, recalulate_probas, use_top_k)
         plot_utils.plot_probas_vs_threshold(test_fullpath, test_probas, test_y, thresholds)
@@ -101,10 +102,11 @@ class LMClassifier:
         return optimal_threshold, fpr, tpr
 
     def _try_different_thresholds(self, probas, y, thresholds, result_writer, use_top_k):
+        results = list(self.trial.values()) + [self.iteration, use_top_k]
         for ts in thresholds:
             y_hat = self._classify(probas, ts)
             metrics = self._metrics(y, y_hat)
-            result_writer.save_results([self.epsilon, self.iteration, use_top_k, ts, *metrics])
+            result_writer.save_results(results + [ts, *metrics])
 
     def _classify(self, probas, threshold):
         return probas >= threshold

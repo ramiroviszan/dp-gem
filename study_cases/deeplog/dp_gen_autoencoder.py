@@ -12,15 +12,15 @@ from common.nn_trainer import NNTrainer
 
 class DPGen:
 
-    def __init__(self, experiment, datasets_params, network_fullpath, network_params, pre_proba_matrix_fullpath, to_privatize_output_fullpath):
+    def __init__(self, experiment, datasets_params, network_fullpath, network_params, to_privatize_output_fullpath):
         self.exp_name = experiment
 
         self.datasets_params = datasets_params
         self.network_fullpath = network_fullpath.format(exp_name=self.exp_name)
         self.network_params = network_params
 
-        self.pre_proba_matrix_fullpath = pre_proba_matrix_fullpath.format(
-            exp_name=self.exp_name)
+        #self.pre_proba_matrix_fullpath = pre_proba_matrix_fullpath.format(
+        #    exp_name=self.exp_name)
         self.to_privatize_output_fullpath = to_privatize_output_fullpath.format(
             exp_name=self.exp_name)
 
@@ -40,7 +40,7 @@ class DPGen:
         self.vocab_size = self.embedding.shape[0]
         return
 
-    def _train_model(self, model_type, vocab_size, window_size, train_sessions):
+    def _train_model(self, model_type, vocab_size, window_size, emb_size, train_sessions):
 
         all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, max_len=window_size, exp_name=self.exp_name)
         
@@ -51,7 +51,7 @@ class DPGen:
         train_x = np.array(data_utils.pad_dataset(all_data, window_size, 'pre'))
         train_y_oh = data_utils.to_onehot(train_x, vocab_size)
 
-        model = models.create_model(model_type, [window_size, vocab_size, int(vocab_size**(1/4))])
+        model = models.create_model(model_type, [window_size, vocab_size, emb_size])
 
         trainer = NNTrainer()
         model = trainer.train(model, self.network_fullpath, train_x, train_y_oh, train_sessions)
@@ -66,17 +66,19 @@ class DPGen:
             self.datasets_to_privatize[dataset_name] = data_utils.load_file(
                 path, to_read=dataset["to_read"], shuffle=False, max_len=self.max_len, dtype=int, split_token='')
 
-    def generate(self, epsilon, iteration):
+    def generate(self, trial, iteration):
         for dataset_name, dataset in self.datasets_to_privatize.items():
             print('\n\nGenerating dataset:', dataset_name, '- Num seqs:', len(dataset))
-            if epsilon == 'no_dp':
-                self._generate_synthetic_no_dp(epsilon, iteration, dataset_name, dataset)
+            if trial['eps'] == 'no_dp':
+                self._generate_synthetic_no_dp(trial, iteration, dataset_name, dataset)
             else:
-                self._generate_synthetic(epsilon, iteration, dataset_name, dataset)
+                self._generate_synthetic(trial, iteration, dataset_name, dataset)
 
-    def _generate_synthetic(self, epsilon, iteration, dataset_name, dataset):
+    def _generate_synthetic(self, trial, iteration, dataset_name, dataset):
         seq_x = np.array(data_utils.pad_dataset(dataset, self.max_len, 'pre'))
-        probas = self.model.predict(seq_x) * epsilon * 0.5
+        epsilon, maxdelta = trial.values()
+        scale =  epsilon / (2 * maxdelta)
+        probas = self.model.predict(seq_x) * scale
 
         fake_data = []
         for seq_i, seq in enumerate(seq_x):
@@ -96,10 +98,10 @@ class DPGen:
             #print("\nOriginal:", seq, "\nPrivate:", np.array(private_seq))
 
         filename_fullpath = self.to_privatize_output_fullpath.format(
-            to_privatize_name=dataset_name, epsilon=epsilon, iteration=iteration)
+            to_privatize_name=dataset_name, iteration=iteration, **trial)
         data_utils.write_file(fake_data, filename_fullpath)
 
-    def _generate_synthetic_no_dp(self, epsilon, iteration, dataset_name, dataset):
+    def _generate_synthetic_no_dp(self, trial, iteration, dataset_name, dataset):
         seq_x = np.array(data_utils.pad_dataset(dataset, self.max_len, 'pre'))
         probas = self.model.predict(seq_x) 
 
@@ -118,5 +120,5 @@ class DPGen:
             fake_data.append(private_seq)
 
         filename_fullpath = self.to_privatize_output_fullpath.format(
-            to_privatize_name=dataset_name, epsilon=epsilon, iteration=iteration)
+            to_privatize_name=dataset_name, iteration=iteration, **trial)
         data_utils.write_file(fake_data, filename_fullpath)
