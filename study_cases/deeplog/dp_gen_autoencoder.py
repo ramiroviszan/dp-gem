@@ -76,10 +76,20 @@ class DPGen:
 
     def _generate_synthetic(self, trial, iteration, dataset_name, dataset):
         seq_x = np.array(data_utils.pad_dataset(dataset, self.max_len, 'pre'))
-        epsilon, maxdelta = trial.values()
-        scale =  epsilon / (2 * maxdelta)
-        probas = self.model.predict(seq_x) * scale
+        lens = np.array([len(seq) for seq in dataset])
 
+        variable_eps = trial.get('variable_eps', False)
+        if not variable_eps:
+            epsilon, maxdelta = trial.values()
+            scale =  epsilon / (2 * maxdelta)
+        else:
+            epsilon, maxdelta, variable_eps = trial.values()
+            epsilons = (lens*epsilon)/self.max_len
+            scale = epsilons / (2 * maxdelta)
+            scale = scale[:, np.newaxis, np.newaxis] #multiply each symbol proba for each position for each sequence by the scale
+
+        probas = self.model.predict(seq_x) * scale
+      
         fake_data = []
         for seq_i, seq in enumerate(seq_x):
             private_seq = []

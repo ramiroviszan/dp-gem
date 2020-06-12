@@ -125,12 +125,12 @@ experiment = {
         'run_iterations': 1,#for each trial bellow will generate 'run_iterations' privatizations
         'trials': [
             {'eps': 'no_dp', 'maxdelta':0},#no dp
-            {'eps': 20, 'maxdelta':1},
-            {'eps': 30, 'maxdelta':1},
-            {'eps': 40, 'maxdelta':1},
-            {'eps': 50, 'maxdelta':1},
-            {'eps': 60, 'maxdelta':1},
-            {'eps': 100, 'maxdelta':1}],
+            {'eps': 20, 'maxdelta': 0.01},
+            {'eps': 20, 'maxdelta': 0.1},
+            {'eps': 20, 'maxdelta': 1},
+            {'eps': 30, 'maxdelta': 0.01},
+            {'eps': 30, 'maxdelta': 0.1},
+            {'eps': 30, 'maxdelta': 1}],
         'mode': 'all',  # all, gen_only, tests_only, skip
         'module_name': 'study_cases.deeplog.dp_gen_autoencoder',
         'class_name': 'DPGen',
@@ -190,7 +190,7 @@ experiment = {
                 'model_type': 'gen_autoencoder',
                 'vocab_size': 31,
                 'window_size': 50,
-                'emb_size': 4,
+                'emb_size': 2,
                 'train_sessions': {
                     'first': {
                         'epochs': 1000,
@@ -212,7 +212,7 @@ experiment = {
                     }
                 }
             },
-            'to_privatize_output_fullpath': '{exp_name}/fake_{{to_privatize_name}}_{{eps}}_{{iteration}}.txt'
+            'to_privatize_output_fullpath': '{exp_name}/fake_{{to_privatize_name}}_{{eps}}_{{maxdelta}}_{{iteration}}.txt'
         },
         'utility_tests': {
             'classifier': {
@@ -223,36 +223,36 @@ experiment = {
                     'datasets_params': {
                         'train': {
                             'normal': {
-                                'fullpath': '{exp_name}/fake_normal_train_{eps}_{iteration}.txt',
+                                'fullpath': '{exp_name}/fake_normal_train_{eps}_{maxdelta}_{iteration}.txt',
                                 'to_read': 0
                             }
                         },
                         'val': {
                             'normal': {
-                                'fullpath': '{exp_name}/fake_normal_val_{eps}_{iteration}.txt',
+                                'fullpath': '{exp_name}/fake_normal_val_{eps}_{maxdelta}_{iteration}.txt',
                                 'to_read': 0,
                                 'class': 1
                             },
                             'abnormal': {
-                                'fullpath': '{exp_name}/fake_abnormal_val_{eps}_{iteration}.txt',
+                                'fullpath': '{exp_name}/fake_abnormal_val_{eps}_{maxdelta}_{iteration}.txt',
                                 'to_read': 0,
                                 'class': 0
                             }
                         },
                         'test': {
                             'normal': {
-                                'fullpath': '{exp_name}/fake_normal_test_{eps}_{iteration}.txt',
+                                'fullpath': '{exp_name}/fake_normal_test_{eps}_{maxdelta}_{iteration}.txt',
                                 'to_read': 0,
                                 'class': 1
                             },
                             'abnormal': {
-                                'fullpath': '{exp_name}/fake_abnormal_test_{eps}_{iteration}.txt',
+                                'fullpath': '{exp_name}/fake_abnormal_test_{eps}_{maxdelta}_{iteration}.txt',
                                 'to_read': 0,
                                 'class': 0
                             }
                         }
                     },
-                    'network_fullpath': '{exp_name}/deeplog_utility_{eps}_{iteration}.h5',
+                    'network_fullpath': '{exp_name}/deeplog_utility_{eps}_{maxdelta}_{iteration}.h5',
                     'network_params': {
                         'model_type': 'control_fixed_window',
                         'window_size': 10,
@@ -283,7 +283,7 @@ experiment = {
                         'roc_thresholds': True,
                         'custom_thresholds': [],
                         'recalulate_probas': False,
-                        'probas_fullpath': '{exp_name}/utility_probas_{{dataset_type}}_topk_{topk}_{eps}_{iteration}.npy',
+                        'probas_fullpath': '{exp_name}/utility_probas_{{dataset_type}}_topk_{topk}_{eps}_{maxdelta}_{iteration}.npy',
                     },
                     'results_fullpath': '{exp_name}/utility_classifier_{dataset_type}_results.csv'
                 }
@@ -297,13 +297,13 @@ experiment = {
                     'datasets_params': {
                         'normal': {
                             'orig_fullpath': '{exp_name}/normal_test.txt',
-                            'privatized_fullpath': '{exp_name}/fake_normal_test_{eps}_{iteration}.txt',
+                            'privatized_fullpath': '{exp_name}/fake_normal_test_{eps}_{maxdelta}_{iteration}.txt',
                             'to_read': 0,
                             'dtype': int
                         },
                         'abnormal': {
                             'orig_fullpath': '{exp_name}/abnormal_test.txt',
-                            'privatized_fullpath': '{exp_name}/fake_abnormal_test_{eps}_{iteration}.txt',
+                            'privatized_fullpath': '{exp_name}/fake_abnormal_test_{eps}_{maxdelta}_{iteration}.txt',
                             'to_read': 0,
                             'dtype': int
                         }
