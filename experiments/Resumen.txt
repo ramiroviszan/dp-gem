@@ -1,0 +1,9 @@
+exp_1 - dp_gen_exponential_lm_emb
+exp_2 - dp_gen_exponential_lm_emb
+exp_3_1 - dp_gen_exponential_class_emb
+exp_3_2 - dp_gen_exponential_class_emb
+exp_4_1_2 - dp_gen_autoencoder
+exp_4_3 - dp_gen_autoencoder
+exp_4_4 - maxdelta 0.25-1.0
+exp_4_5 - maxdelta 0.01-1
+exp_4_6 - maxdelta variable por largo
