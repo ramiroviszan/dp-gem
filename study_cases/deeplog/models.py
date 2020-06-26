@@ -1,6 +1,6 @@
-import keras.backend as K
-from keras.models import Sequential, load_model
-from keras.layers import Embedding, LSTM, Dense, TimeDistributed, Flatten, Lambda, RepeatVector
+import tensorflow.keras.backend as K
+from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.layers import Embedding, LSTM, Dense, TimeDistributed, Flatten, Lambda, RepeatVector
 
 
 def create_model(key, params):

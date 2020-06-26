@@ -4,7 +4,7 @@ import copy
 import random
 import numpy as np
 import tensorflow as tf
-import keras.backend as K
+
 
 from os import listdir
 
@@ -156,8 +156,7 @@ def hot_new(experiment_info, module_name, class_name, params):
 
 
 if __name__ == '__main__':
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-    sess = tf.Session(config=config)
-    K.set_session(sess)
+    physical_devices = tf.config.list_physical_devices('GPU') 
+    for d in physical_devices:
+        tf.config.experimental.set_memory_growth(d, True)
     main()

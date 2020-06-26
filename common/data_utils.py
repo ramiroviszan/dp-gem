@@ -3,8 +3,8 @@ import random
 import numpy as np
 
 from itertools import chain
-from keras.utils import to_categorical
-from keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
 def stack_datasets(first, second, axis=0, verbose=0):

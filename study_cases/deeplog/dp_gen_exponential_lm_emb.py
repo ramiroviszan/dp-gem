@@ -1,4 +1,4 @@
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity

@@ -1,5 +1,5 @@
-from keras.optimizers import Adam
-from keras.callbacks import EarlyStopping
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import EarlyStopping
 
 import common.plot_utils as plot_utils
 

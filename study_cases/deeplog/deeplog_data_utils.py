@@ -1,6 +1,6 @@
 import numpy as np
-from keras.preprocessing.sequence import pad_sequences
-from keras.utils import to_categorical 
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.utils import to_categorical 
 
 def load_dataset_for_cbow(filename, amount_to_load = -1, window_size=-1):
     num_sessions = 0

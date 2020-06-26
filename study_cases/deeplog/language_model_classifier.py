@@ -1,6 +1,6 @@
 import numpy as np
 
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 from sklearn.metrics import confusion_matrix, accuracy_score, roc_curve
 
 import common.plot_utils as plot_utils
