@@ -1,5 +1,5 @@
 experiment = {
-    'skip': False,
+    'skip': True,
     'random_seed': 27,
     'data_preparation': {
         'skip': False,
