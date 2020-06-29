@@ -84,7 +84,7 @@ class DPGen:
         if not variable_eps:
             scale =  epsilon / (2 * maxdelta)
         else:
-            epsilons = (lens*epsilon)/self.max_len
+            epsilons = epsilon/lens
             scale = epsilons / (2 * maxdelta)
             scale = scale[:, np.newaxis, np.newaxis] #multiply each symbol proba for each position for each sequence by the scale
 
