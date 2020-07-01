@@ -2,7 +2,7 @@ experiment = {
     'skip': False,
     'random_seed': 27,
     'data_preparation': {
-        'skip': False,
+        'skip': 1,
         'module_name': 'study_cases.deeplog.deeplog_final_token',
         'class_name': 'DeepLogDataSplitter',
         'params': {
@@ -49,7 +49,7 @@ experiment = {
         }
     },
     'control_test': {
-        'run_iterations': 1,
+        'run_iterations': 0,
         'module_name': 'study_cases.deeplog.lm_classifier',
         'class_name': 'LMClassifier',
         'params': {
@@ -124,9 +124,9 @@ experiment = {
     'dp_gen': {
         'run_iterations': 1,  # for each trial bellow will generate 'run_iterations' privatizations
         'trials': [
-            {'eps': 100},
-            {'eps': 150},
-            {'eps': 200}],
+            {'eps': 40},
+            {'eps': 50},
+            {'eps': 60}],
         'mode': 'all',  # all, gen_only, tests_only, skip
         'module_name': 'study_cases.deeplog.dp_gen_exponential_class_emb',
         'class_name': 'DPGen',
