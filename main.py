@@ -1,3 +1,4 @@
+import sys
 import os
 import time
 import copy
@@ -9,8 +10,14 @@ import tensorflow as tf
 from os import listdir
 
 
-def main():
-    experiments = discover_experiments()
+def main(argv):
+    if len(argv) == 0:
+        sure = input("No exp passed, run all !skipped experiments (Y/N)")
+        if sure != "Y":
+            print("Bye")
+            return
+
+    experiments = discover_experiments(argv)
     for exp_name, exp in experiments.items():
         skip = exp.get('skip', False)
         if skip:
@@ -32,8 +39,12 @@ def main():
             dp_gen_desc = exp.get('dp_gen', None)
             run_generator(dp_gen_desc, exp_name, exp_path)
 
-def discover_experiments():
-    files_in_folder = [(name.split('.py')[0], 'experiments.' + name.split('.py')[0]) for name in listdir('experiments') if name.endswith('.py') and name != '__init__.py']
+def discover_experiments(filtered):
+    if len(filtered) == 0:
+        files_in_folder = [(name.split('.py')[0], 'experiments.' + name.split('.py')[0]) for name in listdir('experiments') if name.endswith('.py') and name != '__init__.py']
+    else:
+        files_in_folder = [(name.split('.py')[0], 'experiments.' + name.split('.py')[0]) for name in listdir('experiments') if name[:-3] in filtered and name.endswith('.py') and name != '__init__.py']
+
     experiments = {}
     for name, exp in files_in_folder:
         module = __import__(exp, globals(), locals(), ['experiment'], 0)
@@ -159,4 +170,4 @@ if __name__ == '__main__':
     physical_devices = tf.config.list_physical_devices('GPU') 
     for d in physical_devices:
         tf.config.experimental.set_memory_growth(d, True)
-    main()
+    main(sys.argv[1:])

@@ -49,6 +49,7 @@ def create_utility_model(vocab_size):
     model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
     return model
 
+#gen emb
 def create_dp_gen_emb_flat_model(vocab_size, emb_size, context_size):
     model = Sequential()
     model.add(Embedding(input_dim=vocab_size, output_dim=emb_size, input_length=context_size, mask_zero=False))
@@ -57,6 +58,7 @@ def create_dp_gen_emb_flat_model(vocab_size, emb_size, context_size):
 
     return model
 
+#gen emb
 def create_dp_gen_emb_avg_model(vocab_size, emb_size, context_size):
     model = Sequential()
     model.add(Embedding(input_dim=vocab_size, output_dim=emb_size, input_length=context_size, mask_zero=True))
@@ -65,6 +67,7 @@ def create_dp_gen_emb_avg_model(vocab_size, emb_size, context_size):
 
     return model
 
+#gen emb lm
 def create_dp_gen_emb_lm_model(vocab_size, emb_size, window_size):
     model = Sequential()
     model.add(Embedding(vocab_size, emb_size, input_length=window_size))
@@ -72,6 +75,7 @@ def create_dp_gen_emb_lm_model(vocab_size, emb_size, window_size):
     model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
     return model
 
+#gen emb classifier
 def create_dp_gen_emb_classifier_model(vocab_size, emb_size, max_length):
     model = Sequential()
     model.add(Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True))
@@ -82,6 +86,7 @@ def create_dp_gen_emb_classifier_model(vocab_size, emb_size, max_length):
     model.add(Dense(1, activation='sigmoid'))
     return model
 
+#gen autoencoder
 def create_dp_gen_autoencoder_no_emb_model(max_length, vocab_size):
     model = Sequential()
     model.add(LSTM(128, return_state=False, return_sequences=False, input_shape=(max_length, 1,)))

@@ -75,6 +75,8 @@ class DPGen:
                 self._generate_synthetic(trial, iteration, dataset_name, dataset)
 
     def _generate_synthetic(self, trial, iteration, dataset_name, dataset):
+        padding = 0
+        
         seq_x = np.array(data_utils.pad_dataset(dataset, self.max_len, 'pre'))
         lens = np.array([len(seq) for seq in dataset])
 
@@ -88,16 +90,15 @@ class DPGen:
             scale = epsilons / (2 * maxdelta)
             scale = scale[:, np.newaxis, np.newaxis] #multiply each symbol proba for each position for each sequence by the scale
 
-
         probas = self.model.predict(seq_x) * scale
       
         fake_data = []
         for seq_i, seq in enumerate(seq_x):
             private_seq = []
             last_index = len(seq) - 1
-            padding = 0
+ 
             for index, real_symbol in enumerate(seq):
-                if real_symbol != 0:#do not include padding
+                if real_symbol != padding:#do not include padding
                     if index == last_index:#do not privatize end token
                         private_symbol = real_symbol
                     else:
@@ -113,16 +114,16 @@ class DPGen:
         data_utils.write_file(fake_data, filename_fullpath)
 
     def _generate_synthetic_no_dp(self, trial, iteration, dataset_name, dataset):
+        padding = 0
         seq_x = np.array(data_utils.pad_dataset(dataset, self.max_len, 'pre'))
         probas = self.model.predict(seq_x) 
-
         fake_data = []
         for seq_i, seq in enumerate(seq_x):
             private_seq = []
             last_index = len(seq) - 1
-            padding = 0
+         
             for index, real_symbol in enumerate(seq):
-                if real_symbol != 0:#do not include padding
+                if real_symbol != padding:#do not include padding
                     if index == last_index:#do not privatize end token
                         private_symbol = real_symbol
                     else:

@@ -41,23 +41,10 @@ class DPGen:
 
     def _train_model(self, model_type, vocab_size, emb_size, train_sessions):
 
-        # t_sets = self.datasets_params['train']
-        # train_x = []
-        # train_x = []
-        # for dataset_name in t_sets:
-        #     t_set = t_sets[dataset_name]
-        #     path = t_set["fullpath"].format(exp_name=self.exp_name)
-        #     temp_x = data_utils.load_file(path, to_read=t_set["to_read"], shuffle=False, dtype=int)
-        #     temp_y = [t_set['class']]*len(temp_x)
-        #     train_x = data_utils.stack_datasets(train_x, temp_x, 1)
-        #     train_y = data_utils.stack_datasets(train_y, temp_y, 1)
-
-        # train_x, train_y = data_utils.unison_shuffled_copies(train_x, train_y)
-
         train_x, train_y = data_utils.load_multiple_files_with_class(self.datasets_params['train'], shuffle=True, dtype=int, exp_name=self.exp_name)
 
         max_len, _ = data_utils.dataset_longest_seq(train_x)
-        # train_x = np.array(data_utils.pad_dataset(train_x, max_len, 'post'))
+
         train_x = np.array(data_utils.pad_dataset(train_x, max_len, 'pre'))
 
         model = models.create_model(model_type, [vocab_size, emb_size, max_len])
@@ -75,7 +62,6 @@ class DPGen:
             self.pre_proba_matrix = self._compute_pre_proba_matrix()
 
     def _compute_pre_proba_matrix(self):
-
         u_matrix = np.zeros(shape=(self.vocab_size, self.vocab_size))
         for i in range(0, self.vocab_size):
             for j in range(i, self.vocab_size):
@@ -114,19 +100,23 @@ class DPGen:
             self._generate_synthetic(epsilon, iteration, dataset_name, dataset)
 
     def _generate_synthetic(self, epsilon, iteration, dataset_name, dataset):
+        padding = 0
+        proba_matrix = softmax(epsilon * self.pre_proba_matrix, axis = 1)
         fake_data = []
-        for seq in dataset:
+        for seq_i, seq in enumerate(dataset):
             private_seq = []
             last_index = len(seq) - 1
-            for index, symbol in enumerate(seq):
-                if index == last_index: #do not privatize end token
-                    private_symbol = symbol
-                else:
-                    #print("Proba:", i, "-", pre_proba_matrix[i], "\n")
-                    #seq_proba = self.model.predict(self.predict([seq[:index]]))
-                    proba_vector = softmax(epsilon * self.pre_proba_matrix[symbol])
-                    private_symbol = np.random.choice(np.arange(0, self.vocab_size), p=proba_vector)
-                private_seq.append(private_symbol)
+            
+            for index, real_symbol in enumerate(seq):
+                 if real_symbol != padding:#do not include padding
+                    if index == last_index:#do not privatize end token
+                        private_symbol = real_symbol
+                    else:
+                        #print("Proba:", i, "-", pre_proba_matrix[i], "\n")
+                        #seq_proba = self.model.predict(self.predict([seq[:index]]))
+                        #proba_vector = softmax(epsilon * self.pre_proba_matrix[real_symbol])
+                        private_symbol = np.random.choice(np.arange(0, self.vocab_size), p=proba_matrix[real_symbol])
+                    private_seq.append(private_symbol)
             fake_data.append(private_seq)
             #print("\nOriginal:", seq, "\nPrivate:", np.array(private_seq))
 

@@ -1,8 +1,8 @@
 experiment = {
-    'skip': True,
+    'skip': False,
     'random_seed': 27,
     'data_preparation': {
-        'skip': True,
+        'skip': False,
         'module_name': 'study_cases.deeplog.deeplog_final_token',
         'class_name': 'DeepLogDataSplitter',
         'params': {
@@ -49,7 +49,7 @@ experiment = {
         }
     },
     'control_test': {
-        'run_iterations': 0,
+        'run_iterations': 1,
         'module_name': 'study_cases.deeplog.lm_classifier',
         'class_name': 'LMClassifier',
         'params': {
@@ -188,10 +188,10 @@ experiment = {
             'network_params': {
                 'model_type': 'gen_class',
                 'vocab_size': 31,
-                'emb_size': 8,
+                'emb_size': 2,
                 'train_sessions': {
                     'first': {
-                        'epochs': 500,
+                        'epochs': 1000,
                         'batch_size': 500,
                         'lr': 0.0001,
                         'loss': 'binary_crossentropy',
@@ -200,7 +200,7 @@ experiment = {
                         'save_model': False
                     },
                     'second': {
-                        'epochs': 500,
+                        'epochs': 1000,
                         'batch_size': 100,
                         'lr': 0.00001,
                         'loss': 'binary_crossentropy',
