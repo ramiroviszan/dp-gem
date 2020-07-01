@@ -107,12 +107,14 @@ class DPGen:
             self.datasets_to_privatize[dataset_name] = data_utils.load_file(
                 path, to_read=t_set["to_read"], shuffle=False, dtype=int, split_token='')
 
-    def generate(self, epsilon, iteration):
+    def generate(self, trial, iteration):
         for dataset_name, dataset in self.datasets_to_privatize.items():
             print('\n\nGenerating dataset:', dataset_name, '- Num seqs:', len(dataset))
-            self._generate_synthetic(epsilon, iteration, dataset_name, dataset)
+            self._generate_synthetic(trial, iteration, dataset_name, dataset)
 
-    def _generate_synthetic(self, epsilon, iteration, dataset_name, dataset):
+    def _generate_synthetic(self, trial, iteration, dataset_name, dataset):
+        padding = 0
+        epsilon = trial.get('eps', 1)
         fake_data = []
         for seq in dataset:
             private_seq = []
@@ -129,5 +131,5 @@ class DPGen:
             #print("\nOriginal:", seq, "\nPrivate:", np.array(private_seq))
 
         filename_fullpath = self.to_privatize_output_fullpath.format(
-            to_privatize_name=dataset_name, epsilon=epsilon, iteration=iteration)
+            to_privatize_name=dataset_name, iteration=iteration, **trial)
         data_utils.write_file(fake_data, filename_fullpath)

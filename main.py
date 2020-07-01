@@ -25,17 +25,19 @@ def main(argv):
         else:
             print('\n\n\n\nExperiment:', exp_name)
             exp_path = create_exp_folder(exp_name)
-            set_random(exp)
 
             print('\n\n\n\nData Preparation')
+            set_random(exp)
             data_preparation_desc = exp.get('data_preparation', None)
             run_data_preparation(data_preparation_desc, exp_name, exp_path)
 
             print('\n\n\n\nControl Tests')
+            set_random(exp)
             control_test_desc = exp.get('control_test', None)
             run_control_tests(control_test_desc, exp_name, exp_path)
 
             print('\n\n\n\nGenerator')
+            set_random(exp)
             dp_gen_desc = exp.get('dp_gen', None)
             run_generator(dp_gen_desc, exp_name, exp_path)
 

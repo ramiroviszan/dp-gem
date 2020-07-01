@@ -42,6 +42,13 @@ def create_control_model_fixed_window(window_size, vocab_size):
 
     return model
 
+def create_model_fixed_window_256(window_size, vocab_size):
+    model = Sequential()
+    model.add(LSTM(256, return_sequences=True, input_shape=(window_size, 1,)))
+    model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
+
+    return model
+
 def create_utility_model(vocab_size):
     model = Sequential()
     model.add(LSTM(512, return_sequences=True, input_shape=(None, 1,)))
@@ -112,5 +119,6 @@ models = {
     'gen_avg': create_dp_gen_emb_avg_model,
     'gen_lm': create_dp_gen_emb_lm_model,
     'gen_class': create_dp_gen_emb_classifier_model,
-    'gen_autoencoder': create_dp_gen_autoencoder_model
+    'gen_autoencoder': create_dp_gen_autoencoder_model,
+    'fixed_window_256': create_model_fixed_window_256
 }

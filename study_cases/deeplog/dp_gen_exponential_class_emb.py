@@ -50,6 +50,7 @@ class DPGen:
         max_len, _ = data_utils.dataset_longest_seq(train_x)
 
         train_x = np.array(data_utils.pad_dataset(train_x, max_len, 'pre'))
+        train_y = np.array(train_y)
 
         model = models.create_model(model_type, [vocab_size, emb_size, max_len])
         trainer = NNTrainer()
@@ -98,13 +99,14 @@ class DPGen:
             self.datasets_to_privatize[dataset_name] = data_utils.load_file(
                 path, to_read=t_set["to_read"], shuffle=False, dtype=int)
 
-    def generate(self, epsilon, iteration):
+    def generate(self, trial, iteration):
         for dataset_name, dataset in self.datasets_to_privatize.items():
             print('\n\nGenerating dataset:', dataset_name, '- Num seqs:', len(dataset))
-            self._generate_synthetic(epsilon, iteration, dataset_name, dataset)
+            self._generate_synthetic(trial, iteration, dataset_name, dataset)
 
-    def _generate_synthetic(self, epsilon, iteration, dataset_name, dataset):
+    def _generate_synthetic(self, trial, iteration, dataset_name, dataset):
         padding = 0
+        epsilon = trial.get('eps', 1)
         proba_matrix = softmax(epsilon * self.pre_proba_matrix, axis = 1)
         fake_data = []
         for seq_i, seq in enumerate(dataset):
@@ -125,5 +127,5 @@ class DPGen:
             #print("\nOriginal:", seq, "\nPrivate:", np.array(private_seq))
 
         filename_fullpath = self.to_privatize_output_fullpath.format(
-            to_privatize_name=dataset_name, epsilon=epsilon, iteration=iteration)
+            to_privatize_name=dataset_name, iteration=iteration, **trial)
         data_utils.write_file(fake_data, filename_fullpath)

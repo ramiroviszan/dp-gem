@@ -87,7 +87,7 @@ experiment = {
             },
             'network_fullpath': '{exp_name}/control.h5',
             'network_params': {
-                'model_type': 'control_fixed_window',
+                'model_type': 'fixed_window_256',
                 'window_size': 10,
                 'vocab_size': 31,  # this value considers padding, 30 without
                 'train_sessions': {
@@ -124,12 +124,9 @@ experiment = {
     'dp_gen': {
         'run_iterations': 1,  # for each trial bellow will generate 'run_iterations' privatizations
         'trials': [
-            {'eps': 20},
-            {'eps': 30},
-            {'eps': 40},
-            {'eps': 50},
-            {'eps': 60},
-            {'eps': 100}],
+            {'eps': 100},
+            {'eps': 150},
+            {'eps': 200}],
         'mode': 'all',  # all, gen_only, tests_only, skip
         'module_name': 'study_cases.deeplog.dp_gen_exponential_class_emb',
         'class_name': 'DPGen',
@@ -188,7 +185,7 @@ experiment = {
             'network_params': {
                 'model_type': 'gen_class',
                 'vocab_size': 31,
-                'emb_size': 2,
+                'emb_size': 8,
                 'train_sessions': {
                     'first': {
                         'epochs': 1000,
@@ -253,7 +250,7 @@ experiment = {
                     },
                     'network_fullpath': '{exp_name}/deeplog_utility_{eps}_{iteration}.h5',
                     'network_params': {
-                        'model_type': 'control_fixed_window',
+                        'model_type': 'fixed_window_256',
                         'window_size': 10,
                         'vocab_size': 31,
                         'train_sessions': {
