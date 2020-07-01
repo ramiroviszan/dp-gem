@@ -1,4 +1,6 @@
 from tensorflow.keras.models import load_model
+from tensorflow.python.distribute.mirrored_strategy import MirroredStrategy
+
 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -6,9 +8,9 @@ from scipy.special import softmax
 
 import common.plot_utils as plot_utils
 import common.data_utils as data_utils
-import study_cases.deeplog.models as models
-import study_cases.deeplog.deeplog_data_utils as d_utils
 from common.nn_trainer import NNTrainer
+
+import study_cases.deeplog.models as models
 
 class DPGen:
 
@@ -24,7 +26,9 @@ class DPGen:
         self.to_privatize_output_fullpath = to_privatize_output_fullpath.format(
             exp_name=self.exp_name)
 
-        self._get_model()
+        strategy = MirroredStrategy()
+        with strategy.scope():
+            self._get_model()
         self._get_pre_proba_matrix()
         self._load_data_to_privatize()
 

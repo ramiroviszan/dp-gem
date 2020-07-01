@@ -1,14 +1,17 @@
 import numpy as np
 
 from tensorflow.keras.models import load_model
+from tensorflow.python.distribute.mirrored_strategy import MirroredStrategy
+
 from sklearn.metrics import confusion_matrix, accuracy_score, roc_curve
 
 import common.plot_utils as plot_utils
 import common.data_utils as data_utils
-import study_cases.deeplog.deeplog_data_utils as d_utils
-import study_cases.deeplog.models as models
 from common.nn_trainer import NNTrainer
 from common.csv_result import CSVResult
+
+import study_cases.deeplog.models as models
+import study_cases.deeplog.deeplog_data_utils as d_utils
 
 
 class LMClassifier:
@@ -29,7 +32,9 @@ class LMClassifier:
         self.val_results = CSVResult(val_results_fullpath, results_header)
         self.test_results = CSVResult(test_results_fullpath, results_header)
 
-        self._get_model()
+        strategy = MirroredStrategy()
+        with strategy.scope():
+            self._get_model()
 
     def _get_model(self):
         try:
