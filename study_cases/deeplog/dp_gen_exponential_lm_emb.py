@@ -26,9 +26,9 @@ class DPGen:
         self.to_privatize_output_fullpath = to_privatize_output_fullpath.format(
             exp_name=self.exp_name)
 
-        strategy = MirroredStrategy()
-        with strategy.scope():
-            self._get_model()
+        #strategy = MirroredStrategy()
+        #with strategy.scope():
+        self._get_model()
         self._get_pre_proba_matrix()
         self._load_data_to_privatize()
 

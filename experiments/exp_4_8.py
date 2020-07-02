@@ -1,8 +1,8 @@
 experiment = {
-    'skip': False,
+    'skip': 0,
     'random_seed': 27,
     'data_preparation': {
-        'skip': 1,
+        'skip': False,
         'module_name': 'study_cases.deeplog.deeplog_final_token',
         'class_name': 'DeepLogDataSplitter',
         'params': {
@@ -87,7 +87,7 @@ experiment = {
             },
             'network_fullpath': '{exp_name}/control.h5',
             'network_params': {
-                'model_type': 'fixed_window_256',
+                'model_type': 'control_fixed_window',
                 'window_size': 10,
                 'vocab_size': 31,  # this value considers padding, 30 without
                 'train_sessions': {
@@ -122,13 +122,17 @@ experiment = {
         }
     },
     'dp_gen': {
-        'run_iterations': 1,  # for each trial bellow will generate 'run_iterations' privatizations
+        'run_iterations': 1,#for each trial bellow will generate 'run_iterations' privatizations
         'trials': [
-            {'eps': 40},
-            {'eps': 50},
-            {'eps': 60}],
+            {'eps': 'no_dp', 'maxdelta':0},#no dp
+            {'eps': 20, 'maxdelta':1},
+            {'eps': 30, 'maxdelta':1},
+            {'eps': 40, 'maxdelta':1},
+            {'eps': 50, 'maxdelta':1},
+            {'eps': 60, 'maxdelta':1},
+            {'eps': 100, 'maxdelta':1}],
         'mode': 'all',  # all, gen_only, tests_only, skip
-        'module_name': 'study_cases.deeplog.dp_gen_exponential_class_emb',
+        'module_name': 'study_cases.deeplog.dp_gen_autoencoder',
         'class_name': 'DPGen',
         'params': {
             'datasets_params': {
@@ -183,9 +187,10 @@ experiment = {
             },
             'network_fullpath': '{exp_name}/gen.h5',
             'network_params': {
-                'model_type': 'gen_class',
+                'model_type': 'gen_autoencoder',
                 'vocab_size': 31,
-                'emb_size': 8,
+                'window_size': 50,
+                'emb_size': 4,
                 'train_sessions': {
                     'first': {
                         'epochs': 1000,
@@ -193,7 +198,7 @@ experiment = {
                         'lr': 0.0001,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 10,
+                        'patience': 20,
                         'save_model': False
                     },
                     'second': {
@@ -202,12 +207,11 @@ experiment = {
                         'lr': 0.00001,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 5,
+                        'patience': 10,
                         'save_model': True
                     }
                 }
             },
-            'pre_proba_matrix_fullpath': '{exp_name}/pre_proba_matrix.npy',
             'to_privatize_output_fullpath': '{exp_name}/fake_{{to_privatize_name}}_{{eps}}_{{iteration}}.txt'
         },
         'utility_tests': {
@@ -250,7 +254,7 @@ experiment = {
                     },
                     'network_fullpath': '{exp_name}/deeplog_utility_{eps}_{iteration}.h5',
                     'network_params': {
-                        'model_type': 'fixed_window_256',
+                        'model_type': 'control_fixed_window',
                         'window_size': 10,
                         'vocab_size': 31,
                         'train_sessions': {

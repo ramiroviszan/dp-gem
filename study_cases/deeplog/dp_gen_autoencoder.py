@@ -26,9 +26,9 @@ class DPGen:
         self.to_privatize_output_fullpath = to_privatize_output_fullpath.format(
             exp_name=self.exp_name)
         
-        strategy = MirroredStrategy()
-        with strategy.scope():
-            self._get_model()
+        #strategy = MirroredStrategy()
+        #with strategy.scope():
+        self._get_model()
         self._load_data_to_privatize()
 
     def _get_model(self):
@@ -107,7 +107,9 @@ class DPGen:
                         private_symbol = real_symbol
                     else:
                         #print("Proba:", i, "-", pre_proba_matrix[i], "\n")
-                        proba_vector = softmax(probas[seq_i][index])
+                        #Sacar la probalilidad de generar padding y endtoken
+                        #proba_vector = softmax(probas[seq_i][index])
+                        proba_vector = softmax(probas[seq_i][index][1:-1])
                         private_symbol = np.random.choice(np.arange(0, self.vocab_size), p=proba_vector)
                     private_seq.append(private_symbol)
             fake_data.append(private_seq)

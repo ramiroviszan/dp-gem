@@ -1,10 +1,14 @@
 exp_1 - dp_gen_exponential_lm_emb
 exp_2 - dp_gen_exponential_lm_emb
+
 exp_3_1 - dp_gen_exponential_class_emb
 exp_3_2 - dp_gen_exponential_class_emb
+exp_3_3 - dp_gen_exponential_class_emb*
+
 exp_4_1_2 - dp_gen_autoencoder
-exp_4_3 - dp_gen_autoencoder
-exp_4_4 - maxdelta 0.25-1.0 - reset cluster se perdieron
-exp_4_5 - maxdelta 0.01-1 - reset cluster se perdieron
-exp_4_6 - epsilon global variable por largo (lens*eps)/max_lens
+exp_4_3 - dp_gen_autoencoder*
+exp_4_4 - dp_gen_autoencoder maxdelta 0.25-1.0
+exp_4_5 - dp_gen_autoencoder maxdelta 0.01-1
+exp_4_6 - dp_gen_autoencoder epsilon global variable por largo (lens*eps)/max_lens
 exp_4_7 - gamma local budget variable por largo eps/len
+exp_4_8 - como 4_3 pero con la softmax den generador sin padding ni endtoken

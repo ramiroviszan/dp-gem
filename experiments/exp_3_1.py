@@ -1,8 +1,8 @@
 experiment = {
-    'skip': True,
+    'skip': False,
     'random_seed': 27,
     'data_preparation': {
-        'skip': True,
+        'skip': False,
         'module_name': 'study_cases.deeplog.deeplog_final_token',
         'class_name': 'DeepLogDataSplitter',
         'params': {
@@ -50,7 +50,7 @@ experiment = {
         }
     },
     'control_test': {
-        'run_iterations': 0,
+        'run_iterations': 1,
         'module_name': 'study_cases.deeplog.language_model_classifier',
         'class_name': 'LMClassifier',
         'params': {

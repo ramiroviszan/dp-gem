@@ -32,9 +32,9 @@ class LMClassifier:
         self.val_results = CSVResult(val_results_fullpath, results_header)
         self.test_results = CSVResult(test_results_fullpath, results_header)
 
-        strategy = MirroredStrategy()
-        with strategy.scope():
-            self._get_model()
+        #strategy = MirroredStrategy()
+        #with strategy.scope():
+        self._get_model()
 
     def _get_model(self):
         try:
