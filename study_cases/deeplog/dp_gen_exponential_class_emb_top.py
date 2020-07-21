@@ -84,12 +84,19 @@ class DPGen:
                 values.append(abs(u_matrix[i] - u_matrix[j]))
         delta_u = np.max(values)
         print('delta_U:', delta_u)
+       
+       
+        print("UShape", u_matrix.shape)
 
         pre_proba_matrix = np.zeros(shape=(self.vocab_size_out, self.vocab_size_out))
         for i in range(0, self.vocab_size_out):
-            for j in range(i, self.vocab_size_out):
-                pre_proba_matrix[i][j] = (u_matrix[i][j]*0.5)/delta_u
-
+            top_k = np.argsort(u_matrix[i])[-4:][::-1][1:]
+            print(i, top_k)
+            for k in top_k:
+                pre_proba_matrix[i][k] = u_matrix[i][k] * 0.5 / delta_u
+        
+        print(pre_proba_matrix)
+        input()
         np.save(self.pre_proba_matrix_fullpath,
                 pre_proba_matrix, allow_pickle=True)
         return pre_proba_matrix

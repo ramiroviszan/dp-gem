@@ -42,6 +42,7 @@ class DPGen:
         self.max_len = self.model.layers[0].input_shape[1]
         self.embedding = self.model.layers[0].get_weights()[0]
         self.vocab_size = self.embedding.shape[0]
+        self.vocab_range = np.arange(1, self.vocab_size-1)
         return
 
     def _train_model(self, model_type, vocab_size, window_size, emb_size, train_sessions):
@@ -109,8 +110,9 @@ class DPGen:
                         #print("Proba:", i, "-", pre_proba_matrix[i], "\n")
                         #Sacar la probalilidad de generar padding y endtoken
                         #proba_vector = softmax(probas[seq_i][index])
+                      # private_symbol = np.random.choice(np.arange(0, self.vocab_size), p=proba_vector)
                         proba_vector = softmax(probas[seq_i][index][1:-1])
-                        private_symbol = np.random.choice(np.arange(0, self.vocab_size), p=proba_vector)
+                        private_symbol = np.random.choice(self.vocab_range, p=proba_vector)
                     private_seq.append(private_symbol)
             fake_data.append(private_seq)
             #print("\nOriginal:", seq, "\nPrivate:", np.array(private_seq))
@@ -133,7 +135,10 @@ class DPGen:
                     if index == last_index:#do not privatize end token
                         private_symbol = real_symbol
                     else:
-                        private_symbol = np.argmax(probas[seq_i][index])
+                        #Sacar la probalilidad de generar padding y endtoken
+                        #private_symbol = np.argmax(probas[seq_i][index])
+                        proba_vector = softmax(probas[seq_i][index][1:-1])
+                        private_symbol = np.argmax(proba_vector)
                     private_seq.append(private_symbol)
             fake_data.append(private_seq)
 

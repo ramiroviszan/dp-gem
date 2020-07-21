@@ -29,7 +29,6 @@ class DPGen:
         #strategy = MirroredStrategy()
         #with strategy.scope():
         self._get_model()
-
         self._get_pre_proba_matrix()
         self._load_data_to_privatize()
 
@@ -43,9 +42,6 @@ class DPGen:
 
         self.embedding = self.model.layers[0].get_weights()[0]
         self.vocab_size = self.embedding.shape[0]
-        self.offset_padding = 1
-        self.vocab_range = np.arange(self.offset_padding, self.vocab_size-1)
-        self.vocab_size_out = len(self.vocab_range)
 
     def _train_model(self, model_type, vocab_size, emb_size, train_sessions):
 
@@ -71,23 +67,23 @@ class DPGen:
             self.pre_proba_matrix = self._compute_pre_proba_matrix()
 
     def _compute_pre_proba_matrix(self):
-        u_matrix = np.zeros(shape=(self.vocab_size_out, self.vocab_size_out))
-        for i in self.vocab_range:
-            for j in self.vocab_range:
-                u_matrix[i-self.offset_padding][j-self.offset_padding] = cosine_similarity(self.embedding[i].reshape(
+        u_matrix = np.zeros(shape=(self.vocab_size, self.vocab_size))
+        for i in range(0, self.vocab_size):
+            for j in range(i, self.vocab_size):
+                u_matrix[i][j] = cosine_similarity(self.embedding[i].reshape(
                     1, -1), self.embedding[j].reshape(1, -1))[0][0]
-                u_matrix[j-self.offset_padding][i-self.offset_padding] = u_matrix[i-self.offset_padding][j-self.offset_padding]
+                u_matrix[j][i] = u_matrix[i][j]
 
         values = []
-        for i in range(0, self.vocab_size_out):
-            for j in range(i, self.vocab_size_out):
+        for i in range(0, self.vocab_size):
+            for j in range(i, self.vocab_size):
                 values.append(abs(u_matrix[i] - u_matrix[j]))
         delta_u = np.max(values)
         print('delta_U:', delta_u)
 
-        pre_proba_matrix = np.zeros(shape=(self.vocab_size_out, self.vocab_size_out))
-        for i in range(0, self.vocab_size_out):
-            for j in range(i, self.vocab_size_out):
+        pre_proba_matrix = np.zeros(shape=(self.vocab_size, self.vocab_size))
+        for i in range(0, self.vocab_size):
+            for j in range(i, self.vocab_size):
                 pre_proba_matrix[i][j] = (u_matrix[i][j]*0.5)/delta_u
 
         np.save(self.pre_proba_matrix_fullpath,
@@ -125,7 +121,7 @@ class DPGen:
                         #print("Proba:", i, "-", pre_proba_matrix[i], "\n")
                         #seq_proba = self.model.predict(self.predict([seq[:index]]))
                         #proba_vector = softmax(epsilon * self.pre_proba_matrix[real_symbol])
-                        private_symbol = np.random.choice(self.vocab_range, p=proba_matrix[real_symbol-self.offset_padding])
+                        private_symbol = np.random.choice(np.arange(0, self.vocab_size), p=proba_matrix[real_symbol])
                     private_seq.append(private_symbol)
             fake_data.append(private_seq)
             #print("\nOriginal:", seq, "\nPrivate:", np.array(private_seq))
