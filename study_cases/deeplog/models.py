@@ -1,6 +1,6 @@
 import tensorflow.keras.backend as K
-from tensorflow.keras.models import Sequential, load_model
-from tensorflow.keras.layers import Embedding, LSTM, Dense, TimeDistributed, Flatten, Lambda, RepeatVector
+from tensorflow.keras.models import Sequential, Model, load_model
+from tensorflow.keras.layers import Embedding, LSTM, Dense, TimeDistributed, Flatten, Lambda, RepeatVector, Input, Add
 
 
 def create_model(key, params):
@@ -111,6 +111,20 @@ def create_dp_gen_autoencoder_model(max_length, vocab_size, emb_size):
     model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
     return model
 
+#gen autoencoder lap
+def create_dp_gen_lap_autoencoder_model(max_length, vocab_size, emb_size, hidden_state_size):
+    inputSeq = Input(shape=(max_length,))
+    inputNoise = Input(shape=(hidden_state_size,))
+    x = Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True)(inputSeq)
+    x = LSTM(hidden_state_size, return_state=False, return_sequences=False)(x)
+    x = Add()([x, inputNoise])
+    x = RepeatVector(max_length)(x)
+    x = LSTM(hidden_state_size, return_sequences=True)(x)
+    x = TimeDistributed(Dense(vocab_size, activation='softmax'))(x)
+
+    model = Model(inputs=[inputSeq, inputNoise], outputs=x)
+    return model
+
 models = {
     'control': create_control_model,
     'control_fixed_window': create_control_model_fixed_window,
@@ -120,5 +134,6 @@ models = {
     'gen_lm': create_dp_gen_emb_lm_model,
     'gen_class': create_dp_gen_emb_classifier_model,
     'gen_autoencoder': create_dp_gen_autoencoder_model,
-    'fixed_window_256': create_model_fixed_window_256
+    'fixed_window_256': create_model_fixed_window_256,
+    'gen_lap_autoencoder': create_dp_gen_lap_autoencoder_model
 }

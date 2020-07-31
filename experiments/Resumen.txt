@@ -15,3 +15,5 @@ exp_4_7 - gamma local budget variable por largo eps/len
 exp_4_8* - como 4_3 pero con la softmax den generador sin padding ni endtoken*
 
 exp_5_1 - dp_gen_exponential_class_emb_top_k
+
+exp_6_1 - dp_gen_lap
