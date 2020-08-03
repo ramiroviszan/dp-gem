@@ -37,8 +37,8 @@ class DPGen:
                   "not found. Training started...")
             self.model = self._train_model(*self.network_params.values())
 
-        self.max_len = self.model.layers[0].input_shape[1]
-        self.embedding = self.model.layers[0].get_weights()[0]
+        self.max_len = self.model.layers[0].input_shape[0][1]
+        self.embedding = self.model.layers[1].get_weights()[0]
         self.vocab_size = self.embedding.shape[0]
         self.vocab_range = np.arange(1, self.vocab_size-1)
         self.hidden_state_size = self.network_params['hidden_state_size']
@@ -94,7 +94,7 @@ class DPGen:
                 epsilons = epsilon/lens
                 scale = maxdelta/epsilons
                 #scale = scale[:, np.newaxis, np.newaxis] #multiply each symbol proba for each position for each sequence by the scale
-            noise = np.random.laplace(0, scale, shape=(len(dataset), self.hidden_state_size))
+            noise = np.random.laplace(0, scale, (len(dataset), self.hidden_state_size))
 
         probas = self.model.predict([seq_x, noise])
 

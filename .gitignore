@@ -139,3 +139,5 @@ dmypy.json
 /.vscode
 
 temporal.ipynb
+utility_similarity_test_results_by_len.csv
+data/
