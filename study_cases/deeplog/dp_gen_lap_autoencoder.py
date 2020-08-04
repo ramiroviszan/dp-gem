@@ -87,7 +87,7 @@ class DPGen:
             noise = np.zeros(shape=(len(dataset), self.hidden_state_size))
         else:
             variable_eps = trial.get('variable_eps', False)
-            maxdelta = 2
+            maxdelta = trial.get('maxdelta', 0)
             if not variable_eps:
                 scale =  maxdelta/epsilon
             else:

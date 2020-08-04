@@ -3,6 +3,8 @@ from tensorflow.keras.models import Sequential, Model, load_model
 from tensorflow.keras.layers import Embedding, LSTM, Dense, TimeDistributed, Flatten, Lambda, RepeatVector, Input, Add
 from tensorflow.keras.utils import normalize
 
+from common.tensorflow.norm_clipping import Norm1Clipping, Norm2Clipping
+
 def create_model(key, params):
     return models[key](*params) 
 
@@ -117,7 +119,7 @@ def create_dp_gen_lap_autoencoder_model(max_length, vocab_size, emb_size, hidden
     inputNoise = Input(shape=(hidden_state_size,))
     x = Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True)(inputSeq)
     x = LSTM(hidden_state_size, return_state=False, return_sequences=False)(x)
-    x = Lambda(lambda t: normalize(t, axis=1, order=1))(x)
+    x = Norm1Clipping()(x)
     x = Add()([x, inputNoise])
     x = RepeatVector(max_length)(x)
     x = LSTM(hidden_state_size, return_sequences=True)(x)

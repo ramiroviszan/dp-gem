@@ -125,12 +125,13 @@ experiment = {
         'run_iterations': 1,#for each trial bellow will generate 'run_iterations' privatizations
         'trials': [
             {'eps': 'no_dp', 'maxdelta':0},#no dp
-            {'eps': 0.5, 'maxdelta':1},
-            {'eps': 1, 'maxdelta':1},
-            {'eps': 10, 'maxdelta':1},
-            {'eps': 20, 'maxdelta':1},
-            {'eps': 30, 'maxdelta':1},
-            {'eps': 40, 'maxdelta':1}],
+            {'eps': 0.5, 'maxdelta':2},
+            {'eps': 1, 'maxdelta':2},
+            {'eps': 10, 'maxdelta':2},
+            {'eps': 20, 'maxdelta':2},
+            {'eps': 40, 'maxdelta':2},
+            {'eps': 50, 'maxdelta':2},
+            {'eps': 100, 'maxdelta':2}],
         'mode': 'all',  # all, gen_only, tests_only, skip
         'module_name': 'study_cases.deeplog.dp_gen_lap_autoencoder',
         'class_name': 'DPGen',
