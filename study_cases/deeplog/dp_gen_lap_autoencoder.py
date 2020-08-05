@@ -98,22 +98,28 @@ class DPGen:
 
         probas = self.model.predict([seq_x, noise])
 
+        use_random_sampling = "trials_per_seq" in trial
+        trials_per_seq = trial.get('trials_per_seq', 1)
         fake_data = []
         for seq_i, seq in enumerate(seq_x):
-            private_seq = []
-            last_index = len(seq) - 1
-            for index, real_symbol in enumerate(seq):
-                if real_symbol != padding:#do not include padding
-                    if index == last_index:#do not privatize end token
-                        private_symbol = real_symbol
-                    else:
-                        #proba_vector = softmax(probas[seq_i][index][1:-1])
-                        #private_symbol = np.random.choice(self.vocab_range, p=proba_vector)
-                        proba_vector = softmax(probas[seq_i][index][1:-1])
-                        private_symbol = np.argmax(proba_vector) + 1
+            for i in range(0, trials_per_seq):
+                private_seq = []
+                last_index = len(seq) - 1
+                for index, real_symbol in enumerate(seq):
+                    if real_symbol != padding:#do not include padding
+                        if index == last_index:#do not privatize end token
+                            private_symbol = real_symbol
+                        else:
+                            #proba_vector = softmax(probas[seq_i][index][1:-1])
+                            #private_symbol = np.random.choice(self.vocab_range, p=proba_vector)
+                            proba_vector = softmax(probas[seq_i][index][1:-1])
+                            if use_random_sampling:
+                                private_symbol = np.random.choice(self.vocab_range, p=proba_vector)
+                            else:
+                                private_symbol = np.argmax(proba_vector) + 1 #+ 1 because padding is 0
 
-                    private_seq.append(private_symbol)
-            fake_data.append(private_seq)
+                        private_seq.append(private_symbol)
+                fake_data.append(private_seq)
 
         filename_fullpath = self.to_privatize_output_fullpath.format(
             to_privatize_name=dataset_name, iteration=iteration, **trial)
