@@ -31,7 +31,7 @@ class DPGen:
 
     def _get_model(self):
         try:
-            self.model = load_model(self.network_fullpath)
+            self.model = models.load_model_adapter(self.network_fullpath)
         except:
             print("\nModel", self.network_fullpath,
                   "not found. Training started...")
@@ -110,7 +110,7 @@ class DPGen:
                         #proba_vector = softmax(probas[seq_i][index][1:-1])
                         #private_symbol = np.random.choice(self.vocab_range, p=proba_vector)
                         proba_vector = softmax(probas[seq_i][index][1:-1])
-                        private_symbol = np.argmax(proba_vector)
+                        private_symbol = np.argmax(proba_vector) + 1
 
                     private_seq.append(private_symbol)
             fake_data.append(private_seq)

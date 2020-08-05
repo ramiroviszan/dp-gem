@@ -1,7 +1,7 @@
 import tensorflow.keras.backend as K
 from tensorflow.keras.models import Sequential, Model, load_model
 from tensorflow.keras.layers import Embedding, LSTM, Dense, TimeDistributed, Flatten, Lambda, RepeatVector, Input, Add
-from tensorflow.keras.utils import normalize
+from tensorflow.keras.utils import CustomObjectScope
 
 from common.tensorflow.norm_clipping import Norm1Clipping, Norm2Clipping
 
@@ -127,6 +127,10 @@ def create_dp_gen_lap_autoencoder_model(max_length, vocab_size, emb_size, hidden
 
     model = Model(inputs=[inputSeq, inputNoise], outputs=x)
     return model
+
+def load_model_adapter(path):
+    with CustomObjectScope({'Norm1Clipping': Norm1Clipping, 'Norm2Clipping': Norm2Clipping}):
+        return load_model(path)
 
 models = {
     'control': create_control_model,

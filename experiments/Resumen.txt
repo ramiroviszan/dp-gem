@@ -16,4 +16,5 @@ deeplog_4_8* - como 4_3 pero con la softmax den generador sin padding ni endtoke
 
 deeplog_5_1 - dp_gen_exponential_class_emb_top_k
 
-deeplog_6_1 - dp_gen_lap
+exp_6_1 - dp_gen_lap maxdelta 1 no norm
+deeplog_6_1 - dp_gen_lap maxdelta 2, norm1clipping

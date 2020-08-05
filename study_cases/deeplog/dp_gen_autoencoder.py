@@ -138,7 +138,7 @@ class DPGen:
                         #Sacar la probalilidad de generar padding y endtoken
                         #private_symbol = np.argmax(probas[seq_i][index])
                         proba_vector = softmax(probas[seq_i][index][1:-1])
-                        private_symbol = np.argmax(proba_vector)
+                        private_symbol = np.argmax(proba_vector) + 1#0 is padding so we need to shift +1
                     private_seq.append(private_symbol)
             fake_data.append(private_seq)
 
