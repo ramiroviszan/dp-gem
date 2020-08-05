@@ -17,8 +17,8 @@ class Norm1Clipping(Layer):
         super(Norm1Clipping, self).__init__ (**kwargs)
         
     def call(self, inputs):
-        norm = tf.norm(inputs, ord=1, axis=1)
-        return tf.divide(inputs, tf.reshape(norm, [tf.shape(inputs)[0], 1]))
+        norm = tf.reshape(tf.norm(inputs, ord=1, axis=1), [tf.shape(inputs)[0], 1])
+        return tf.divide(inputs, tf.maximum(norm, 1))
 
     def get_config(self):
         return super(Norm1Clipping, self).get_config()
