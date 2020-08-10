@@ -17,4 +17,6 @@ deeplog_4_8* - como 4_3 pero con la softmax den generador sin padding ni endtoke
 deeplog_5_1 - dp_gen_exponential_class_emb_top_k
 
 exp_6_1 - dp_gen_lap maxdelta 1 no norm
-deeplog_6_1 - dp_gen_lap maxdelta 2, norm1clipping
+deeplog_6_1_2 - dp_gen_lap maxdelta 2, norm1clipping siempre
+deeplog_6_1_3 - dp_gen_lap maxdelta 2, norm1clipping solo si supera 1*
+deeplog_6_2 - deeplog_6_1_3 pero sin argmax y con 5 samplings per seq original
