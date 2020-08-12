@@ -31,10 +31,27 @@ def create_control_model(vocab_size, window_size, emb_size, drop_out, hidden_lay
 
     return model
 
+#gen autoencoder lap
+def create_dp_gen_lap_autoencoder_model(max_length, vocab_size, emb_size, hidden_state_size):
+    inputSeq = Input(shape=(max_length,))
+    inputNoise = Input(shape=(hidden_state_size,))
+    x = Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True)(inputSeq)
+    x = LSTM(hidden_state_size, return_state=False, return_sequences=False)(x)
+    x = Norm1Clipping()(x)
+    x = Add()([x, inputNoise])
+    x = RepeatVector(max_length)(x)
+    x = LSTM(hidden_state_size, return_sequences=True)(x)
+    x = TimeDistributed(Dense(vocab_size, activation='softmax'))(x)
+
+    model = Model(inputs=[inputSeq, inputNoise], outputs=x)
+    return model
+
+
 def load_model_adapter(path):
     with CustomObjectScope({'Norm1Clipping': Norm1Clipping, 'Norm2Clipping': Norm2Clipping}):
         return load_model(path)
 
 models = {
-    'control': create_control_model
+    'control': create_control_model,
+    'gen': create_dp_gen_lap_autoencoder_model
 }

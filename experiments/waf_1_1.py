@@ -2,7 +2,7 @@ experiment = {
     'skip': 0,
     'random_seed': 27,
     'data_preparation': {
-        'skip': 0,
+        'skip': 1,
         'module_name': 'common.data_splitter',
         'class_name': 'DataSplitter',
         'params': {
@@ -93,7 +93,7 @@ experiment = {
                     'window_size': 10,
                     'emb_size': 4,
                     'dropout': 0.1,
-                    'hidden_layers': [256, 256]
+                    'hidden_layers': [512, 512]
                 },
                 'train_sessions': {
                     'first': {
@@ -102,7 +102,7 @@ experiment = {
                         'lr': 0.01,
                         'loss': 'categorical_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 10,
+                        'patience': 5,
                         'save_model': False
                     },
                     'second': {
@@ -111,7 +111,7 @@ experiment = {
                         'lr': 0.001,
                         'loss': 'categorical_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 10,
+                        'patience': 5,
                         'save_model': True
                     }
                 }
@@ -137,7 +137,7 @@ experiment = {
             {'eps': 30, 'maxdelta':1},
             {'eps': 40, 'maxdelta':1}],
         'mode': 'all',  # all, gen_only, tests_only, skip
-        'module_name': 'study_cases.deeplog.dp_gen_lap_autoencoder',
+        'module_name': 'study_cases.waf.dp_gen_lap_autoencoder',
         'class_name': 'DPGen',
         'params': {
             'datasets_params': {
