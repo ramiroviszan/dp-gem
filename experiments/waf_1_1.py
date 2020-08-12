@@ -3,16 +3,16 @@ experiment = {
     'random_seed': 27,
     'data_preparation': {
         'skip': 0,
-        'module_name': 'study_cases.deeplog.deeplog_final_token',
-        'class_name': 'DeepLogDataSplitter',
+        'module_name': 'common.data_splitter',
+        'class_name': 'DataSplitter',
         'params': {
             'datasets': {
                 'normal': {
                     'original': {
-                        'fullpath': 'data/deeplog/all_normal.txt',
-                        'to_read': 4000,
+                        'fullpath': 'data/waf/all_normal.txt',
+                        'to_read': 20000,
                         'shuffle': True,
-                        'max_len': 50,
+                        'max_len': 200,
                         'dtype': int,
                         'split_token': '',
                         'encoding': 'ascii',
@@ -28,10 +28,10 @@ experiment = {
                 },
                 'abnormal': {
                     'original': {
-                        'fullpath': 'data/deeplog/all_abnormal.txt',
-                        'to_read': 4000,
+                        'fullpath': 'data/waf/all_abnormal.txt',
+                        'to_read': 20000,
                         'shuffle': True,
-                        'max_len': 50,
+                        'max_len': 200,
                         'dtype': int,
                         'split_token': '',
                         'encoding': 'ascii',
@@ -49,8 +49,8 @@ experiment = {
         }
     },
     'control_test': {
-        'run_iterations': 0,
-        'module_name': 'study_cases.deeplog.lm_classifier',
+        'run_iterations': 1,
+        'module_name': 'study_cases.waf.lm_classifier',
         'class_name': 'LMClassifier',
         'params': {
             'datasets_params': {
@@ -87,9 +87,12 @@ experiment = {
             },
             'network_fullpath': '{exp_name}/control.h5',
             'network_params': {
-                'model_type': 'control_fixed_window',
-                'window_size': 10,
-                'vocab_size': 31,  # this value considers padding, 30 without
+                'model_type': 'control',
+                'model_params': {
+                    'window_size': 10,
+                    'vocab_size': 258,  #Real vocab goes from 1-256, 0-257 with padding and endtoken = 258
+                    'hidden_layers': [1024, 512, 256],
+                },
                 'train_sessions': {
                     'first': {
                         'epochs': 100,
@@ -188,8 +191,8 @@ experiment = {
             'network_fullpath': '{exp_name}/gen.h5',
             'network_params': {
                 'model_type': 'gen_lap_autoencoder',
-                'vocab_size': 31,
-                'window_size': 50,
+                'vocab_size': 258,
+                'window_size': 150,
                 'emb_size': 4,
                 'hidden_state_size': 1024,
                 'train_sessions': {
@@ -257,7 +260,7 @@ experiment = {
                     'network_params': {
                         'model_type': 'control_fixed_window',
                         'window_size': 10,
-                        'vocab_size': 31,
+                        'vocab_size': 258,
                         'train_sessions': {
                             'first': {
                                 'epochs': 100,
