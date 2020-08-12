@@ -56,7 +56,7 @@ experiment = {
             'datasets_params': {
                 'train': {
                     'normal': {
-                        'fullpath': '{exp_name}/normal_train.txt',
+                        'fullpath': '{exp_name}/abnormal_train.txt',
                         'to_read': 0
                     }
                 },
@@ -89,15 +89,17 @@ experiment = {
             'network_params': {
                 'model_type': 'control',
                 'model_params': {
-                    'window_size': 10,
                     'vocab_size': 258,  #Real vocab goes from 1-256, 0-257 with padding and endtoken = 258
-                    'hidden_layers': [1024, 512, 256],
+                    'window_size': 10,
+                    'emb_size': 4,
+                    'dropout': 0.1,
+                    'hidden_layers': [256, 256]
                 },
                 'train_sessions': {
                     'first': {
-                        'epochs': 100,
+                        'epochs': 50,
                         'batch_size': 100,
-                        'lr': 0.001,
+                        'lr': 0.01,
                         'loss': 'categorical_crossentropy',
                         'validation_split': 0.3,
                         'patience': 10,

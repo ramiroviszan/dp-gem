@@ -50,7 +50,6 @@ class LMClassifier:
         window_size = model_params.get('window_size', 0)
         vocab_size = model_params['vocab_size']
 
-
         if window_size == 0:
             max_len, _ = data_utils.dataset_longest_seq(all_data)
             window_size = max_len
