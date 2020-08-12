@@ -140,4 +140,4 @@ dmypy.json
 
 temporal.ipynb
 utility_similarity_test_results_by_len.csv
-data/
+data/**/*.txt
