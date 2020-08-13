@@ -54,7 +54,7 @@ class LMClassifier:
             max_len, _ = data_utils.dataset_longest_seq(all_data)
             window_size = max_len
             
-        train_x = data_utils.generate_windows_from_dataset(all_data, window_size)
+        train_x = data_utils.generate_windows_from_dataset(all_data, window_size, True)
         train_x, train_y = data_utils.shift_windows(train_x)
 
         train_x = np.expand_dims(train_x, axis=2)

@@ -65,7 +65,7 @@ def pad_dataset(data, max_length, padding):
     return list(pad_sequences(data, maxlen=max_length, padding=padding))
 
 
-def generate_windows_from_dataset(data, window_size, padding='pre'):
+def generate_windows_from_dataset(data, window_size, remove_shorter=False, padding='pre'):
     """_
     #Input:
     \ndata  = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
@@ -81,10 +81,10 @@ def generate_windows_from_dataset(data, window_size, padding='pre'):
      array([0, 0, 1, 2]),
      ...
      array([3, 4, 5, 6])]"""
-    prefixes = get_dataset_prefixes(data)
+    prefixes = get_dataset_prefixes(data, window_size, remove_shorter)
     return pad_dataset(prefixes, window_size, padding)
 
-def get_dataset_prefixes(sequences):
+def get_dataset_prefixes(sequences, window_size, remove_shorter):
     """_
     #Input:
     \ndata  = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
@@ -100,7 +100,10 @@ def get_dataset_prefixes(sequences):
      [1, 2],
      ...
      [1, 2, 3, 4, 5, 6]]"""
-    return list(chain.from_iterable([get_seq_prefixes(seq) for seq in sequences]))
+    result = list(chain.from_iterable([get_seq_prefixes(seq) for seq in sequences])) 
+    if remove_shorter:
+        result = [seq for seq in result if len(seq) >= window_size]
+    return result
 
 
 def get_seq_prefixes(seq):
