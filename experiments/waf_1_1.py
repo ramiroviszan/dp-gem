@@ -2,15 +2,15 @@ experiment = {
     'skip': 0,
     'random_seed': 27,
     'data_preparation': {
-        'skip': 1,
+        'skip': 0,
         'module_name': 'common.data_splitter',
         'class_name': 'DataSplitter',
         'params': {
             'datasets': {
                 'normal': {
                     'original': {
-                        'fullpath': 'data/waf/all_normal.txt',
-                        'to_read': 20000,
+                        'fullpath': 'data/waf/token_all_normal.txt',
+                        'to_read': 0.2, #0 = 100%, (0, 1) = %, >= 1 count
                         'shuffle': True,
                         'max_len': 200,
                         'dtype': int,
@@ -28,8 +28,8 @@ experiment = {
                 },
                 'abnormal': {
                     'original': {
-                        'fullpath': 'data/waf/all_abnormal.txt',
-                        'to_read': 20000,
+                        'fullpath': 'data/waf/token_all_abnormal.txt',
+                        'to_read': 0.2,
                         'shuffle': True,
                         'max_len': 200,
                         'dtype': int,
@@ -89,11 +89,11 @@ experiment = {
             'network_params': {
                 'model_type': 'control',
                 'model_params': {
-                    'vocab_size': 258,  #Real vocab goes from 1-256, 0-257 with padding and endtoken = 258
+                    'vocab_size': 257,  #Real vocab goes from 1-256, 0-257 with padding
                     'window_size': 10,
                     'emb_size': 4,
                     'dropout': 0.1,
-                    'hidden_layers': [512, 512]
+                    'hidden_layers': [512, 512, 512]
                 },
                 'train_sessions': {
                     'first': {
@@ -121,7 +121,7 @@ experiment = {
                 'roc_thresholds': True,
                 'custom_thresholds': [],
                 'recalulate_probas': False,
-                'probas_fullpath': '{exp_name}/control_probas_{{dataset_type}}_topk_{topk}.npy',
+                'probas_fullpath': '{exp_name}/control_probas_{{dataset_type}}_topk_{topk}.npy'
             },
             'results_fullpath': '{exp_name}/control_{dataset_type}_results.csv'
         }
@@ -193,7 +193,7 @@ experiment = {
             'network_fullpath': '{exp_name}/gen.h5',
             'network_params': {
                 'model_type': 'gen_lap_autoencoder',
-                'vocab_size': 258,
+                'vocab_size': 257,
                 'window_size': 150,
                 'emb_size': 4,
                 'hidden_state_size': 1024,
@@ -262,7 +262,7 @@ experiment = {
                     'network_params': {
                         'model_type': 'control_fixed_window',
                         'window_size': 10,
-                        'vocab_size': 258,
+                        'vocab_size': 257,
                         'train_sessions': {
                             'first': {
                                 'epochs': 100,

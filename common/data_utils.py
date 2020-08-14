@@ -67,24 +67,99 @@ def pad_dataset(data, max_length, padding):
 
 def generate_windows_from_dataset(data, window_size, remove_shorter=False, padding='pre'):
     """_
-    #Input:
-    \ndata  = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
-    \nws = get_windows_from_dataset(data, 4, 'pre')
+    #Input 1:
+    \ndata  = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6], [1,2,3]]
+    \nws = get_windows_from_dataset(data, 4, False, 'pre')
     
-    #Output:
-    \ndata = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
-    \nws = [array([0, 0, 0, 1]),
-     array([0, 0, 1, 2]),
-     ...
-     array([2, 3, 4, 5]),
-     array([0, 0, 0, 1]),
-     array([0, 0, 1, 2]),
-     ...
-     array([3, 4, 5, 6])]"""
-    prefixes = get_dataset_prefixes(data, window_size, remove_shorter)
-    return pad_dataset(prefixes, window_size, padding)
+    #Output 1:
+    \ndata = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6], [1,2,3]]
+    \nws = [
+    array([0, 0, 0, 1]),
+    array([0, 0, 1, 2]),
+    array([0, 1, 2, 3]),
+    array([1, 2, 3, 4]),
+    array([2, 3, 4, 5]),
+    array([0, 0, 0, 1]),
+    array([0, 0, 1, 2]),
+    array([0, 1, 2, 3]),
+    array([1, 2, 3, 4]),
+    array([2, 3, 4, 5]),
+    array([3, 4, 5, 6]),
+    array([0, 0, 0, 1]),
+    array([0, 0, 1, 2]),
+    array([0, 1, 2, 3])]
+     
+    #Input 2:
+    \ndata  = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6], [1,2,3]]
+    \nws = get_windows_from_dataset(data, 4, True, 'pre')
 
-def get_dataset_prefixes(sequences, window_size, remove_shorter):
+    #Output 2:
+    \ndata = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6], [1,2,3]]
+    \nws = [
+    array([1, 2, 3, 4]),
+    array([2, 3, 4, 5]),
+    array([1, 2, 3, 4]),
+    array([2, 3, 4, 5]),
+    array([3, 4, 5, 6]),
+    array([0, 1, 2, 3])]
+
+    #Input 3:
+    \ndata  = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6], [1,2,3]]
+    \nws = get_windows_from_dataset(data, 4, False, 'post')
+
+    #Output 3:
+    \ndata = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6], [1,2,3]]
+    \nws = [
+    array([1, 2, 3, 4]),
+    array([2, 3, 4, 5]),
+    array([3, 4, 5, 0]),
+    array([4, 5, 0, 0]),
+    array([5, 0, 0, 0]),
+    array([1, 2, 3, 4]),
+    array([2, 3, 4, 5]),
+    array([3, 4, 5, 6]),
+    array([4, 5, 6, 0]),
+    array([5, 6, 0, 0]),
+    array([6, 0, 0, 0]),
+    array([1, 2, 3, 0]),
+    array([2, 3, 0, 0]),
+    array([3, 0, 0, 0])]
+        
+    #Input 4:
+    \ndata  = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6], [1,2,3]]
+    \nws = get_windows_from_dataset(data, 4, True, 'post')
+
+    #Output 4:
+    \ndata = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6], [1,2,3]]
+    \nws = [array([1, 2, 3, 4]),
+    array([2, 3, 4, 5]),
+    array([1, 2, 3, 4]),
+    array([2, 3, 4, 5]),
+    array([3, 4, 5, 6]),
+    array([1, 2, 3, 0])]"""
+    
+    seqs = []
+    if remove_shorter == False:
+        pre = list(np.zeros(window_size-1))
+    else:
+        pre = []
+
+    for seq in data:
+        if padding == 'pre':
+            seq = pre + seq
+        else:
+            seq = seq + pre
+
+        if len(seq) < window_size:
+            seqs.append(seq)            
+        for i in range(0, len(seq) - window_size + 1): 
+            subseq = seq[i:i+window_size]            
+            seqs.append(subseq)
+
+    return pad_dataset(seqs, window_size, padding)
+
+
+def get_dataset_prefixes(sequences):
     """_
     #Input:
     \ndata  = [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5, 6]]
@@ -100,10 +175,7 @@ def get_dataset_prefixes(sequences, window_size, remove_shorter):
      [1, 2],
      ...
      [1, 2, 3, 4, 5, 6]]"""
-    result = list(chain.from_iterable([get_seq_prefixes(seq) for seq in sequences])) 
-    if remove_shorter:
-        result = [seq for seq in result if len(seq) >= window_size]
-    return result
+    return list(chain.from_iterable([get_seq_prefixes(seq) for seq in sequences])) 
 
 
 def get_seq_prefixes(seq):
@@ -173,6 +245,9 @@ def load_file(fullpath, to_read=0, shuffle=False, max_len=0, dtype=None, split_t
         if to_read <= 0:
             to_read = len(sample)
 
+        if to_read < 1 and to_read > 0:
+            to_read = int(len(sample) * to_read)
+
         sample = sample[0: to_read]
 
     return sample
@@ -238,6 +313,14 @@ def load_multiple_files_with_class(files_dict, shuffle=False, max_len=0, dtype=N
 
 def write_file(dataset, filename_out, split_token=' ', encoding='utf-8', errors='strict'):
     with open(str(filename_out), 'w', encoding=encoding, errors=errors) as file:
-        for element in dataset:
+        for idx, element in enumerate(dataset):
             file.write(split_token.join(map(str, np.array(element))))
-            file.write('\n')
+            if idx != len(dataset) - 1:
+                file.write('\n')
+
+def write_strings_file(dataset, filename_out, encoding='utf-8', errors='strict'):
+    with open(str(filename_out), 'w', encoding=encoding, errors=errors) as file:
+        for idx, element in enumerate(dataset):
+            file.write(element)
+            if element[-1] != "\n" and idx != len(dataset) - 1:
+                file.write('\n')
