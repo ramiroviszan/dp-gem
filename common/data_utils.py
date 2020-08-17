@@ -140,15 +140,18 @@ def generate_windows_from_dataset(data, window_size, remove_shorter=False, paddi
     
     seqs = []
     if remove_shorter == False:
-        pre = list(np.zeros(window_size-1))
+        pad = list(np.zeros(window_size-1))
     else:
-        pre = []
+        pad = []
 
+    print(data)
     for seq in data:
+        seq = list(seq)
         if padding == 'pre':
-            seq = pre + seq
+            seq = pad + seq
         else:
-            seq = seq + pre
+            seq = seq + pad
+        print(seq)
 
         if len(seq) < window_size:
             seqs.append(seq)            
