@@ -2,7 +2,7 @@ experiment = {
     'skip': 0,
     'random_seed': 27,
     'data_preparation': {
-        'iterations': 0,
+        'type': 'single',
         "mode": "all",
         'module_name': 'common.data_splitter',
         'class_name': 'DataSplitter',
@@ -10,10 +10,10 @@ experiment = {
             'datasets': {
                 'normal': {
                     'original': {
-                        'fullpath': 'data/waf/token_all_normal.txt',
-                        'to_read': 0.2, #0 = 100%, (0, 1) = %, >= 1 count
+                        'fullpath': 'data/example/normal.txt',
+                        'to_read': 0, #0 = 100%, (0, 1) = %, >= 1 count
                         'shuffle': True,
-                        'max_len': 200,
+                        'max_len': 0,
                         'dtype': int,
                         'split_token': '',
                         'encoding': 'ascii',
@@ -23,16 +23,16 @@ experiment = {
                     'val_output_fullpath': '{exp_name}/normal_val.txt',
                     'test_output_fullpath': '{exp_name}/normal_test.txt',
                     'splits': {
-                        'train_test': 0.3,
-                        'train_val': 0.3
+                        'train_test': 0.2,
+                        'train_val': 0.2
                     }
                 },
                 'abnormal': {
                     'original': {
-                        'fullpath': 'data/waf/token_all_abnormal.txt',
-                        'to_read': 0.2,
+                        'fullpath': 'data/example/abnormal.txt',
+                        'to_read': 0,
                         'shuffle': True,
-                        'max_len': 200,
+                        'max_len': 0,
                         'dtype': int,
                         'split_token': '',
                         'encoding': 'ascii',
@@ -42,17 +42,18 @@ experiment = {
                     'val_output_fullpath': '{exp_name}/abnormal_val.txt',
                     'test_output_fullpath': '{exp_name}/abnormal_test.txt',
                     'splits': {
-                        'train_test': 0.3,
-                        'train_val': 0.3
+                        'train_test': 0.2,
+                        'train_val': 0.2
                     }
                 }
             }
         }
     },
     'control_test': {
-        'iterations': 1,
+        'type': 'iterations',
+        'iterations': 2,
         "mode": "all",
-        'module_name': 'study_cases.waf.lm_classifier',
+        'module_name': 'study_cases.example.lm_classifier',
         'class_name': 'LMClassifier',
         'params': {
             'datasets_params': {
@@ -91,16 +92,16 @@ experiment = {
             'network_params': {
                 'model_type': 'control',
                 'model_params': {
-                    'vocab_size': 257,  #Real vocab goes from 1-256, 0-257 with padding
-                    'window_size': 10,
-                    'emb_size': 4,
+                    'vocab_size': 11,  #Real vocab goes from 1-256, 0-257 with padding
+                    'window_size': 2,
+                    'emb_size': 2,
                     'dropout': 0.1,
-                    'hidden_layers': [512, 512, 512]
+                    'hidden_layers': [128]
                 },
                 'train_sessions': {
                     'first': {
-                        'epochs': 50,
-                        'batch_size': 100,
+                        'epochs': 1,
+                        'batch_size': 3,
                         'lr': 0.01,
                         'loss': 'categorical_crossentropy',
                         'validation_split': 0.3,
@@ -108,8 +109,8 @@ experiment = {
                         'save_model': False
                     },
                     'second': {
-                        'epochs': 50,
-                        'batch_size': 30,
+                        'epochs': 1,
+                        'batch_size': 3,
                         'lr': 0.001,
                         'loss': 'categorical_crossentropy',
                         'validation_split': 0.3,
@@ -129,17 +130,13 @@ experiment = {
         }
     },
     'dp_gen': {
-        'interations': 1,
+        'type': 'trials',
+        'interations': 2,
         'trials': [
             {'eps': 'no_dp', 'maxdelta':0},#no dp
-            {'eps': 0.5, 'maxdelta':1},
-            {'eps': 1, 'maxdelta':1},
-            {'eps': 10, 'maxdelta':1},
-            {'eps': 20, 'maxdelta':1},
-            {'eps': 30, 'maxdelta':1},
-            {'eps': 40, 'maxdelta':1}],
+            {'eps': 0.5, 'maxdelta':1}],
         'mode': 'all',  # all, main_only, submodules_only, skip
-        'module_name': 'study_cases.waf.dp_gen_lap_autoencoder',
+        'module_name': 'study_cases.example.dp_gen_lap_autoencoder',
         'class_name': 'DPGen',
         'params': {
             'datasets_params': {
@@ -194,28 +191,28 @@ experiment = {
             },
             'network_fullpath': '{exp_name}/gen.h5',
             'network_params': {
-                'model_type': 'gen_lap_autoencoder',
-                'vocab_size': 257,
-                'window_size': 150,
+                'model_type': 'gen',
+                'vocab_size': 11,
+                'window_size': 2,
                 'emb_size': 4,
-                'hidden_state_size': 1024,
+                'hidden_state_size': 128,
                 'train_sessions': {
                     'first': {
-                        'epochs': 1000,
-                        'batch_size': 500,
-                        'lr': 0.0001,
+                        'epochs': 1,
+                        'batch_size': 3,
+                        'lr': 0.01,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 20,
+                        'patience': 3,
                         'save_model': False
                     },
                     'second': {
-                        'epochs': 1000,
-                        'batch_size': 100,
-                        'lr': 0.00001,
+                        'epochs': 1,
+                        'batch_size': 3,
+                        'lr': 0.001,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 10,
+                        'patience': 3,
                         'save_model': True
                     }
                 }
@@ -224,9 +221,10 @@ experiment = {
         },
         'submodules': {
             'classifier': {
+                'type': 'iterations',
                 'iterations': 1,  # the iterations are given by dp_gen iterations
                 'mode': 'all',
-                'module_name': 'study_cases.waf.lm_classifier',
+                'module_name': 'study_cases.example.lm_classifier',
                 'class_name': 'LMClassifier',
                 'params': {
                     'datasets_params': {
@@ -261,15 +259,20 @@ experiment = {
                             }
                         }
                     },
-                    'network_fullpath': '{exp_name}/deeplog_utility_{eps}_{iteration}.h5',
+                    'network_fullpath': '{exp_name}/utility_{eps}_{iteration}.h5',
                     'network_params': {
-                        'model_type': 'control_fixed_window',
-                        'window_size': 10,
-                        'vocab_size': 257,
+                        'model_type': 'control',
+                        'model_params': {
+                            'vocab_size': 11,  #Real vocab goes from 1-256, 0-257 with padding
+                            'window_size': 2,
+                            'emb_size': 2,
+                            'dropout': 0.1,
+                            'hidden_layers': [128]
+                        },
                         'train_sessions': {
                             'first': {
-                                'epochs': 100,
-                                'batch_size': 100,
+                                'epochs': 1,
+                                'batch_size': 3,
                                 'lr': 0.001,
                                 'loss': 'categorical_crossentropy',
                                 'validation_split': 0.3,
@@ -277,8 +280,8 @@ experiment = {
                                 'save_model': False
                             },
                             'second': {
-                                'epochs': 50,
-                                'batch_size': 30,
+                                'epochs': 1,
+                                'batch_size': 3,
                                 'lr': 0.001,
                                 'loss': 'categorical_crossentropy',
                                 'validation_split': 0.3,
@@ -298,6 +301,7 @@ experiment = {
                 }
             },
             'similarity': {
+                'type': 'iterations',
                 'iterations': 1,  # the iterations are given by dp_gen iterations
                 'mode': 'all',
                 'module_name': 'common.data_similarity',
