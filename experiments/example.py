@@ -3,7 +3,6 @@ experiment = {
     'random_seed': 27,
     'data_preparation': {
         'type': 'single',
-        "mode": "all",
         'module_name': 'common.data_splitter',
         'class_name': 'DataSplitter',
         'params': {
@@ -50,9 +49,7 @@ experiment = {
         }
     },
     'control_test': {
-        'type': 'iterations',
-        'iterations': 2,
-        "mode": "all",
+        'type': 'single',
         'module_name': 'study_cases.example.lm_classifier',
         'class_name': 'LMClassifier',
         'params': {
@@ -129,15 +126,10 @@ experiment = {
             'results_fullpath': '{exp_name}/control_{dataset_type}_results.csv'
         }
     },
-    'dp_gen': {
-        'type': 'trials',
-        'interations': 2,
-        'trials': [
-            {'eps': 'no_dp', 'maxdelta':0},#no dp
-            {'eps': 0.5, 'maxdelta':1}],
-        'mode': 'all',  # all, main_only, submodules_only, skip
-        'module_name': 'study_cases.example.dp_gen_lap_autoencoder',
-        'class_name': 'DPGen',
+    'dp_train': {
+        'type': 'single',
+        'module_name': 'study_cases.example.dp_trainer_lap_autoencoder',
+        'class_name': 'Trainer',
         'params': {
             'datasets_params': {
                 'train': {
@@ -159,32 +151,6 @@ experiment = {
                     },
                     'abnormal': {
                         'fullpath': '{exp_name}/abnormal_val.txt',
-                        'to_read': 0
-                    }
-                },
-                'to_privatize': {
-                    'normal_train': {
-                        'fullpath': '{exp_name}/normal_train.txt',
-                        'to_read': 0
-                    },
-                    'abnormal_train': {
-                        'fullpath': '{exp_name}/abnormal_train.txt',
-                        'to_read': 0
-                    },
-                    'normal_val': {
-                        'fullpath': '{exp_name}/normal_val.txt',
-                        'to_read': 0
-                    },
-                    'abnormal_val': {
-                        'fullpath': '{exp_name}/abnormal_val.txt',
-                        'to_read': 0
-                    },
-                    'normal_test': {
-                        'fullpath': '{exp_name}/normal_test.txt',
-                        'to_read': 0
-                    },
-                    'abnormal_test': {
-                        'fullpath': '{exp_name}/abnormal_test.txt',
                         'to_read': 0
                     }
                 }
@@ -216,14 +182,52 @@ experiment = {
                         'save_model': True
                     }
                 }
+            }
+        }
+    },
+    'dp_gen': {
+        'type': 'trials',
+        'trials': [
+            {'eps': 'no_dp', 'maxdelta':0},#no dp
+            {'eps': 0.5, 'maxdelta':1}],
+        'mode': 'all',  # all, main_only, submodules_only, skip
+        'module_name': 'study_cases.example.dp_gen_lap_autoencoder',
+        'class_name': 'Gen',
+        'params': {
+            'datasets_params': {
+                'to_privatize': {
+                    'normal_train': {
+                        'fullpath': '{exp_name}/normal_train.txt',
+                        'to_read': 0
+                    },
+                    'abnormal_train': {
+                        'fullpath': '{exp_name}/abnormal_train.txt',
+                        'to_read': 0
+                    },
+                    'normal_val': {
+                        'fullpath': '{exp_name}/normal_val.txt',
+                        'to_read': 0
+                    },
+                    'abnormal_val': {
+                        'fullpath': '{exp_name}/abnormal_val.txt',
+                        'to_read': 0
+                    },
+                    'normal_test': {
+                        'fullpath': '{exp_name}/normal_test.txt',
+                        'to_read': 0
+                    },
+                    'abnormal_test': {
+                        'fullpath': '{exp_name}/abnormal_test.txt',
+                        'to_read': 0
+                    }
+                }
             },
+            'network_fullpath': '{exp_name}/gen.h5',
             'to_privatize_output_fullpath': '{exp_name}/fake_{{to_privatize_name}}_{{eps}}_{{iteration}}.txt'
         },
         'submodules': {
             'classifier': {
-                'type': 'iterations',
-                'iterations': 1,  # the iterations are given by dp_gen iterations
-                'mode': 'all',
+                'type': 'single',
                 'module_name': 'study_cases.example.lm_classifier',
                 'class_name': 'LMClassifier',
                 'params': {
@@ -301,9 +305,7 @@ experiment = {
                 }
             },
             'similarity': {
-                'type': 'iterations',
-                'iterations': 1,  # the iterations are given by dp_gen iterations
-                'mode': 'all',
+                'type': 'single',
                 'module_name': 'common.data_similarity',
                 'class_name': 'DataSimilarity',
                 'params': {

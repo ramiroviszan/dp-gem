@@ -12,27 +12,27 @@ class BaseRunner:
         self.exp_path = exp_path
 
     def run_module(self, module_desc, exp_info = None):
-        type = module_desc.get('type', 'single')
+        run_type = module_desc.get('type', 'single')
         iterations = module_desc.get('iterations', 0)
         trials = module_desc.get('trials', [])
         mode = module_desc.get('mode', 'all')
         submodules = module_desc.get('submodules', None)
 
-        if type == "single":
+        if run_type == "single":
             if submodules == None:
                 params = list(module_desc.values())[2:]
             else:
                 params = list(module_desc.values())[2:-1]
 
             self.run_single(mode, submodules, params, exp_info)
-        elif type == "iterations":
+        elif run_type == "iterations":
             if submodules == None:
                 params = list(module_desc.values())[3:]
             else:
                 params = list(module_desc.values())[3:-1]
 
             self.run_interation_based(iterations, mode, submodules, params, exp_info)
-        elif type == "trials" and len(trials) > 0:
+        elif run_type == "trials" and len(trials) > 0:
             if submodules == None:
                 params = list(module_desc.values())[4:]
             else:
@@ -54,7 +54,6 @@ class BaseRunner:
             self.run_submodules(submodules, parent_intertion_desc)
 
     def run_interation_based(self, iterations, mode, submodules, params, exp_info):
-        print(iterations)
         for i in range(0, iterations):
             if mode == "all" or mode == "main_only":
                 if exp_info == None:
