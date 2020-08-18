@@ -12,84 +12,65 @@ class BaseRunner:
         self.exp_path = exp_path
 
     def run_module(self, module_desc, exp_info = None):
-        run_type = module_desc.get('type', 'single')
-        iterations = module_desc.get('iterations', 0)
-        trials = module_desc.get('trials', [])
-        mode = module_desc.get('mode', 'all')
-        submodules = module_desc.get('submodules', None)
+        skipStart = 0
+        skipEnd = 0
+        
+        run_type = 'single'
+        if 'run_type' in module_desc.keys():
+            skipStart = skipStart + 1
+            run_type = module_desc.get('type')
 
+        if 'trials' in module_desc.keys():
+            trials = module_desc.get('trials', [])
+            skipStart = skipStart + 1
+            if len(trials) == 0:
+                print("Error")
+                return 
+
+        mode = 'all'
+        if 'mode' in module_desc.keys():
+            skipStart = skipStart + 1
+            mode = module_desc.get('mode')
+        
+        if 'submodules' in module_desc.keys():
+            skipEnd = skipEnd - 1
+            submodules = module_desc.get('submodules')
+
+        params = list(module_desc.values())[skipStart:SkipEnd]
+        
         if run_type == "single":
-            if submodules == None:
-                params = list(module_desc.values())[2:]
-            else:
-                params = list(module_desc.values())[2:-1]
-
-            self.run_single(mode, submodules, params, exp_info)
-        elif run_type == "iterations":
-            if submodules == None:
-                params = list(module_desc.values())[3:]
-            else:
-                params = list(module_desc.values())[3:-1]
-
-            self.run_interation_based(iterations, mode, submodules, params, exp_info)
-        elif run_type == "trials" and len(trials) > 0:
-            if submodules == None:
-                params = list(module_desc.values())[4:]
-            else:
-                params = list(module_desc.values())[4:-1]
-            self.run_trial_based(iterations, trials, mode, submodules, params, exp_info)
-
+            self.run_single(params, mode, exp_info, submodules)
+        elif run_type == "trials":
+            self.run_trials_based(params, mode, exp_info, submodules)
+        
     def run_single(self, mode, submodules, params, exp_info):
+        
+        creation_info = (self.exp_path, {}) if exp_info == None else exp_info
         if mode == "all" or mode == "main_only":
-            if exp_info == None:
-                run_info = self.exp_path
-            else:
-                run_info = exp_info
-            run_params = copy.deepcopy(params)
-            module = self.hot_new(run_info, *run_params)
+            creation_params = copy.deepcopy(params)
+            module = self.hot_new(creation_info, *creation_params)
             module.run()
         
         if submodules != None and (mode == "all" or mode == "submodules_only"):
-            parent_intertion_desc = self.exp_name
-            self.run_submodules(submodules, parent_intertion_desc)
-
-    def run_interation_based(self, iterations, mode, submodules, params, exp_info):
-        for i in range(0, iterations):
-            if mode == "all" or mode == "main_only":
-                if exp_info == None:
-                    run_info = (self.exp_path, {}, i)
-                else:
-                    run_info = exp_info
-                run_params = copy.deepcopy(params)
-                module = self.hot_new(run_info, *run_params)
-                module.run()
-            
-            if submodules != None and (mode == "all" or mode == "submodules_only"):
-                parent_intertion_desc = (self.exp_name, {}, i)
-                self.run_submodules(submodules, parent_intertion_desc)
+            self.run_submodules(submodules, creation_info)
 
     def run_trial_based(self, iterations, trials, mode, submodules, params, exp_info):
         if mode == "all" or mode == "main_only":
-            if exp_info == None:
-                run_info = self.exp_path
-            else:
-                run_info = exp_info
-            run_params = copy.deepcopy(params)
-            module = self.hot_new(run_info, *run_params)
+            creation_info = (self.exp_path, {}) if exp_info == None else exp_info
+            creation_params = copy.deepcopy(params)
+            module = self.hot_new(creation_info, *creation_params)
 
         for trial in trials:
             if module != None:
-                for i in range(0, iterations):
-                    module.run(trial, i)
+                module.run(trial)
             
             if submodules != None and (mode == "all" or mode == "submodules_only"):
-                for i in range(0, iterations):
-                    parent_trial_iteration_desc = (self.exp_name, trial, i)
-                    self.run_submodules(submodules, parent_trial_iteration_desc)
+                parent_info = (self.exp_name, trial)
+                self.run_submodules(submodules, parent_info)
     
-    def run_submodules(self, submodules, parent_run_desc):
+    def run_submodules(self, submodules, parent_info):
         for submodule in submodules:
-            self.run_module(submodule, parent_run_desc)
+            self.run_module(submodule, parent_info)
     
     def hot_new(self, exp_info, module_name, class_name, params):
         module = __import__(module_name, globals(), locals(), [class_name], 0)

@@ -273,7 +273,6 @@ def load_multiple_files(files_dict, shuffle=False, max_len=0, dtype=None, split_
 
     all_data = []
     for dataset in files_dict.values():
-        print(dataset)
         path = dataset["fullpath"].format(**path_params)
         data = load_file(path, to_read=dataset["to_read"], shuffle=shuffle, max_len=max_len, dtype=dtype, split_token=split_token, encoding=encoding, errors=errors)
         all_data.append(data)
