@@ -114,7 +114,15 @@ class Classifier:
         for ts in thresholds:
             y_hat = self._classify(probas, ts)
             metrics = self._metrics(y, y_hat)
+            tn, fp, fn, tp, acc = metrics
             result_writer.save_results(results + [ts, *metrics])
+            wandb.log({
+                f"tn_{ts}":  tn,
+                f"fp_{ts}": fp, 
+                f"fn_{ts}": fn,
+                f"tp_{ts}": tp,
+                f"acc_{ts}": acc
+            })
 
     def _classify(self, probas, threshold):
         return probas >= threshold
