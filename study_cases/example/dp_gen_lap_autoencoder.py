@@ -24,6 +24,8 @@ class Gen:
         self.network_params = network_params
 
         wandb.config.network_params = network_params
+        wandb.config.network_params = self.parent_trial
+        
         
         self.to_privatize_output_fullpath = to_privatize_output_fullpath.format(
             exp_name=self.exp_name)

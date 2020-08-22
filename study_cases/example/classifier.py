@@ -25,6 +25,7 @@ class Classifier:
         self.network_fullpath = network_fullpath.format(exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
         self.network_params = network_params
         wandb.config.network_params = network_params
+        wandb.config.parent_trial = self.parent_trial
 
 
         result_header = list(self.parent_trial.keys())
