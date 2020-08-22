@@ -3,29 +3,30 @@ from sklearn.metrics.pairwise import pairwise_distances
 
 import common.data_utils as data_utils
 from common.csv_result import CSVResult
-
+from common.trials_utils import flat_trial
 
 class DataSimilarity:
 
-    def __init__(self, experiment, metrics, datasets_params, results_fullpath):
-        self.exp_name, self.trial, self.iteration = experiment
+    def __init__(self, experiment, logger, metrics, datasets_params, results_fullpath):
+        self.exp_name, self.parent_trial = experiment
+        self.logger = logger
         self.metrics = metrics
         self.datasets_params = datasets_params
 
-        results_header = list(self.trial.keys()) + ['iter', 'metric']
+        results_header = list(self.parent_trial.keys()) + ['metric']
         for dataset_type in self.datasets_params:
             results_header.append('mean_' + dataset_type)
         results_header.append('mean_all')
 
         self.result_line = dict()
-        result_line = list(self.trial.values()) + [self.iteration]
+        result_line = list(self.parent_trial.values())
         for metric_name in metrics:
             self.result_line[metric_name] = result_line + [metric_name]
 
         results_fullpath = results_fullpath.format(exp_name=self.exp_name)
         self.results = CSVResult(results_fullpath, results_header)
 
-    def run_test(self):
+    def run(self, trial):
         datasets = []
         for dataset_type in self.datasets_params:
             first, second = self._load_test(*self.datasets_params[dataset_type].values())
@@ -46,8 +47,8 @@ class DataSimilarity:
             self.results.save_results(self.result_line[metric_name])
 
     def _load_test(self, first_fullpath, second_fullpath, to_read, dtype):
-        first_fullpath = first_fullpath.format(exp_name=self.exp_name, iteration=self.iteration, **self.trial)
-        second_fullpath = second_fullpath.format(exp_name=self.exp_name, iteration=self.iteration, **self.trial)
+        first_fullpath = first_fullpath.format(exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
+        second_fullpath = second_fullpath.format(exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
         
         first = data_utils.load_file(first_fullpath, to_read, shuffle=False, dtype=dtype)
         second= data_utils.load_file(second_fullpath, to_read, shuffle=False, dtype=dtype)

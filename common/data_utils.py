@@ -144,14 +144,12 @@ def generate_windows_from_dataset(data, window_size, remove_shorter=False, paddi
     else:
         pad = []
 
-    print(data)
     for seq in data:
         seq = list(seq)
         if padding == 'pre':
             seq = pad + seq
         else:
             seq = seq + pad
-        print(seq)
 
         if len(seq) < window_size:
             seqs.append(seq)            
@@ -247,8 +245,7 @@ def load_file(fullpath, to_read=0, shuffle=False, max_len=0, dtype=None, split_t
 
         if to_read <= 0:
             to_read = len(sample)
-
-        if to_read < 1 and to_read > 0:
+        elif 0 < to_read < 1:
             to_read = int(len(sample) * to_read)
 
         sample = sample[0: to_read]

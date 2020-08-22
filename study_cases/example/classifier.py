@@ -11,23 +11,23 @@ from common.nn_trainer import NNTrainer
 from common.csv_result import CSVResult
 from common.trials_utils import flat_trial
 
-import study_cases.waf.models as models
+import study_cases.example.models as models
 
 
 class Classifier:
 
-    def __init__(self, experiment, datasets_params, network_fullpath, network_params, classifier_params, results_fullpath):
-        self.exp_name, self.trial = experiment
+    def __init__(self, experiment, logger, datasets_params, network_fullpath, network_params, results_fullpath):
+        self.exp_name, self.parent_trial = experiment
+        self.logger = logger
 
         self.datasets_params = datasets_params
-        self.network_fullpath = network_fullpath.format(exp_name=self.exp_name, trial=flat_trial(self.trial))
+        self.network_fullpath = network_fullpath.format(exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
         self.network_params = network_params
+        self.logger.config.network_params = network_params
 
-        self.classifier_params = classifier_params
-        self.classifier_params['probas_fullpath'] = self.classifier_params['probas_fullpath'].format(exp_name=self.exp_name, trial=flat_trial(self.trial))
 
-        result_header = list(self.trial.keys())
-        results_header = result_header + ['iter', 'use_top_k', 'threshold', 'tn', 'fp', 'fn', 'tp', 'acc']
+        result_header = list(self.parent_trial.keys())
+        results_header = result_header + ['threshold', 'tn', 'fp', 'fn', 'tp', 'acc']
         val_results_fullpath = results_fullpath.format(exp_name=self.exp_name, dataset_type='val')
         test_results_fullpath = results_fullpath.format(exp_name=self.exp_name, dataset_type='test')
         self.val_results = CSVResult(val_results_fullpath, results_header)
@@ -39,14 +39,14 @@ class Classifier:
         
     def _get_model(self):
         try:
-            self.model = load_model(self.network_fullpath)
+            self.model = models.load_model_adapter(self.network_fullpath)
         except:
             print("\nModel", self.network_fullpath, "not found. Training started...")
             self.model = self._train_model(*self.network_params.values())
 
     def _train_model(self, model_type, model_params, train_sessions):
         
-        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, exp_name=self.exp_name, trial=flat_trial(self.trial))
+        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
 
         window_size = model_params.get('window_size', 0)
         vocab_size = model_params['vocab_size']
@@ -67,40 +67,38 @@ class Classifier:
 
         return model
 
-    def run_test(self):
-        self._run(*self.classifier_params.values())
+    def run(self, trial):
+        classifier_params = trial
+        classifier_params['probas_fullpath'] = trial['probas_fullpath'].format(exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
+        self._run(*classifier_params.values())
 
-    def _run(self, use_top_k, roc_thresholds, custom_thresholds, recalulate_probas, probas_fullpath):
+    def _run(self, recalulate_probas, probas_fullpath):
 
-        val_x, val_y = data_utils.load_multiple_files_with_class(self.datasets_params['val'], shuffle=False, dtype=int, exp_name=self.exp_name, trial=flat_trial(self.trial))
+        val_x, val_y = data_utils.load_multiple_files_with_class(self.datasets_params['val'], shuffle=False, dtype=int, exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
         val_fullpath = probas_fullpath.format(dataset_type = 'val')
-        val_probas = self._get_dataset_proba(val_fullpath, val_x, recalulate_probas, use_top_k)
+        val_probas = self._get_dataset_proba(val_fullpath, val_x, recalulate_probas)
 
-        if use_top_k > 0:
-            thresholds = [0.5]
-        else:
-            thresholds = custom_thresholds
-            if roc_thresholds:
-                roc_ts, fpr, tpr = self._get_roc_threshold(val_y, val_probas)
-                thresholds.append(roc_ts)
+        thresholds = [0.5]
+        roc_ts, fpr, tpr = self._get_roc_threshold(val_y, val_probas)
+        thresholds.append(roc_ts)
 
         plot_utils.plot_probas_vs_threshold(val_fullpath, val_probas, val_y, thresholds)
-        self._try_different_thresholds(val_probas, val_y, thresholds, self.val_results, use_top_k)
+        self._try_different_thresholds(val_probas, val_y, thresholds, self.val_results)
 
-        test_x, test_y = data_utils.load_multiple_files_with_class(self.datasets_params['test'], shuffle=False, dtype=int, exp_name=self.exp_name, trial=flat_trial(self.trial))
+        test_x, test_y = data_utils.load_multiple_files_with_class(self.datasets_params['test'], shuffle=False, dtype=int, exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
         test_fullpath = probas_fullpath.format(dataset_type = 'test')
-        test_probas = self._get_dataset_proba(test_fullpath, test_x, recalulate_probas, use_top_k)
+        test_probas = self._get_dataset_proba(test_fullpath, test_x, recalulate_probas)
         plot_utils.plot_probas_vs_threshold(test_fullpath, test_probas, test_y, thresholds)
-        self._try_different_thresholds(test_probas, test_y, thresholds, self.test_results, use_top_k)
+        self._try_different_thresholds(test_probas, test_y, thresholds, self.test_results)
 
-    def _get_dataset_proba(self, probas_fullpath, x_test, recalulate_probas, use_top_k):
+    def _get_dataset_proba(self, probas_fullpath, x_test, recalulate_probas):
         if recalulate_probas:
-             probas = self._calculate_probas(probas_fullpath, x_test, use_top_k)
+             probas = self._calculate_probas(probas_fullpath, x_test)
         else:
             try:
                 probas = np.load(probas_fullpath, allow_pickle=True)
             except:
-                probas = self._calculate_probas(probas_fullpath, x_test, use_top_k)
+                probas = self._calculate_probas(probas_fullpath, x_test)
         return probas
 
     def _get_roc_threshold(self, y, probas):
@@ -109,8 +107,8 @@ class Classifier:
         optimal_threshold = thresholds[optimal_idx]
         return optimal_threshold, fpr, tpr
 
-    def _try_different_thresholds(self, probas, y, thresholds, result_writer, use_top_k):
-        results = list(self.trial.values()) + [self.iteration, use_top_k]
+    def _try_different_thresholds(self, probas, y, thresholds, result_writer):
+        results = list(self.parent_trial.values())
         for ts in thresholds:
             y_hat = self._classify(probas, ts)
             metrics = self._metrics(y, y_hat)
@@ -124,7 +122,7 @@ class Classifier:
         acc = accuracy_score(y, y_hat)
         return tn, fp, fn, tp, acc
 
-    def _calculate_probas(self, probas_fullpath, x_test, use_top_k):
+    def _calculate_probas(self, probas_fullpath, x_test):
 
         print('\n\nCalculating Probas for', len(x_test), 'seqs.')
 
@@ -132,14 +130,14 @@ class Classifier:
         probas = []
         for i, x in enumerate(x_test):
             print(str(i) + "/" + str(len(x_test)), end="\r")
-            proba = self._probability_of_a_seq(x, window_size,use_top_k,verbose=0)
+            proba = self._probability_of_a_seq(x, window_size, verbose=0)
             probas.append(proba)
         probas = np.array(probas)
         np.save(probas_fullpath, probas, allow_pickle=True)
 
         return probas
 
-    def _probability_of_a_seq(self, seq, window_size, use_top_k=0, use_padded_start = False, verbose=2):
+    def _probability_of_a_seq(self, seq, window_size, use_padded_start = False, verbose=2):
         if use_padded_start:
             seq = [0] + list(seq)
 
@@ -172,17 +170,7 @@ class Classifier:
                 top5 = yhat_last.argsort()[-5:][::-1]
                 print("Top 5 Symbols:", top5)
 
-            if(use_top_k > 0):
-                topk = yhat_last.argsort()[-use_top_k:][::-1]
-                in_top = expected_symbol_index in topk
-                if(verbose > 2):
-                    print("Top", use_top_k, "Symbols:", topk)
-                    print("Is Expected in top", use_top_k, ":", in_top)
-                if not in_top:
-                    #proba = proba * precited_proba_for_expected_symbol
-                    return 0
-            else:
-                proba = proba + np.log(precited_proba_for_expected_symbol) 
+            proba = proba + np.log(precited_proba_for_expected_symbol) 
 
             if(verbose > 1):
                 print("Subsequence:", str(seq[:i+1]), "proba:", str(proba))

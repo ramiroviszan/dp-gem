@@ -26,11 +26,11 @@ def main(argv):
             print('\n\n\n\nExperiment:', exp_name)
             exp_path = create_exp_folder(exp_name)
 
-            runner = BaseRunner(exp_name, exp_path)
             for module_name, module_desc in exp.items():
                 if type(module_desc) == dict: 
                     print('\n\n\n\n', module_name)
                     set_random(exp)
+                    runner = BaseRunner(module_name, exp_name, exp_path)
                     runner.run_module(module_desc)
 
 def discover_experiments(filtered):

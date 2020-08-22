@@ -7,11 +7,12 @@ import common.data_utils as data_utils
 
 class DataSplitter:
 
-    def __init__(self, experiment, datasets):
-        self.exp_name = experiment
+    def __init__(self, experiment, logger, datasets):
+        self.exp_name, self.parent_trial = experiment
+        self.logger = logger
         self.datasets = datasets
 
-    def run(self):
+    def run(self, trial):
         loaded = dict()
         for dataset_name, dataset_desc in self.datasets.items():
             loaded[dataset_name] = data_utils.load_file(*dataset_desc['original'].values())

@@ -7,8 +7,9 @@ from common.csv_result import CSVResult
 
 class DataSimilarity:
 
-    def __init__(self, experiment, metrics, datasets_params, results_fullpath):
+    def __init__(self, experiment, logger, metrics, datasets_params, results_fullpath):
         self.exp_name, self.trial, self.iteration = experiment
+        self.logger = logger
         self.metrics = metrics
         self.datasets_params = datasets_params
 

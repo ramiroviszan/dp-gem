@@ -2,15 +2,15 @@ experiment = {
     'skip': 0,
     'random_seed': 27,
     'data_preparation': {
-        'type': 'single',
+        'skip': 0,
         'module_name': 'common.data_splitter',
         'class_name': 'DataSplitter',
-        'params': {
+        'build_params': {
             'datasets': {
                 'normal': {
                     'original': {
                         'fullpath': 'data/example/normal.txt',
-                        'to_read': 0, #0 = 100%, (0, 1) = %, >= 1 count
+                        'to_read': 0,  # 0 = 100%, (0, 1) = %, >= 1 count
                         'shuffle': True,
                         'max_len': 0,
                         'dtype': int,
@@ -46,13 +46,14 @@ experiment = {
                     }
                 }
             }
-        }
+        },
+        'trials_params': [{}]
     },
     'control_test': {
-        'type': 'single',
+        'skip': 0,
         'module_name': 'study_cases.example.classifier',
         'class_name': 'Classifier',
-        'params': {
+        'build_params': {
             'datasets_params': {
                 'train': {
                     'normal': {
@@ -89,7 +90,7 @@ experiment = {
             'network_params': {
                 'model_type': 'control',
                 'model_params': {
-                    'vocab_size': 11,  #Real vocab goes from 1-256, 0-257 with padding
+                    'vocab_size': 11,  # Real vocab goes from 1-256, 0-257 with padding
                     'window_size': 2,
                     'emb_size': 2,
                     'dropout': 0.1,
@@ -116,21 +117,18 @@ experiment = {
                     }
                 }
             },
-            'classifier_params': {
-                'use_top_k': 0,  # if top == 0 threasholds will be evaluated
-                'roc_thresholds': True,
-                'custom_thresholds': [],
-                'recalulate_probas': False,
-                'probas_fullpath': '{exp_name}/control_probas_{{dataset_type}}_topk_{topk}.npy'
-            },
             'results_fullpath': '{exp_name}/control_{dataset_type}_results.csv'
-        }
+        },
+        'trials_params': [{
+            'recalulate_probas': False,
+            'probas_fullpath': '{exp_name}/control_probas_{{dataset_type}}.npy'
+        }]
     },
-    'dp_train': {
-        'type': 'single',
-        'module_name': 'study_cases.example.dp_trainer_lap_autoencoder',
-        'class_name': 'Trainer',
-        'params': {
+    'dp_gen': {
+        'skip': 0,
+        'module_name': 'study_cases.example.dp_gen_lap_autoencoder',
+        'class_name': 'Gen',
+        'build_params': {
             'datasets_params': {
                 'train': {
                     'normal': {
@@ -153,49 +151,7 @@ experiment = {
                         'fullpath': '{exp_name}/abnormal_val.txt',
                         'to_read': 0
                     }
-                }
-            },
-            'network_fullpath': '{exp_name}/gen.h5',
-            'network_params': {
-                'model_type': 'gen',
-                'vocab_size': 11,
-                'window_size': 2,
-                'emb_size': 4,
-                'hidden_state_size': 128,
-                'train_sessions': {
-                    'first': {
-                        'epochs': 1,
-                        'batch_size': 3,
-                        'lr': 0.01,
-                        'loss': 'binary_crossentropy',
-                        'validation_split': 0.3,
-                        'patience': 3,
-                        'save_model': False
-                    },
-                    'second': {
-                        'epochs': 1,
-                        'batch_size': 3,
-                        'lr': 0.001,
-                        'loss': 'binary_crossentropy',
-                        'validation_split': 0.3,
-                        'patience': 3,
-                        'save_model': True
-                    }
-                }
-            }
-        }
-    },
-    'dp_gen': {
-        'type': 'trials',
-        'trials': [
-            {'eps': 'no_dp', 'maxdelta':0},#no dp
-            {'iter': 0, 'eps': 0.5, 'maxdelta':1},
-            {'iter': 1, 'eps': 0.5, 'maxdelta':1}],
-        'mode': 'all',  # all, main_only, submodules_only, skip
-        'module_name': 'study_cases.example.dp_gen_lap_autoencoder',
-        'class_name': 'Gen',
-        'params': {
-            'datasets_params': {
+                },
                 'to_privatize': {
                     'normal_train': {
                         'fullpath': '{exp_name}/normal_train.txt',
@@ -224,51 +180,82 @@ experiment = {
                 }
             },
             'network_fullpath': '{exp_name}/gen.h5',
+            'network_params': {
+                'model_type': 'gen',
+                'vocab_size': 11,
+                'window_size': 0,
+                'emb_size': 4,
+                'hidden_state_size': 128,
+                'train_sessions': {
+                    'first': {
+                        'epochs': 1,
+                        'batch_size': 3,
+                        'lr': 0.01,
+                        'loss': 'binary_crossentropy',
+                        'validation_split': 0.3,
+                        'patience': 3,
+                        'save_model': False
+                    },
+                    'second': {
+                        'epochs': 1,
+                        'batch_size': 3,
+                        'lr': 0.001,
+                        'loss': 'binary_crossentropy',
+                        'validation_split': 0.3,
+                        'patience': 3,
+                        'save_model': True
+                    }
+                }
+            },
             'to_privatize_output_fullpath': '{exp_name}/fake_{{to_privatize_name}}_{{trial}}.txt'
         },
+        'trials_params': [
+            {'iter': 0, 'eps': 'no_dp', 'maxdelta': 0},  # no dp
+            {'iter': 0, 'eps': 0.5, 'maxdelta': 1},
+            {'iter': 1, 'eps': 0.5, 'maxdelta': 1}],
         'submodules': {
             'classifier': {
-                'type': 'single',
-                'module_name': 'study_cases.example.lm_classifier',
-                'class_name': 'LMClassifier',
-                'params': {
+                'skip': 0,
+                'module_name': 'study_cases.example.classifier',
+                'class_name': 'Classifier',
+                'build_params': {
                     'datasets_params': {
                         'train': {
                             'normal': {
-                                'fullpath': '{exp_name}/fake_normal_train_{trial}.txt',
+                                'fullpath': '{exp_name}/fake_normal_train_{parent_trial}.txt',
                                 'to_read': 0
                             }
                         },
                         'val': {
                             'normal': {
-                                'fullpath': '{exp_name}/fake_normal_val_{trial}.txt',
+                                'fullpath': '{exp_name}/fake_normal_val_{parent_trial}.txt',
                                 'to_read': 0,
                                 'class': 1
                             },
                             'abnormal': {
-                                'fullpath': '{exp_name}/fake_abnormal_val_{trial}.txt',
+                                'fullpath': '{exp_name}/fake_abnormal_val_{parent_trial}.txt',
                                 'to_read': 0,
                                 'class': 0
                             }
                         },
                         'test': {
                             'normal': {
-                                'fullpath': '{exp_name}/fake_normal_test_{trial}.txt',
+                                'fullpath': '{exp_name}/fake_normal_test_{parent_trial}.txt',
                                 'to_read': 0,
                                 'class': 1
                             },
                             'abnormal': {
-                                'fullpath': '{exp_name}/fake_abnormal_test_{trial}.txt',
+                                'fullpath': '{exp_name}/fake_abnormal_test_{parent_trial}.txt',
                                 'to_read': 0,
                                 'class': 0
                             }
                         }
                     },
-                    'network_fullpath': '{exp_name}/utility_{trial}.h5',
+                    'network_fullpath': '{exp_name}/utility_{parent_trial}.h5',
                     'network_params': {
                         'model_type': 'control',
                         'model_params': {
-                            'vocab_size': 11,  #Real vocab goes from 1-256, 0-257 with padding
+                            'vocab_size': 11,  # Real vocab goes from 1-256, 0-257 with padding
                             'window_size': 2,
                             'emb_size': 2,
                             'dropout': 0.1,
@@ -295,38 +282,36 @@ experiment = {
                             }
                         }
                     },
-                    'classifier_params': {
-                        'use_top_k': 0,  # if top == 0 threasholds will be evaluated
-                        'roc_thresholds': True,
-                        'custom_thresholds': [],
-                        'recalulate_probas': False,
-                        'probas_fullpath': '{exp_name}/utility_probas_{{dataset_type}}_{trial}.npy',
-                    },
                     'results_fullpath': '{exp_name}/utility_classifier_{dataset_type}_results.csv'
-                }
+                },
+                'trials_params': [{
+                    'recalulate_probas': False,
+                    'probas_fullpath': '{exp_name}/utility_probas_{{dataset_type}}_{parent_trial}.npy',
+                }]
             },
             'similarity': {
-                'type': 'single',
+                'skip': 0,
                 'module_name': 'common.data_similarity',
                 'class_name': 'DataSimilarity',
-                'params': {
+                'build_params': {
                     'metrics': ['hamming', 'hamming_wise', 'cosine'],
                     'datasets_params': {
                         'normal': {
                             'orig_fullpath': '{exp_name}/normal_test.txt',
-                            'privatized_fullpath': '{exp_name}/fake_normal_test_{trial}.txt',
+                            'privatized_fullpath': '{exp_name}/fake_normal_test_{parent_trial}.txt',
                             'to_read': 0,
                             'dtype': int
                         },
                         'abnormal': {
                             'orig_fullpath': '{exp_name}/abnormal_test.txt',
-                            'privatized_fullpath': '{exp_name}/fake_abnormal_test_{trial}.txt',
+                            'privatized_fullpath': '{exp_name}/fake_abnormal_test_{parent_trial}.txt',
                             'to_read': 0,
                             'dtype': int
                         }
                     },
                     'results_fullpath': '{exp_name}/utility_similarity_test_results.csv'
-                }
+                },
+                'trials_params': [{}]
             }
         }
     }
