@@ -20,7 +20,7 @@ class BaseRunner:
         skip = module_desc.get('skip', 0)
         module_name = module_desc.get('module_name')
         class_name = module_desc.get('class_name')
-        use_wandb = module_desc.get('wandb', False)
+        use_wandb = module_desc.get('use_wandb', 0)
         build_params = module_desc.get('build_params', {})
         creation_params = [module_name, class_name, build_params] 
         trials_params = module_desc.get('trials_params', [{}])
@@ -28,17 +28,18 @@ class BaseRunner:
         submodules = module_desc.get('submodules', None)
         
         if skip == 0:
-            if use_wandb:
+            if use_wandb == 1:
                 end_name = ""
                 if parent_info != None:
                     flat = flat_trial(parent_info)
                     end_name = f"_{flat}"
                 
                 logger = wandb.init(
-                    name=f"{self.exp_name}_{self.module_name}{end_name}", 
-                    project="dp-project",
-                    group=self.exp_name,
-                    reinit=True
+                    name=f"{self.module_name}{end_name}", 
+                    project=f"{self.exp_name}",
+                    group=f"{self.module_name}",
+                    reinit=True,
+                    config = {}
                 )
                 with logger:
                     self._run(creation_params, trials_params, mode, parent_info, submodules, logger)

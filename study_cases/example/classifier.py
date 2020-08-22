@@ -1,9 +1,10 @@
 from tensorflow.keras.models import load_model
 from tensorflow.python.distribute.mirrored_strategy import MirroredStrategy
 
-
+import wandb
 import numpy as np
 from sklearn.metrics import confusion_matrix, accuracy_score, roc_curve
+
 
 import common.plot_utils as plot_utils
 import common.data_utils as data_utils
@@ -23,7 +24,7 @@ class Classifier:
         self.datasets_params = datasets_params
         self.network_fullpath = network_fullpath.format(exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
         self.network_params = network_params
-        self.logger.config.network_params = network_params
+        wandb.config.network_params = network_params
 
 
         result_header = list(self.parent_trial.keys())

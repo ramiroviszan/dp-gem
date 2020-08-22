@@ -51,6 +51,7 @@ experiment = {
     },
     'control_test': {
         'skip': 0,
+        'use_wandb': 1,
         'module_name': 'study_cases.example.classifier',
         'class_name': 'Classifier',
         'build_params': {
@@ -126,6 +127,7 @@ experiment = {
     },
     'dp_gen': {
         'skip': 0,
+        'use_wandb': 1,
         'module_name': 'study_cases.example.dp_gen_lap_autoencoder',
         'class_name': 'Gen',
         'build_params': {
@@ -216,6 +218,7 @@ experiment = {
         'submodules': {
             'classifier': {
                 'skip': 0,
+                'use_wandb': 1,
                 'module_name': 'study_cases.example.classifier',
                 'class_name': 'Classifier',
                 'build_params': {
@@ -291,6 +294,7 @@ experiment = {
             },
             'similarity': {
                 'skip': 0,
+                'use_wandb': 1,
                 'module_name': 'common.data_similarity',
                 'class_name': 'DataSimilarity',
                 'build_params': {
