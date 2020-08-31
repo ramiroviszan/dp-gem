@@ -7,9 +7,8 @@ import common.data_utils as data_utils
 
 class DataSplitter:
 
-    def __init__(self, experiment, logger, datasets):
+    def __init__(self, experiment, datasets):
         self.exp_name, self.parent_trial = experiment
-        self.logger = logger
         self.datasets = datasets
 
     def run(self, trial):

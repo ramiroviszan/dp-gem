@@ -10,19 +10,20 @@ import common.plot_utils as plot_utils
 import common.data_utils as data_utils
 from common.nn_trainer import NNTrainer
 from common.trials_utils import flat_trial
+from common.logger_utils import get_logger
 
 import study_cases.example.models as models
 
 class Gen:
 
-    def __init__(self, experiment, logger, datasets_params, network_fullpath, network_params, to_privatize_output_fullpath):
+    def __init__(self, experiment, datasets_params, network_fullpath, network_params, to_privatize_output_fullpath):
         self.exp_name, self.parent_trial = experiment
-        self.logger = logger
         
         self.datasets_params = datasets_params
         self.network_fullpath = network_fullpath.format(exp_name=self.exp_name)
         self.network_params = network_params
 
+        self.logger = get_logger('gen', self.exp_name, self.parent_trial)
         wandb.config.network_params = network_params
         wandb.config.parent_trial = self.parent_trial
         

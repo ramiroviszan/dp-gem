@@ -5,12 +5,13 @@ from sklearn.metrics.pairwise import pairwise_distances
 import common.data_utils as data_utils
 from common.csv_result import CSVResult
 from common.trials_utils import flat_trial
+from common.logger_utils import get_logger
 
 class DataSimilarity:
 
-    def __init__(self, experiment, logger, metrics, datasets_params, results_fullpath):
+    def __init__(self, experiment, metrics, datasets_params, results_fullpath):
         self.exp_name, self.parent_trial = experiment
-        self.logger = logger
+        self.logger = get_logger('similarity', self.exp_name, self.parent_trial)
         self.metrics = metrics
         self.datasets_params = datasets_params
 

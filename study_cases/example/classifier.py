@@ -17,14 +17,15 @@ import study_cases.example.models as models
 
 class Classifier:
 
-    def __init__(self, experiment, logger, datasets_params, network_fullpath, network_params, results_fullpath):
+    def __init__(self, experiment, datasets_params, network_fullpath, network_params, results_fullpath):
         self.exp_name, self.parent_trial = experiment
-        self.logger = logger
 
         self.datasets_params = datasets_params
         self.network_fullpath = network_fullpath.format(exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
         self.network_params = network_params
-        wandb.config.network_params = network_params
+        
+        self.logger = get_logger('classifier_train', self.exp_name, self.parent_trial)
+        wandb.config.network_params = self.network_params
         wandb.config.parent_trial = self.parent_trial
 
 
@@ -112,17 +113,23 @@ class Classifier:
     def _try_different_thresholds(self, probas, y, thresholds, result_writer):
         results = list(self.parent_trial.values())
         for ts in thresholds:
+            self._start_threshold_logger(ts)
             y_hat = self._classify(probas, ts)
             metrics = self._metrics(y, y_hat)
             tn, fp, fn, tp, acc = metrics
             result_writer.save_results(results + [ts, *metrics])
             wandb.log({
-                f"tn_{ts}":  tn,
-                f"fp_{ts}": fp, 
-                f"fn_{ts}": fn,
-                f"tp_{ts}": tp,
-                f"acc_{ts}": acc
+                f"tn":  tn,
+                f"fp": fp, 
+                f"fn": fn,
+                f"tp": tp,
+                f"acc": acc
             })
+
+    def _start_threshold_logger(self, ts):
+        self.logger = get_logger(f'classifier_ts_{ts}', self.exp_name, self.parent_trial)
+        wandb.config.network_params = self.network_params
+        wandb.config.parent_trial = self.parent_trial
 
     def _classify(self, probas, threshold):
         return probas >= threshold
