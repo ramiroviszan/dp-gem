@@ -19,10 +19,10 @@ import study_cases.example.models as models
 class Classifier:
 
     def __init__(self, experiment, datasets_params, network_fullpath, network_params, results_fullpath):
-        self.exp_name, self.parent_trial = experiment
+        self.exp_name, self.exp_path, self.parent_trial = experiment
 
         self.datasets_params = datasets_params
-        self.network_fullpath = network_fullpath.format(exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
+        self.network_fullpath = network_fullpath.format(exp_path=self.exp_path, parent_trial=flat_trial(self.parent_trial))
         self.network_params = network_params
         
         self.logger = get_logger('classifier_train', self.exp_name, self.parent_trial)
@@ -32,8 +32,8 @@ class Classifier:
 
         result_header = list(self.parent_trial.keys())
         results_header = result_header + ['threshold', 'tn', 'fp', 'fn', 'tp', 'acc']
-        val_results_fullpath = results_fullpath.format(exp_name=self.exp_name, dataset_type='val')
-        test_results_fullpath = results_fullpath.format(exp_name=self.exp_name, dataset_type='test')
+        val_results_fullpath = results_fullpath.format(exp_path=self.exp_path, dataset_type='val')
+        test_results_fullpath = results_fullpath.format(exp_path=self.exp_path, dataset_type='test')
         self.val_results = CSVResult(val_results_fullpath, results_header)
         self.test_results = CSVResult(test_results_fullpath, results_header)
 
@@ -50,7 +50,7 @@ class Classifier:
 
     def _train_model(self, model_type, model_params, train_sessions):
         
-        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
+        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, exp_path=self.exp_path, parent_trial=flat_trial(self.parent_trial))
 
         window_size = model_params.get('window_size', 0)
         vocab_size = model_params['vocab_size']
@@ -73,12 +73,12 @@ class Classifier:
 
     def run(self, trial):
         classifier_params = trial
-        classifier_params['probas_fullpath'] = trial['probas_fullpath'].format(exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
+        classifier_params['probas_fullpath'] = trial['probas_fullpath'].format(exp_path=self.exp_path, parent_trial=flat_trial(self.parent_trial))
         self._run(*classifier_params.values())
 
     def _run(self, recalulate_probas, probas_fullpath):
 
-        val_x, val_y = data_utils.load_multiple_files_with_class(self.datasets_params['val'], shuffle=False, dtype=int, exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
+        val_x, val_y = data_utils.load_multiple_files_with_class(self.datasets_params['val'], shuffle=False, dtype=int, exp_path=self.exp_path, parent_trial=flat_trial(self.parent_trial))
         val_fullpath = probas_fullpath.format(dataset_type = 'val')
         val_probas = self._get_dataset_proba(val_fullpath, val_x, recalulate_probas)
 
@@ -89,7 +89,7 @@ class Classifier:
         plot_utils.plot_probas_vs_threshold(val_fullpath, val_probas, val_y, thresholds)
         self._try_different_thresholds(val_probas, val_y, thresholds, self.val_results)
 
-        test_x, test_y = data_utils.load_multiple_files_with_class(self.datasets_params['test'], shuffle=False, dtype=int, exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
+        test_x, test_y = data_utils.load_multiple_files_with_class(self.datasets_params['test'], shuffle=False, dtype=int, exp_path=self.exp_path, parent_trial=flat_trial(self.parent_trial))
         test_fullpath = probas_fullpath.format(dataset_type = 'test')
         test_probas = self._get_dataset_proba(test_fullpath, test_x, recalulate_probas)
         plot_utils.plot_probas_vs_threshold(test_fullpath, test_probas, test_y, thresholds)

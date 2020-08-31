@@ -31,7 +31,7 @@ class BaseRunner:
 
     def _run(self, creation_params, trials, mode, parent_info, submodules):
         if mode == "all" or mode == "main_only":
-            creation_info = (self.exp_path, {}) if parent_info == None else (self.exp_path, parent_info)
+            creation_info = (self.exp_name, self.exp_path, {}) if parent_info == None else (self.exp_name, self.exp_path, parent_info)
             creation_params_copy = copy.deepcopy(creation_params)
             module = self.hot_new(creation_info, *creation_params_copy)
 

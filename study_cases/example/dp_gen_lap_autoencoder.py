@@ -17,10 +17,10 @@ import study_cases.example.models as models
 class Gen:
 
     def __init__(self, experiment, datasets_params, network_fullpath, network_params, to_privatize_output_fullpath):
-        self.exp_name, self.parent_trial = experiment
+        self.exp_name, self.exp_path, self.parent_trial = experiment
         
         self.datasets_params = datasets_params
-        self.network_fullpath = network_fullpath.format(exp_name=self.exp_name)
+        self.network_fullpath = network_fullpath.format(exp_path=self.exp_path)
         self.network_params = network_params
 
         self.logger = get_logger('gen', self.exp_name, self.parent_trial)
@@ -29,7 +29,7 @@ class Gen:
         
         
         self.to_privatize_output_fullpath = to_privatize_output_fullpath.format(
-            exp_name=self.exp_name)
+            exp_path=self.exp_path)
         
         #strategy = MirroredStrategy()
         #with strategy.scope():
@@ -52,7 +52,7 @@ class Gen:
 
     def _train_model(self, model_type, vocab_size, window_size, emb_size, hidden_state_size, train_sessions):
 
-        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, max_len=window_size, exp_name=self.exp_name)
+        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, max_len=window_size, exp_path=self.exp_path)
 
         if window_size == 0:
             max_len, _ = data_utils.dataset_longest_seq(all_data)
@@ -73,7 +73,7 @@ class Gen:
         t_sets = self.datasets_params['to_privatize']
         self.datasets_to_privatize = {}
         for dataset_name, dataset in t_sets.items():
-            path = dataset["fullpath"].format(exp_name=self.exp_name)
+            path = dataset["fullpath"].format(exp_path=self.exp_path)
             self.datasets_to_privatize[dataset_name] = data_utils.load_file(
                 path, to_read=dataset["to_read"], shuffle=False, max_len=self.max_len, dtype=int, split_token='')
 

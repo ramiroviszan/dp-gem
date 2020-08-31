@@ -8,7 +8,7 @@ import common.data_utils as data_utils
 class DataSplitter:
 
     def __init__(self, experiment, datasets):
-        self.exp_name, self.parent_trial = experiment
+        self.exp_name, self.exp_path, self.parent_trial = experiment
         self.datasets = datasets
 
     def run(self, trial):
@@ -27,11 +27,11 @@ class DataSplitter:
 
     def _split_dataset(self, data, train_output_fullpath, val_output_fullpath, test_output_fullpath, splits):
         train_output_fullpath = train_output_fullpath.format(
-            exp_name=self.exp_name)
+            exp_path=self.exp_path)
         val_output_fullpath = val_output_fullpath.format(
-            exp_name=self.exp_name)
+            exp_path=self.exp_path)
         test_output_fullpath = test_output_fullpath.format(
-            exp_name=self.exp_name)
+            exp_path=self.exp_path)
         train_test_ratio, train_val_ratio = splits.values()
 
         train, test = train_test_split(data, test_size=float(train_test_ratio))

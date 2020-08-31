@@ -10,7 +10,7 @@ from common.logger_utils import get_logger
 class DataSimilarity:
 
     def __init__(self, experiment, metrics, datasets_params, results_fullpath):
-        self.exp_name, self.parent_trial = experiment
+        self.exp_name, self.exp_path, self.parent_trial = experiment
         self.logger = get_logger('similarity', self.exp_name, self.parent_trial)
         self.metrics = metrics
         self.datasets_params = datasets_params
@@ -25,7 +25,7 @@ class DataSimilarity:
         for metric_name in metrics:
             self.result_line[metric_name] = result_line + [metric_name]
 
-        results_fullpath = results_fullpath.format(exp_name=self.exp_name)
+        results_fullpath = results_fullpath.format(exp_path=self.exp_path)
         self.results = CSVResult(results_fullpath, results_header)
 
     def run(self, trial):
@@ -52,8 +52,8 @@ class DataSimilarity:
         
 
     def _load_test(self, first_fullpath, second_fullpath, to_read, dtype):
-        first_fullpath = first_fullpath.format(exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
-        second_fullpath = second_fullpath.format(exp_name=self.exp_name, parent_trial=flat_trial(self.parent_trial))
+        first_fullpath = first_fullpath.format(exp_path=self.exp_path, parent_trial=flat_trial(self.parent_trial))
+        second_fullpath = second_fullpath.format(exp_path=self.exp_path, parent_trial=flat_trial(self.parent_trial))
         
         first = data_utils.load_file(first_fullpath, to_read, shuffle=False, dtype=dtype)
         second= data_utils.load_file(second_fullpath, to_read, shuffle=False, dtype=dtype)

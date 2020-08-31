@@ -264,7 +264,7 @@ def load_multiple_files(files_dict, shuffle=False, max_len=0, dtype=None, split_
             'fullpath': 'chau.txt', 'to_read': 10
         }
     },
-    \n**path_params= exp_name='exp_1', epsilon=2, iteration=1...
+    \n**path_params= exp_path='exp_1', epsilon=2, iteration=1...
     #Output:
     \n[[1,2,3], [1,2]...]"""
 
@@ -290,7 +290,7 @@ def load_multiple_files_with_class(files_dict, shuffle=False, max_len=0, dtype=N
             'fullpath': 'chau.txt', 'to_read': 10, 'class': 1
         }
     },
-    \n**path_params= exp_name='exp_1', epsilon=2, iteration=1...
+    \n**path_params= exp_path='exp_1', epsilon=2, iteration=1...
     #Output:
     \n[[1,2,3], [1,2]...], [0, 1,...]"""
     all_x = []
