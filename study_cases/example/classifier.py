@@ -1,6 +1,7 @@
 from tensorflow.keras.models import load_model
 from tensorflow.python.distribute.mirrored_strategy import MirroredStrategy
 
+import copy
 import wandb
 import numpy as np
 from sklearn.metrics import confusion_matrix, accuracy_score, roc_curve
@@ -119,13 +120,17 @@ class Classifier:
             metrics = self._metrics(y, y_hat)
             tn, fp, fn, tp, acc = metrics
             result_writer.save_results(results + [ts, *metrics])
-            wandb.log({
-                f"tn":  tn,
-                f"fp": fp, 
-                f"fn": fn,
-                f"tp": tp,
-                f"acc": acc
-            })
+            
+            wandb_res = {
+                "tn":  tn,
+                "fp": fp, 
+                "fn": fn,
+                "tp": tp,
+                "acc": acc,
+                "tpr": tp / (tp+fn),
+                "tnr": tn / (tn+fp)
+            }
+            wandb.log({**self.parent_trial, **wandb_res})
 
     def _start_threshold_logger(self, ts):
         self.logger = get_logger(f'ts_{ts}', self.exp_name, self.parent_trial, 'classifier')
