@@ -11,6 +11,7 @@ import common.data_utils as data_utils
 from common.nn_trainer import NNTrainer
 from common.csv_result import CSVResult
 from common.trials_utils import flat_trial
+from common.logger_utils import get_logger
 
 import study_cases.example.models as models
 
