@@ -128,7 +128,7 @@ class Classifier:
             })
 
     def _start_threshold_logger(self, ts):
-        self.logger = get_logger(f'classifier_ts_{ts}', self.exp_name, self.parent_trial)
+        self.logger = get_logger(f'ts_{ts}', self.exp_name, self.parent_trial, 'classifier')
         wandb.config.network_params = self.network_params
         wandb.config.parent_trial = self.parent_trial
 
