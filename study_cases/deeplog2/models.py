@@ -9,7 +9,7 @@ from common.tensorflow.norm_clipping import Norm1Clipping, Norm2Clipping
 def create_model(key, params):
     return globals()[key](*params) #models[key](*params) 
 
-def control_model(vocab_size, window_size, emb_size, drop_out, hidden_layers=[256]):
+def control_model(vocab_size, window_size, emb_size, hidden_layers=[256]):
     #The LSTM input layer must be 3D.
     #The meaning of the 3 input dimensions are: samples, time steps, and features.
     #The LSTM input layer is defined by the input_shape argument on the first hidden layer.
@@ -26,8 +26,6 @@ def control_model(vocab_size, window_size, emb_size, drop_out, hidden_layers=[25
     model.add(Embedding(input_dim=vocab_size, output_dim=emb_size, input_length=window_size, mask_zero=True))
     for size in hidden_layers:
             model.add(LSTM(size, return_sequences = True))
-    
-    model.add(Dropout(drop_out))
     model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
 
     return model
