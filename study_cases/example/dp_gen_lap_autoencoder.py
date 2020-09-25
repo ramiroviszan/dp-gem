@@ -56,10 +56,10 @@ class Gen:
 
         window_size = model_params.get('window_size', 0)
         all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, max_len=window_size, exp_path=self.exp_path)
-
         if window_size == 0:
             max_len, _ = data_utils.dataset_longest_seq(all_data)
             window_size = max_len
+            model_params['window_size'] = window_size
 
         train_x = np.array(data_utils.pad_dataset(all_data, window_size, 'pre'))
         noise_x = np.zeros(shape=(len(train_x), self.hidden_state_size))

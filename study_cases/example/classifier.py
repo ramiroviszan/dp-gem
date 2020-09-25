@@ -51,14 +51,14 @@ class Classifier:
 
     def _train_model(self, model_type, model_params, train_sessions):
         
-        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, exp_path=self.exp_path, parent_trial=flat_trial(self.parent_trial))
-
-        window_size = model_params.get('window_size', 0)
         vocab_size = model_params['vocab_size']
-
+        
+        window_size = model_params.get('window_size', 0)
+        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, exp_path=self.exp_path, parent_trial=flat_trial(self.parent_trial))
         if window_size == 0:
             max_len, _ = data_utils.dataset_longest_seq(all_data)
             window_size = max_len
+            model_params['window_size'] = window_size
             
         train_x = data_utils.generate_windows_from_dataset(all_data, window_size, True)
         train_x, train_y = data_utils.shift_windows(train_x)
@@ -66,6 +66,7 @@ class Classifier:
         train_x = np.expand_dims(train_x, axis=2)
         train_y_oh = data_utils.to_onehot(train_y, vocab_size)
 
+ 
         model = models.create_model(model_type, model_params.values())
         trainer = NNTrainer()
         model = trainer.train(model, self.network_fullpath, train_x, train_y_oh, train_sessions)

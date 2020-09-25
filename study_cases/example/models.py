@@ -32,7 +32,7 @@ def create_control_model(vocab_size, window_size, emb_size, drop_out, hidden_lay
     return model
 
 #gen autoencoder lap
-def create_dp_gen_lap_autoencoder_model(max_length, vocab_size, emb_size, hidden_state_size):
+def create_dp_gen_lap_autoencoder_model(vocab_size, max_length, emb_size, hidden_state_size):
     inputSeq = Input(shape=(max_length,))
     inputNoise = Input(shape=(hidden_state_size,))
     x = Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True)(inputSeq)
