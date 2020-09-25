@@ -18,9 +18,9 @@ experiment = {
                         'encoding': 'ascii',
                         'errors': 'strict'
                     },
-                    'train_output_fullpath': '{exp_name}/normal_train.txt',
-                    'val_output_fullpath': '{exp_name}/normal_val.txt',
-                    'test_output_fullpath': '{exp_name}/normal_test.txt',
+                    'train_output_fullpath': '{exp_path}/normal_train.txt',
+                    'val_output_fullpath': '{exp_path}/normal_val.txt',
+                    'test_output_fullpath': '{exp_path}/normal_test.txt',
                     'splits': {
                         'train_test': 0.3,
                         'train_val': 0.3
@@ -37,9 +37,9 @@ experiment = {
                         'encoding': 'ascii',
                         'errors': 'strict'
                     },
-                    'train_output_fullpath': '{exp_name}/abnormal_train.txt',
-                    'val_output_fullpath': '{exp_name}/abnormal_val.txt',
-                    'test_output_fullpath': '{exp_name}/abnormal_test.txt',
+                    'train_output_fullpath': '{exp_path}/abnormal_train.txt',
+                    'val_output_fullpath': '{exp_path}/abnormal_val.txt',
+                    'test_output_fullpath': '{exp_path}/abnormal_test.txt',
                     'splits': {
                         'train_test': 0.3,
                         'train_val': 0.3
@@ -56,36 +56,36 @@ experiment = {
             'datasets_params': {
                 'train': {
                     'normal': {
-                        'fullpath': '{exp_name}/normal_train.txt',
+                        'fullpath': '{exp_path}/normal_train.txt',
                         'to_read': 0
                     }
                 },
                 'val': {
                     'normal': {
-                        'fullpath': '{exp_name}/normal_val.txt',
+                        'fullpath': '{exp_path}/normal_val.txt',
                         'to_read': 0,
                         'class': 1
                     },
                     'abnormal': {
-                        'fullpath': '{exp_name}/abnormal_val.txt',
+                        'fullpath': '{exp_path}/abnormal_val.txt',
                         'to_read': 0,
                         'class': 0
                     }
                 },
                 'test': {
                     'normal': {
-                        'fullpath': '{exp_name}/normal_test.txt',
+                        'fullpath': '{exp_path}/normal_test.txt',
                         'to_read': 0,
                         'class': 1
                     },
                     'abnormal': {
-                        'fullpath': '{exp_name}/abnormal_test.txt',
+                        'fullpath': '{exp_path}/abnormal_test.txt',
                         'to_read': 0,
                         'class': 0
                     }
                 }
             },
-            'network_fullpath': '{exp_name}/control.h5',
+            'network_fullpath': '{exp_path}/control.h5',
             'network_params': {
                 'model_type': 'control_model',
                 'model_params': {
@@ -113,7 +113,7 @@ experiment = {
                     }
                 }
             },
-            'results_fullpath': '{exp_name}/control_{dataset_type}_results.csv'
+            'results_fullpath': '{exp_path}/control_{dataset_type}_results.csv'
         },
         'trials_params': [{
             'use_top_k': 0,  # if top == 0 threasholds will be evaluated
@@ -132,54 +132,54 @@ experiment = {
             'datasets_params': {
                 'train': {
                     'normal': {
-                        'fullpath': '{exp_name}/normal_train.txt',
+                        'fullpath': '{exp_path}/normal_train.txt',
                         'to_read': 0,
                         'class': 1
                     },
                     'abnormal': {
-                        'fullpath': '{exp_name}/abnormal_train.txt',
+                        'fullpath': '{exp_path}/abnormal_train.txt',
                         'to_read': 0,
                         'class': 0
                     }
                 },
                 'val': {
                     'normal': {
-                        'fullpath': '{exp_name}/normal_val.txt',
+                        'fullpath': '{exp_path}/normal_val.txt',
                         'to_read': 0,
                     },
                     'abnormal': {
-                        'fullpath': '{exp_name}/abnormal_val.txt',
+                        'fullpath': '{exp_path}/abnormal_val.txt',
                         'to_read': 0
                     }
                 },
                 'to_privatize': {
                     'normal_train': {
-                        'fullpath': '{exp_name}/normal_train.txt',
+                        'fullpath': '{exp_path}/normal_train.txt',
                         'to_read': 0
                     },
                     'abnormal_train': {
-                        'fullpath': '{exp_name}/abnormal_train.txt',
+                        'fullpath': '{exp_path}/abnormal_train.txt',
                         'to_read': 0
                     },
                     'normal_val': {
-                        'fullpath': '{exp_name}/normal_val.txt',
+                        'fullpath': '{exp_path}/normal_val.txt',
                         'to_read': 0
                     },
                     'abnormal_val': {
-                        'fullpath': '{exp_name}/abnormal_val.txt',
+                        'fullpath': '{exp_path}/abnormal_val.txt',
                         'to_read': 0
                     },
                     'normal_test': {
-                        'fullpath': '{exp_name}/normal_test.txt',
+                        'fullpath': '{exp_path}/normal_test.txt',
                         'to_read': 0
                     },
                     'abnormal_test': {
-                        'fullpath': '{exp_name}/abnormal_test.txt',
+                        'fullpath': '{exp_path}/abnormal_test.txt',
                         'to_read': 0
                     }
                 }
             },
-            'network_fullpath': '{exp_name}/gen.h5',
+            'network_fullpath': '{exp_path}/gen.h5',
             'network_params': {
                 'model_type': 'dp_gen_emb_classifier',
                 'model_params': {
@@ -209,8 +209,8 @@ experiment = {
                     }
                 }
             },
-            'pre_proba_matrix_fullpath': '{exp_name}/pre_proba_matrix.npy',
-            'to_privatize_output_fullpath': '{exp_name}/fake_{{to_privatize_name}}_{{trial}}.txt'
+            'pre_proba_matrix_fullpath': '{exp_path}/pre_proba_matrix.npy',
+            'to_privatize_output_fullpath': '{exp_path}/fake_{{to_privatize_name}}_{{trial}}.txt'
         },
         'trials_params': [
             {'eps': 20},
@@ -226,36 +226,36 @@ experiment = {
                     'datasets_params': {
                         'train': {
                             'normal': {
-                                'fullpath': '{exp_name}/fake_normal_train_{parent_trial}.txt',
+                                'fullpath': '{exp_path}/fake_normal_train_{parent_trial}.txt',
                                 'to_read': 0
                             }
                         },
                         'val': {
                             'normal': {
-                                'fullpath': '{exp_name}/fake_normal_val_{parent_trial}.txt',
+                                'fullpath': '{exp_path}/fake_normal_val_{parent_trial}.txt',
                                 'to_read': 0,
                                 'class': 1
                             },
                             'abnormal': {
-                                'fullpath': '{exp_name}/fake_abnormal_val_{parent_trial}.txt',
+                                'fullpath': '{exp_path}/fake_abnormal_val_{parent_trial}.txt',
                                 'to_read': 0,
                                 'class': 0
                             }
                         },
                         'test': {
                             'normal': {
-                                'fullpath': '{exp_name}/fake_normal_test_{parent_trial}.txt',
+                                'fullpath': '{exp_path}/fake_normal_test_{parent_trial}.txt',
                                 'to_read': 0,
                                 'class': 1
                             },
                             'abnormal': {
-                                'fullpath': '{exp_name}/fake_abnormal_test_{parent_trial}.txt',
+                                'fullpath': '{exp_path}/fake_abnormal_test_{parent_trial}.txt',
                                 'to_read': 0,
                                 'class': 0
                             }
                         }
                     },
-                    'network_fullpath': '{exp_name}/utility_{parent_trial}.h5',
+                    'network_fullpath': '{exp_path}/utility_{parent_trial}.h5',
                     'network_params': {
                         'model_type': 'control_model',
                         'model_params': {
@@ -283,7 +283,7 @@ experiment = {
                             }
                         }
                     },
-                    'results_fullpath': '{exp_name}/utility_classifier_{dataset_type}_results.csv'
+                    'results_fullpath': '{exp_path}/utility_classifier_{dataset_type}_results.csv'
                 },
                 'trials_params': [{
                     'use_top_k': 0,  # if top == 0 threasholds will be evaluated
@@ -301,19 +301,19 @@ experiment = {
                     'metrics': ['hamming', 'hamming_wise', 'cosine'],
                     'datasets_params': {
                         'normal': {
-                            'orig_fullpath': '{exp_name}/normal_test.txt',
-                            'privatized_fullpath': '{exp_name}/fake_normal_test_{parent_trial}.txt',
+                            'orig_fullpath': '{exp_path}/normal_test.txt',
+                            'privatized_fullpath': '{exp_path}/fake_normal_test_{parent_trial}.txt',
                             'to_read': 0,
                             'dtype': int
                         },
                         'abnormal': {
-                            'orig_fullpath': '{exp_name}/abnormal_test.txt',
-                            'privatized_fullpath': '{exp_name}/fake_abnormal_test_{parent_trial}.txt',
+                            'orig_fullpath': '{exp_path}/abnormal_test.txt',
+                            'privatized_fullpath': '{exp_path}/fake_abnormal_test_{parent_trial}.txt',
                             'to_read': 0,
                             'dtype': int
                         }
                     },
-                    'results_fullpath': '{exp_name}/utility_similarity_test_results.csv'
+                    'results_fullpath': '{exp_path}/utility_similarity_test_results.csv'
                 }
             }
         }
