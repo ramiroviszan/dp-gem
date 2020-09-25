@@ -60,7 +60,7 @@ class Classifier:
             window_size = max_len
             model_params['window_size'] = window_size
             
-        train_x = data_utils.generate_windows_from_dataset(all_data, window_size, True)
+        train_x = data_utils.generate_windows_from_dataset(all_data, window_size, remove_shorter=True)
         train_x, train_y = data_utils.shift_windows(train_x)
 
         train_x = np.expand_dims(train_x, axis=2)
@@ -69,7 +69,7 @@ class Classifier:
  
         model = models.create_model(model_type, model_params.values())
         trainer = NNTrainer()
-        model = trainer.train(model, self.network_fullpath, train_x, train_y_oh, train_sessions)
+        model = trainer.train(model, self.network_fullpath, train_x, train_y_oh, train_sessions, use_wandb=True)
 
         return model
 

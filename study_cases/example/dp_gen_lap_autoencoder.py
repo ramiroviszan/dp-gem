@@ -68,7 +68,7 @@ class Gen:
         model = models.create_model(model_type, model_params.values())
 
         trainer = NNTrainer()
-        model = trainer.train(model, self.network_fullpath, [train_x, noise_x], train_y_oh, train_sessions)
+        model = trainer.train(model, self.network_fullpath, [train_x, noise_x], train_y_oh, train_sessions, use_wandb=True)
 
         return model
 
