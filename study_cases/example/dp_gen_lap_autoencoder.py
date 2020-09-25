@@ -37,6 +37,10 @@ class Gen:
         self._load_data_to_privatize()
 
     def _get_model(self):
+        self.vocab_size = self.network_params['model_params']['vocab_size'] 
+        self.vocab_range = np.arange(1, self.vocab_size-1)
+        self.hidden_state_size = self.network_params['model_params']['hidden_state_size']
+        
         try:
             self.model = models.load_model_adapter(self.network_fullpath)
         except:
@@ -45,13 +49,12 @@ class Gen:
             self.model = self._train_model(*self.network_params.values())
 
         self.max_len = self.model.layers[0].input_shape[0][1]
-        self.vocab_size = self.network_params['vocab_size'] 
-        self.vocab_range = np.arange(1, self.vocab_size-1)
-        self.hidden_state_size = self.network_params['hidden_state_size']
+
         return
 
-    def _train_model(self, model_type, vocab_size, window_size, emb_size, hidden_state_size, train_sessions):
+    def _train_model(self, model_type, model_params, train_sessions):
 
+        window_size = model_params.get('window_size', 0)
         all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, max_len=window_size, exp_path=self.exp_path)
 
         if window_size == 0:
@@ -59,10 +62,10 @@ class Gen:
             window_size = max_len
 
         train_x = np.array(data_utils.pad_dataset(all_data, window_size, 'pre'))
-        noise_x = np.zeros(shape=(len(train_x), hidden_state_size))
-        train_y_oh = data_utils.to_onehot(train_x, vocab_size)
+        noise_x = np.zeros(shape=(len(train_x), self.hidden_state_size))
+        train_y_oh = data_utils.to_onehot(train_x, self.vocab_size)
 
-        model = models.create_model(model_type, [window_size, vocab_size, emb_size, hidden_state_size])
+        model = models.create_model(model_type, model_params.values())
 
         trainer = NNTrainer()
         model = trainer.train(model, self.network_fullpath, [train_x, noise_x], train_y_oh, train_sessions)
