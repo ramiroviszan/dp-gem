@@ -3,8 +3,8 @@ experiment = {
     'random_seed': 27,
     'data_preparation': {
         'skip': 0,
-        'module_name': 'study_cases.deeplog.deeplog_final_token',
-        'class_name': 'DeepLogDataSplitter',
+        'module_name': 'study_cases.deeplog2.final_token',
+        'class_name': 'CustomDataSplitter',
         'build_params': {
             'datasets': {
                 'normal': {
@@ -50,8 +50,8 @@ experiment = {
     },
     'control_test': {
         'skip': 0,
-        'module_name': 'study_cases.deeplog.lm_classifier',
-        'class_name': 'LMClassifier',
+        'module_name': 'study_cases.deeplog2.classifier',
+        'class_name': 'Classifier',
         'build_params': {
             'datasets_params': {
                 'train': {
@@ -87,7 +87,7 @@ experiment = {
             },
             'network_fullpath': '{exp_name}/control.h5',
             'network_params': {
-                'model_type': 'fixed_window_256',
+                'model_type': 'control_model',
                 'model_params': {
                     'vocab_size': 31, #this value considers padding, 30 without
                     'window_size': 10
@@ -125,8 +125,8 @@ experiment = {
     },
     'dp_gen': {
         'skip': 0,  
-        'module_name': 'study_cases.deeplog.dp_gen_exponential_class_emb',
-        'class_name': 'DPGen',
+        'module_name': 'study_cases.deeplog2.dp_gen_exponential_class_emb',
+        'class_name': 'Gen',
         'mode': 'all',  # all, main_only, submodules_only
         'build_params': {
             'datasets_params': {
@@ -181,10 +181,12 @@ experiment = {
             },
             'network_fullpath': '{exp_name}/gen.h5',
             'network_params': {
-                'model_type': 'gen_class',
+                'model_type': 'dp_gen_emb_classifier',
                 'model_params': {
                     'vocab_size': 31, #this value considers padding, 30 without
-                    'emb_size': 8
+                    'emb_size': 8,
+                    'max_len': 0, 
+                    'hidden_layers': [512, 256, 128]
                 },
                 'train_sessions': {
                     'first': {
@@ -218,8 +220,8 @@ experiment = {
         'submodules': {
             'classifier': {
                 'skip': 0, 
-                'module_name': 'study_cases.deeplog.lm_classifier',
-                'class_name': 'LMClassifier',
+                'module_name': 'study_cases.deeplog2.classifier',
+                'class_name': 'Classifier',
                 'build_params': {
                     'datasets_params': {
                         'train': {
@@ -255,7 +257,7 @@ experiment = {
                     },
                     'network_fullpath': '{exp_name}/utility_{parent_trial}.h5',
                     'network_params': {
-                        'model_type': 'fixed_window_256',
+                        'model_type': 'control_model',
                         'model_params': {
                             'vocab_size': 31, #this value considers padding, 30 without
                             'window_size': 10
