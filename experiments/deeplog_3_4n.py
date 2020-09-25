@@ -1,273 +1,269 @@
 experiment = {
-    'skip': 0,
+    'skip': False,
     'random_seed': 27,
     'data_preparation': {
         'skip': 0,
-        'module_name': 'common.data_splitter',
-        'class_name': 'DataSplitter',
+        'module_name': 'study_cases.deeplog.deeplog_final_token',
+        'class_name': 'DeepLogDataSplitter',
         'build_params': {
             'datasets': {
                 'normal': {
                     'original': {
-                        'fullpath': 'data/example/normal.txt',
-                        'to_read': 0,  # 0 = 100%, (0, 1) = %, >= 1 count
+                        'fullpath': 'data/deeplog/all_normal.txt',
+                        'to_read': 4000,
                         'shuffle': True,
-                        'max_len': 0,
+                        'max_len': 50,
                         'dtype': int,
                         'split_token': '',
                         'encoding': 'ascii',
                         'errors': 'strict'
                     },
-                    'train_output_fullpath': '{exp_path}/normal_train.txt',
-                    'val_output_fullpath': '{exp_path}/normal_val.txt',
-                    'test_output_fullpath': '{exp_path}/normal_test.txt',
+                    'train_output_fullpath': '{exp_name}/normal_train.txt',
+                    'val_output_fullpath': '{exp_name}/normal_val.txt',
+                    'test_output_fullpath': '{exp_name}/normal_test.txt',
                     'splits': {
-                        'train_test': 0.2,
-                        'train_val': 0.2
+                        'train_test': 0.3,
+                        'train_val': 0.3
                     }
                 },
                 'abnormal': {
                     'original': {
-                        'fullpath': 'data/example/abnormal.txt',
-                        'to_read': 0,
+                        'fullpath': 'data/deeplog/all_abnormal.txt',
+                        'to_read': 4000,
                         'shuffle': True,
-                        'max_len': 0,
+                        'max_len': 50,
                         'dtype': int,
                         'split_token': '',
                         'encoding': 'ascii',
                         'errors': 'strict'
                     },
-                    'train_output_fullpath': '{exp_path}/abnormal_train.txt',
-                    'val_output_fullpath': '{exp_path}/abnormal_val.txt',
-                    'test_output_fullpath': '{exp_path}/abnormal_test.txt',
+                    'train_output_fullpath': '{exp_name}/abnormal_train.txt',
+                    'val_output_fullpath': '{exp_name}/abnormal_val.txt',
+                    'test_output_fullpath': '{exp_name}/abnormal_test.txt',
                     'splits': {
-                        'train_test': 0.2,
-                        'train_val': 0.2
+                        'train_test': 0.3,
+                        'train_val': 0.3
                     }
                 }
             }
-        },
-        'trials_params': [{}]
+        }
     },
     'control_test': {
         'skip': 0,
-        'module_name': 'study_cases.example.classifier',
-        'class_name': 'Classifier',
+        'module_name': 'study_cases.deeplog.lm_classifier',
+        'class_name': 'LMClassifier',
         'build_params': {
             'datasets_params': {
                 'train': {
                     'normal': {
-                        'fullpath': '{exp_path}/abnormal_train.txt',
+                        'fullpath': '{exp_name}/normal_train.txt',
                         'to_read': 0
                     }
                 },
                 'val': {
                     'normal': {
-                        'fullpath': '{exp_path}/normal_val.txt',
+                        'fullpath': '{exp_name}/normal_val.txt',
                         'to_read': 0,
                         'class': 1
                     },
                     'abnormal': {
-                        'fullpath': '{exp_path}/abnormal_val.txt',
+                        'fullpath': '{exp_name}/abnormal_val.txt',
                         'to_read': 0,
                         'class': 0
                     }
                 },
                 'test': {
                     'normal': {
-                        'fullpath': '{exp_path}/normal_test.txt',
+                        'fullpath': '{exp_name}/normal_test.txt',
                         'to_read': 0,
                         'class': 1
                     },
                     'abnormal': {
-                        'fullpath': '{exp_path}/abnormal_test.txt',
+                        'fullpath': '{exp_name}/abnormal_test.txt',
                         'to_read': 0,
                         'class': 0
                     }
                 }
             },
-            'network_fullpath': '{exp_path}/control.h5',
+            'network_fullpath': '{exp_name}/control.h5',
             'network_params': {
-                'model_type': 'control',
+                'model_type': 'fixed_window_256',
                 'model_params': {
-                    'vocab_size': 11,  # Real vocab goes from 1-X, 0-(X+1) with padding 
-                    'window_size': 2,
-                    'emb_size': 2,
-                    'dropout': 0.1,
-                    'hidden_layers': [128]
+                    'vocab_size': 31, #this value considers padding, 30 without
+                    'window_size': 10
                 },
                 'train_sessions': {
                     'first': {
-                        'epochs': 1,
-                        'batch_size': 3,
-                        'lr': 0.01,
-                        'loss': 'categorical_crossentropy',
-                        'validation_split': 0.3,
-                        'patience': 5,
-                        'save_model': False
-                    },
-                    'second': {
-                        'epochs': 1,
-                        'batch_size': 3,
+                        'epochs': 100,
+                        'batch_size': 100,
                         'lr': 0.001,
                         'loss': 'categorical_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 5,
+                        'patience': 10,
+                        'save_model': False
+                    },
+                    'second': {
+                        'epochs': 50,
+                        'batch_size': 30,
+                        'lr': 0.001,
+                        'loss': 'categorical_crossentropy',
+                        'validation_split': 0.3,
+                        'patience': 10,
                         'save_model': True
                     }
                 }
             },
-            'results_fullpath': '{exp_path}/control_{dataset_type}_results.csv'
+            'results_fullpath': '{exp_name}/control_{dataset_type}_results.csv'
         },
         'trials_params': [{
+            'use_top_k': 0,  # if top == 0 threasholds will be evaluated
+            'roc_thresholds': True,
+            'custom_thresholds': [],
             'recalulate_probas': False,
             'probas_fullpath': '{exp_path}/control_probas_{{dataset_type}}.npy'
         }]
     },
     'dp_gen': {
-        'skip': 0,
-        'module_name': 'study_cases.example.dp_gen_lap_autoencoder',
-        'class_name': 'Gen',
+        'skip': 0,  
+        'module_name': 'study_cases.deeplog.dp_gen_exponential_class_emb',
+        'class_name': 'DPGen',
         'mode': 'all',  # all, main_only, submodules_only
         'build_params': {
             'datasets_params': {
                 'train': {
                     'normal': {
-                        'fullpath': '{exp_path}/normal_train.txt',
+                        'fullpath': '{exp_name}/normal_train.txt',
                         'to_read': 0,
                         'class': 1
                     },
                     'abnormal': {
-                        'fullpath': '{exp_path}/abnormal_train.txt',
+                        'fullpath': '{exp_name}/abnormal_train.txt',
                         'to_read': 0,
                         'class': 0
                     }
                 },
                 'val': {
                     'normal': {
-                        'fullpath': '{exp_path}/normal_val.txt',
+                        'fullpath': '{exp_name}/normal_val.txt',
                         'to_read': 0,
                     },
                     'abnormal': {
-                        'fullpath': '{exp_path}/abnormal_val.txt',
+                        'fullpath': '{exp_name}/abnormal_val.txt',
                         'to_read': 0
                     }
                 },
                 'to_privatize': {
                     'normal_train': {
-                        'fullpath': '{exp_path}/normal_train.txt',
+                        'fullpath': '{exp_name}/normal_train.txt',
                         'to_read': 0
                     },
                     'abnormal_train': {
-                        'fullpath': '{exp_path}/abnormal_train.txt',
+                        'fullpath': '{exp_name}/abnormal_train.txt',
                         'to_read': 0
                     },
                     'normal_val': {
-                        'fullpath': '{exp_path}/normal_val.txt',
+                        'fullpath': '{exp_name}/normal_val.txt',
                         'to_read': 0
                     },
                     'abnormal_val': {
-                        'fullpath': '{exp_path}/abnormal_val.txt',
+                        'fullpath': '{exp_name}/abnormal_val.txt',
                         'to_read': 0
                     },
                     'normal_test': {
-                        'fullpath': '{exp_path}/normal_test.txt',
+                        'fullpath': '{exp_name}/normal_test.txt',
                         'to_read': 0
                     },
                     'abnormal_test': {
-                        'fullpath': '{exp_path}/abnormal_test.txt',
+                        'fullpath': '{exp_name}/abnormal_test.txt',
                         'to_read': 0
                     }
                 }
             },
-            'network_fullpath': '{exp_path}/gen.h5',
+            'network_fullpath': '{exp_name}/gen.h5',
             'network_params': {
-                'model_type': 'gen',
+                'model_type': 'gen_class',
                 'model_params': {
-                    'vocab_size': 11,
-                    'window_size': 0,
-                    'emb_size': 4,
-                    'hidden_state_size': 128,
+                    'vocab_size': 31, #this value considers padding, 30 without
+                    'emb_size': 8
                 },
                 'train_sessions': {
                     'first': {
-                        'epochs': 1,
-                        'batch_size': 3,
-                        'lr': 0.01,
+                        'epochs': 1000,
+                        'batch_size': 500,
+                        'lr': 0.0001,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 3,
+                        'patience': 10,
                         'save_model': False
                     },
                     'second': {
-                        'epochs': 1,
-                        'batch_size': 3,
-                        'lr': 0.001,
+                        'epochs': 1000,
+                        'batch_size': 100,
+                        'lr': 0.00001,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 3,
+                        'patience': 5,
                         'save_model': True
                     }
                 }
             },
-            'to_privatize_output_fullpath': '{exp_path}/fake_{{to_privatize_name}}_{{trial}}.txt'
+            'pre_proba_matrix_fullpath': '{exp_name}/pre_proba_matrix.npy',
+            'to_privatize_output_fullpath': '{exp_name}/fake_{{to_privatize_name}}_{{trial}}.txt'
         },
         'trials_params': [
-            {'iter': 0, 'eps': 'no_dp', 'maxdelta': 0},  # no dp
-            {'iter': 0, 'eps': 0.5, 'maxdelta': 1},
-            {'iter': 1, 'eps': 0.5, 'maxdelta': 1}],
+            {'eps': 20},
+            {'eps': 30},
+            {'eps': 40},
+            {'eps': 50}],
         'submodules': {
             'classifier': {
-                'skip': 0,
-                'module_name': 'study_cases.example.classifier',
-                'class_name': 'Classifier',
+                'skip': 0, 
+                'module_name': 'study_cases.deeplog.lm_classifier',
+                'class_name': 'LMClassifier',
                 'build_params': {
                     'datasets_params': {
                         'train': {
                             'normal': {
-                                'fullpath': '{exp_path}/fake_normal_train_{parent_trial}.txt',
+                                'fullpath': '{exp_name}/fake_normal_train_{parent_trial}.txt',
                                 'to_read': 0
                             }
                         },
                         'val': {
                             'normal': {
-                                'fullpath': '{exp_path}/fake_normal_val_{parent_trial}.txt',
+                                'fullpath': '{exp_name}/fake_normal_val_{parent_trial}.txt',
                                 'to_read': 0,
                                 'class': 1
                             },
                             'abnormal': {
-                                'fullpath': '{exp_path}/fake_abnormal_val_{parent_trial}.txt',
+                                'fullpath': '{exp_name}/fake_abnormal_val_{parent_trial}.txt',
                                 'to_read': 0,
                                 'class': 0
                             }
                         },
                         'test': {
                             'normal': {
-                                'fullpath': '{exp_path}/fake_normal_test_{parent_trial}.txt',
+                                'fullpath': '{exp_name}/fake_normal_test_{parent_trial}.txt',
                                 'to_read': 0,
                                 'class': 1
                             },
                             'abnormal': {
-                                'fullpath': '{exp_path}/fake_abnormal_test_{parent_trial}.txt',
+                                'fullpath': '{exp_name}/fake_abnormal_test_{parent_trial}.txt',
                                 'to_read': 0,
                                 'class': 0
                             }
                         }
                     },
-                    'network_fullpath': '{exp_path}/utility_{parent_trial}.h5',
+                    'network_fullpath': '{exp_name}/utility_{parent_trial}.h5',
                     'network_params': {
-                        'model_type': 'control',
+                        'model_type': 'fixed_window_256',
                         'model_params': {
-                            'vocab_size': 11,  # Real vocab goes from 1-256, 0-257 with padding
-                            'window_size': 2,
-                            'emb_size': 2,
-                            'dropout': 0.1,
-                            'hidden_layers': [128]
+                            'vocab_size': 31, #this value considers padding, 30 without
+                            'window_size': 10
                         },
                         'train_sessions': {
                             'first': {
-                                'epochs': 1,
-                                'batch_size': 3,
+                                'epochs': 100,
+                                'batch_size': 100,
                                 'lr': 0.001,
                                 'loss': 'categorical_crossentropy',
                                 'validation_split': 0.3,
@@ -275,8 +271,8 @@ experiment = {
                                 'save_model': False
                             },
                             'second': {
-                                'epochs': 1,
-                                'batch_size': 3,
+                                'epochs': 50,
+                                'batch_size': 30,
                                 'lr': 0.001,
                                 'loss': 'categorical_crossentropy',
                                 'validation_split': 0.3,
@@ -285,36 +281,38 @@ experiment = {
                             }
                         }
                     },
-                    'results_fullpath': '{exp_path}/utility_classifier_{dataset_type}_results.csv'
+                    'results_fullpath': '{exp_name}/utility_classifier_{dataset_type}_results.csv'
                 },
                 'trials_params': [{
+                    'use_top_k': 0,  # if top == 0 threasholds will be evaluated
+                    'roc_thresholds': True,
+                    'custom_thresholds': [],
                     'recalulate_probas': False,
                     'probas_fullpath': '{exp_path}/utility_probas_{{dataset_type}}_{parent_trial}.npy',
                 }]
             },
             'similarity': {
-                'skip': 0,
+                'skip': 0,  
                 'module_name': 'common.data_similarity',
                 'class_name': 'DataSimilarity',
                 'build_params': {
                     'metrics': ['hamming', 'hamming_wise', 'cosine'],
                     'datasets_params': {
                         'normal': {
-                            'orig_fullpath': '{exp_path}/normal_test.txt',
-                            'privatized_fullpath': '{exp_path}/fake_normal_test_{parent_trial}.txt',
+                            'orig_fullpath': '{exp_name}/normal_test.txt',
+                            'privatized_fullpath': '{exp_name}/fake_normal_test_{parent_trial}.txt',
                             'to_read': 0,
                             'dtype': int
                         },
                         'abnormal': {
-                            'orig_fullpath': '{exp_path}/abnormal_test.txt',
-                            'privatized_fullpath': '{exp_path}/fake_abnormal_test_{parent_trial}.txt',
+                            'orig_fullpath': '{exp_name}/abnormal_test.txt',
+                            'privatized_fullpath': '{exp_name}/fake_abnormal_test_{parent_trial}.txt',
                             'to_read': 0,
                             'dtype': int
                         }
                     },
-                    'results_fullpath': '{exp_path}/utility_similarity_test_results.csv'
-                },
-                'trials_params': [{}]
+                    'results_fullpath': '{exp_name}/utility_similarity_test_results.csv'
+                }
             }
         }
     }
