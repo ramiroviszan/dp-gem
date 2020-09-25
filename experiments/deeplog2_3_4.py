@@ -117,9 +117,6 @@ experiment = {
             'results_fullpath': '{exp_path}/control_{dataset_type}_results.csv'
         },
         'trials_params': [{
-            'use_top_k': 0,  # if top == 0 threasholds will be evaluated
-            'roc_thresholds': True,
-            'custom_thresholds': [],
             'recalulate_probas': False,
             'probas_fullpath': '{exp_path}/control_probas_{{dataset_type}}.npy'
         }]
@@ -287,9 +284,6 @@ experiment = {
                     'results_fullpath': '{exp_path}/utility_classifier_{dataset_type}_results.csv'
                 },
                 'trials_params': [{
-                    'use_top_k': 0,  # if top == 0 threasholds will be evaluated
-                    'roc_thresholds': True,
-                    'custom_thresholds': [],
                     'recalulate_probas': False,
                     'probas_fullpath': '{exp_path}/utility_probas_{{dataset_type}}_{parent_trial}.npy',
                 }]
