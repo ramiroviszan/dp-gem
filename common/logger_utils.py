@@ -2,7 +2,7 @@
 
 import wandb
 from common.trials_utils import flat_trial
-
+from coolname import generate_slug
 
 def get_logger(logger_name, exp_name, parent_info = None, group_name=None):
 
@@ -22,5 +22,6 @@ def get_logger(logger_name, exp_name, parent_info = None, group_name=None):
         reinit=True,
         config = {}
     )
+    wandb.config.id = generate_slug(2)
 
     return logger
