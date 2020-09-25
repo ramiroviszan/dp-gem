@@ -90,7 +90,8 @@ experiment = {
                 'model_type': 'control_model',
                 'model_params': {
                     'vocab_size': 31, #this value considers padding, 30 without
-                    'window_size': 10
+                    'window_size': 10,
+                    'hidden_layers': [256]
                 },
                 'train_sessions': {
                     'first': {
