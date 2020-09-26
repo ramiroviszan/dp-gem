@@ -111,7 +111,7 @@ class Gen:
             self.datasets_to_privatize[dataset_name] = data_utils.load_file(
                 path, to_read=dataset["to_read"], shuffle=False, dtype=int, split_token='')
 
-    def generate(self, trial, iteration):
+    def run(self, trial):
         for dataset_name, dataset in self.datasets_to_privatize.items():
             print('\n\nGenerating dataset:', dataset_name, '- Num seqs:', len(dataset))
             self._generate_synthetic(trial, dataset_name, dataset)
