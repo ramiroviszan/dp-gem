@@ -179,7 +179,7 @@ experiment = {
             },
             'network_fullpath': '{exp_path}/gen.h5',
             'network_params': {
-                'model_type': 'gen_lap_autoencoder',
+                'model_type': 'dp_gen_lap_autoencoder',
                 'model_params': {
                     'vocab_size': 31,
                     'window_size': 50,
