@@ -1,5 +1,5 @@
 experiment = {
-    'skip': False,
+    'skip': 0,
     'random_seed': 27,
     'data_preparation': {
         'skip': 0,
@@ -52,7 +52,7 @@ experiment = {
         'skip': 0,
         'module_name': 'study_cases.deeplog2.classifier',
         'class_name': 'Classifier',
-        'build_params': {
+        'params': {
             'datasets_params': {
                 'train': {
                     'normal': {
@@ -122,8 +122,8 @@ experiment = {
         }]
     },
     'dp_gen': {
-        'skip': 0,  
-        'module_name': 'study_cases.deeplog2.dp_gen_exponential_class_emb',
+        'skup': 0,
+        'module_name': 'study_cases.deeplog2.dp_gen_lap_autoencoder',
         'class_name': 'Gen',
         'mode': 'all',  # all, main_only, submodules_only
         'build_params': {
@@ -179,12 +179,12 @@ experiment = {
             },
             'network_fullpath': '{exp_path}/gen.h5',
             'network_params': {
-                'model_type': 'dp_gen_emb_classifier',
+                'model_type': 'gen_lap_autoencoder',
                 'model_params': {
-                    'vocab_size': 31, #this value considers padding, 30 without
-                    'emb_size': 8,
-                    'max_len': 0, 
-                    'hidden_layers': [512, 256, 128]
+                    'vocab_size': 31,
+                    'window_size': 50,
+                    'emb_size': 4,
+                    'hidden_state_size': 1024,
                 },
                 'train_sessions': {
                     'first': {
@@ -193,7 +193,7 @@ experiment = {
                         'lr': 0.0001,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 10,
+                        'patience': 20,
                         'save_model': False
                     },
                     'second': {
@@ -202,58 +202,55 @@ experiment = {
                         'lr': 0.00001,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 5,
+                        'patience': 10,
                         'save_model': True
                     }
                 }
             },
-            'pre_proba_matrix_fullpath': '{exp_path}/pre_proba_matrix.npy',
             'to_privatize_output_fullpath': '{exp_path}/fake_{{to_privatize_name}}_{{trial}}.txt'
         },
         'trials_params': [
-            {'eps': 20},
-            {'eps': 30},
-            {'eps': 40},
-            {'eps': 50}],
+            {'eps': 'no_dp', 'maxdelta':0, 'trials_per_seq': 5},#no dp
+            {'eps': 1, 'maxdelta':2, 'trials_per_seq': 5},],
         'submodules': {
             'classifier': {
-                'skip': 0, 
+                'skip': 0,  # the iterations are given by dp_gen iterations
                 'module_name': 'study_cases.deeplog2.classifier',
                 'class_name': 'Classifier',
-                'build_params': {
+                'params': {
                     'datasets_params': {
                         'train': {
                             'normal': {
-                                'fullpath': '{exp_path}/fake_normal_train_{parent_trial}.txt',
+                                'fullpath': '{exp_path}/fake_normal_train_{trial}.txt',
                                 'to_read': 0
                             }
                         },
                         'val': {
                             'normal': {
-                                'fullpath': '{exp_path}/fake_normal_val_{parent_trial}.txt',
+                                'fullpath': '{exp_path}/fake_normal_val_{trial}.txt',
                                 'to_read': 0,
                                 'class': 1
                             },
                             'abnormal': {
-                                'fullpath': '{exp_path}/fake_abnormal_val_{parent_trial}.txt',
+                                'fullpath': '{exp_path}/fake_abnormal_val_{trial}.txt',
                                 'to_read': 0,
                                 'class': 0
                             }
                         },
                         'test': {
                             'normal': {
-                                'fullpath': '{exp_path}/fake_normal_test_{parent_trial}.txt',
+                                'fullpath': '{exp_path}/fake_normal_test_{trial}.txt',
                                 'to_read': 0,
                                 'class': 1
                             },
                             'abnormal': {
-                                'fullpath': '{exp_path}/fake_abnormal_test_{parent_trial}.txt',
+                                'fullpath': '{exp_path}/fake_abnormal_test_{trial}.txt',
                                 'to_read': 0,
                                 'class': 0
                             }
                         }
                     },
-                    'network_fullpath': '{exp_path}/utility_{parent_trial}.h5',
+                    'network_fullpath': '{exp_path}/deeplog_utility_{trial}.h5',
                     'network_params': {
                         'model_type': 'control_model',
                         'model_params': {
@@ -290,7 +287,7 @@ experiment = {
                 }]
             },
             'similarity': {
-                'skip': 0,  
+                'skip': 0,  # the iterations are given by dp_gen iterations
                 'module_name': 'common.data_similarity',
                 'class_name': 'DataSimilarity',
                 'build_params': {
@@ -298,13 +295,13 @@ experiment = {
                     'datasets_params': {
                         'normal': {
                             'orig_fullpath': '{exp_path}/normal_test.txt',
-                            'privatized_fullpath': '{exp_path}/fake_normal_test_{parent_trial}.txt',
+                            'privatized_fullpath': '{exp_path}/fake_normal_test_{trial}.txt',
                             'to_read': 0,
                             'dtype': int
                         },
                         'abnormal': {
                             'orig_fullpath': '{exp_path}/abnormal_test.txt',
-                            'privatized_fullpath': '{exp_path}/fake_abnormal_test_{parent_trial}.txt',
+                            'privatized_fullpath': '{exp_path}/fake_abnormal_test_{trial}.txt',
                             'to_read': 0,
                             'dtype': int
                         }

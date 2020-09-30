@@ -20,3 +20,6 @@ exp_6_1 - dp_gen_lap maxdelta 1 no norm
 deeplog_6_1_2 - dp_gen_lap maxdelta 2, norm1clipping siempre
 deeplog_6_1_3 - dp_gen_lap maxdelta 2, norm1clipping solo si supera 1*
 deeplog_6_2 - deeplog_6_1_3 pero sin argmax y con 5 samplings per seq original
+
+deeplog2_3_4 - Como deeplog_3_4 pero con runner nuevo
+deeplog2_6_3 - Como deeplog_6_2 pero con runner nuevo
