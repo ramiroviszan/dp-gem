@@ -52,7 +52,7 @@ experiment = {
         'skip': 0,
         'module_name': 'study_cases.deeplog2.classifier',
         'class_name': 'Classifier',
-        'params': {
+        'build_params': {
             'datasets_params': {
                 'train': {
                     'normal': {
