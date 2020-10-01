@@ -56,6 +56,33 @@ def dp_gen_emb_classifier(vocab_size, emb_size, max_length, hidden_layers=[512])
 
     return model
 
+#hidden state comparison
+def dp_gen_lap_autoencoder(vocab_size, max_length, emb_size, hidden_state_size):
+    inputSeq1 = Input(shape=(max_length,))
+    x = Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True)(inputSeq1)
+    x = LSTM(hidden_state_size, return_state=False, return_sequences=False)(x)
+    x_1 = Norm1Clipping()(x)
+    x = RepeatVector(max_length)(x_1)
+    x = LSTM(hidden_state_size, return_sequences=True)(x)
+    x = TimeDistributed(Dense(vocab_size, activation='softmax'))(x)
+
+    #Habría que inicializar los pesos iguales?
+    inputSeq2 = Input(shape=(max_length,))
+    x = Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True)(inputSeq2)
+    x = LSTM(hidden_state_size, return_state=False, return_sequences=False)(x)
+    x_2 = Norm1Clipping()(x)
+    x = RepeatVector(max_length)(x_2)
+    x = LSTM(hidden_state_size, return_sequences=True)(x)
+    x = TimeDistributed(Dense(vocab_size, activation='softmax'))(x)
+
+    dif = Add()([x_1, -x_2])
+    norm = Norm1Clipping()(x)
+
+    model1 = Model(inputs=[inputSeq1], outputs=x)
+    model2 = Model(inputs=[inputSeq2], outputs=x)
+    model3 = Model(inputs=[inputSeq1, inputSeq2], outputs=norm)
+    return model1, model2, model3
+
 def load_model_adapter(path):
     with CustomObjectScope({'Norm1Clipping': Norm1Clipping, 'Norm2Clipping': Norm2Clipping}):
         return load_model(path)
