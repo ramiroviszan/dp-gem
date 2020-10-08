@@ -6,8 +6,10 @@ from tensorflow.keras.utils import CustomObjectScope
 
 from common.tensorflow.norm_clipping import Norm1Clipping, Norm2Clipping
 
+
 def create_model(key, params):
-    return globals()[key](*params) #models[key](*params) 
+    return globals()[key](*params)  # models[key](*params)
+
 
 def control_model(vocab_size, window_size, hidden_layers=[256]):
     #The LSTM input layer must be 3D.
@@ -22,10 +24,11 @@ def control_model(vocab_size, window_size, hidden_layers=[256]):
     ###...if X is a vector of integer symbols [4 1 4].
     ###...In this chase X for train must be (batch, window_size, 1) and np.expand_dims(train_x, axis=2) is needed
     model = Sequential()
-    
-    model.add(LSTM(hidden_layers[0], return_sequences=True, input_shape=(window_size, 1,)))
+
+    model.add(
+        LSTM(hidden_layers[0], return_sequences=True, input_shape=(window_size, 1,)))
     for size in hidden_layers[1:]:
-            model.add(LSTM(size, return_sequences = True))
+            model.add(LSTM(size, return_sequences=True))
     model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
 
     return model
@@ -34,7 +37,8 @@ def control_model(vocab_size, window_size, hidden_layers=[256]):
 def dp_gen_lap_autoencoder(vocab_size, max_length, emb_size, hidden_state_size):
     inputSeq = Input(shape=(max_length,))
     inputNoise = Input(shape=(hidden_state_size,))
-    x = Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True)(inputSeq)
+    x = Embedding(vocab_size, emb_size, input_length=max_length,
+                  mask_zero=True)(inputSeq)
     x = LSTM(hidden_state_size, return_state=False, return_sequences=False)(x)
     x = Norm1Clipping()(x)
     x = Add()([x, inputNoise])
@@ -48,40 +52,50 @@ def dp_gen_lap_autoencoder(vocab_size, max_length, emb_size, hidden_state_size):
 #gen emb classifier
 def dp_gen_emb_classifier(vocab_size, emb_size, max_length, hidden_layers=[512]):
     model = Sequential()
-    model.add(Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True))
+    model.add(Embedding(vocab_size, emb_size,
+                        input_length=max_length, mask_zero=True))
     model.add(Lambda(lambda x: K.mean(x, axis=1), output_shape=(emb_size,)))
     for size in hidden_layers:
-        model.add(Dense(size, activation='relu'))            
+        model.add(Dense(size, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
 
     return model
 
 #hidden state comparison
-def dp_gen_lap_autoencoder(vocab_size, max_length, emb_size, hidden_state_size):
+def dp_gen_lap_autoencoder_h(vocab_size, max_length, emb_size, hidden_state_size):
+    #INPUT LAYERS
     inputSeq1 = Input(shape=(max_length,))
-    x = Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True)(inputSeq1)
-    x = LSTM(hidden_state_size, return_state=False, return_sequences=False)(x)
-    x_1 = Norm1Clipping()(x)
-    x = RepeatVector(max_length)(x_1)
-    x = LSTM(hidden_state_size, return_sequences=True)(x)
-    x = TimeDistributed(Dense(vocab_size, activation='softmax'))(x)
-
-    #Habría que inicializar los pesos iguales?
     inputSeq2 = Input(shape=(max_length,))
-    x = Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True)(inputSeq2)
-    x = LSTM(hidden_state_size, return_state=False, return_sequences=False)(x)
-    x_2 = Norm1Clipping()(x)
-    x = RepeatVector(max_length)(x_2)
-    x = LSTM(hidden_state_size, return_sequences=True)(x)
-    x = TimeDistributed(Dense(vocab_size, activation='softmax'))(x)
 
-    dif = Add()([x_1, -x_2])
-    norm = Norm1Clipping()(x)
+    #COMMON LAYERS
+    emb = Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True)
+    lstm1 = LSTM(hidden_state_size, return_state=False, return_sequences=False)
+    norm = Norm1Clipping()
+    repeat = RepeatVector(max_length)
+    lstm2 = LSTM(hidden_state_size, return_sequences=True)
+    time = TimeDistributed(Dense(vocab_size, activation='softmax'))
 
-    model1 = Model(inputs=[inputSeq1], outputs=x)
-    model2 = Model(inputs=[inputSeq2], outputs=x)
-    model3 = Model(inputs=[inputSeq1, inputSeq2], outputs=norm)
-    return model1, model2, model3
+    #FIRST MODEL
+    x1 = emb(inputSeq1)
+    x1 = lstm1(x1)
+    x1_o = norm(x1)
+    x1 = repeat(x1_o)
+    x1 = lstm2(x1)
+    x1 = time(x1)
+    model = Model(inputs=[inputSeq1], outputs=x)
+
+    #SECOND MODEL
+    x2 = emb(inputSeq2)
+    x2 = lstm1(x2)
+    x2_o = norm(x2)
+
+    #DIFF MODEL
+    dif = Add()([x1_o, -x2_o])
+    dif = Norm1Clipping()(dif)
+    model_diff= Model(inputs=[inputSeq1, inputSeq2], outputs=dif)
+
+    return model, model_diff
+
 
 def load_model_adapter(path):
     with CustomObjectScope({'Norm1Clipping': Norm1Clipping, 'Norm2Clipping': Norm2Clipping}):
