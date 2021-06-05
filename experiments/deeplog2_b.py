@@ -4,7 +4,7 @@ experiment = {
     'data_preparation': {
         'skip': False,
         'module_name': 'study_cases.deeplog2.final_token',
-        'class_name': 'DeepLogDataSplitter',
+        'class_name': 'CustomDataSplitter',
         'build_params': {
             'datasets': {
                 'normal': {
