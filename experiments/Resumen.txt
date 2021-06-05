@@ -4,7 +4,7 @@ deeplog_2 - dp_gen_exponential_lm_emb
 deeplog_3_1 - dp_gen_exponential_class_emb_old
 deeplog_3_2 - dp_gen_exponential_class_emb_old
 deeplog_3_3 - dp_gen_exponential_class_emb_old
-deeplog_3_4* - dp_gen_exponential_class_emb pero con la softmax den generador sin padding ni endtoken*
+deeplog_3_4* - dp_gen_exponential_class_emb pero con la softmax del generador sin padding ni endtoken*
 
 deeplog_4_1_2 - dp_gen_autoencoder
 deeplog_4_3 - dp_gen_autoencoder
@@ -12,7 +12,7 @@ deeplog_4_4 - dp_gen_autoencoder maxdelta 0.25-1.0
 deeplog_4_5 - dp_gen_autoencoder maxdelta 0.01-1
 deeplog_4_6 - dp_gen_autoencoder epsilon global variable por largo (lens*eps)/max_lens
 deeplog_4_7 - gamma local budget variable por largo eps/len
-deeplog_4_8* - como 4_3 pero con la softmax den generador sin padding ni endtoken*
+deeplog_4_8* - como 4_3 pero con la softmax del generador sin padding ni endtoken*
 
 deeplog_5_1 - dp_gen_exponential_class_emb_top_k
 
@@ -22,4 +22,11 @@ deeplog_6_1_3 - dp_gen_lap maxdelta 2, norm1clipping solo si supera 1*
 deeplog_6_2 - deeplog_6_1_3 pero sin argmax y con 5 samplings per seq original
 
 deeplog2_3_4 - Como deeplog_3_4 pero con runner nuevo
-deeplog2_6_3 - Como deeplog_6_2 pero con runner nuevo
+deeplog2_6_2 - Como deeplog_6_2 pero con runner nuevo
+
+---------------------------------------------------------------------------------
+deeplog2_3_4 - dp_gen_exponential_class_emb pero con la softmax del generador sin padding ni endtoken
+deeplog2_4_8 - dp_gen_autoencoder con la softmax del generador sin padding ni endtoken
+deeplog2_6_2 - dp_gen_lap_autoencoder maxdelta 2, norm1clipping solo si supera 1,
+              pero sin argmax y con 5 samplings per seq original
+---------------------------------------------------------------------------------

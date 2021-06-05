@@ -33,6 +33,16 @@ def control_model(vocab_size, window_size, hidden_layers=[256]):
 
     return model
 
+
+def dp_gen_autoencoder(vocab_size, max_length, emb_size):
+    model = Sequential()
+    model.add(Embedding(vocab_size, emb_size, input_length=max_length, mask_zero=True))
+    model.add(LSTM(1024, return_state=False, return_sequences=False))
+    model.add(RepeatVector(max_length))
+    model.add(LSTM(1024, return_sequences=True))
+    model.add(TimeDistributed(Dense(vocab_size, activation='softmax')))
+    return model
+
 #gen autoencoder lap
 def dp_gen_lap_autoencoder(vocab_size, max_length, emb_size, hidden_state_size):
     inputSeq = Input(shape=(max_length,))
@@ -82,7 +92,7 @@ def dp_gen_lap_autoencoder_h(vocab_size, max_length, emb_size, hidden_state_size
     x1 = repeat(x1_o)
     x1 = lstm2(x1)
     x1 = time(x1)
-    model = Model(inputs=[inputSeq1], outputs=x)
+    model = Model(inputs=[inputSeq1], outputs=x1)
 
     #SECOND MODEL
     x2 = emb(inputSeq2)

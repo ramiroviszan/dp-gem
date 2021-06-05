@@ -1,5 +1,5 @@
 experiment = {
-    'skip': False,
+    'skip': 0,
     'random_seed': 27,
     'data_preparation': {
         'skip': 0,
@@ -46,7 +46,8 @@ experiment = {
                     }
                 }
             }
-        }
+        },
+        'trials_params': [{}]
     },
     'control_test': {
         'skip': 0,
@@ -211,10 +212,12 @@ experiment = {
             'to_privatize_output_fullpath': '{exp_path}/fake_{{to_privatize_name}}_{{trial}}.txt'
         },
         'trials_params': [
-            {'eps': 20},
-            {'eps': 30},
-            {'eps': 40},
-            {'eps': 50}],
+            {'iter': 0, 'eps': 'no_dp'},  # no dp
+            {'iter': 1, 'eps': 20},
+            {'iter': 2, 'eps': 30},
+            {'iter': 3, 'eps': 40},
+            {'iter': 4, 'eps': 50},
+        ],
         'submodules': {
             'classifier': {
                 'skip': 0, 
@@ -310,7 +313,8 @@ experiment = {
                         }
                     },
                     'results_fullpath': '{exp_path}/utility_similarity_test_results.csv'
-                }
+                },
+                'trials_params': [{}]
             }
         }
     }
