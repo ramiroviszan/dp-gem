@@ -50,7 +50,7 @@ experiment = {
         'trials_params': [{}]
     },
     'control_test': {
-        'skip': 0,
+        'skip':0,
         'module_name': 'study_cases.deeplog2.classifier',
         'class_name': 'Classifier',
         'build_params': {
@@ -212,11 +212,10 @@ experiment = {
             'to_privatize_output_fullpath': '{exp_path}/fake_{{to_privatize_name}}_{{trial}}.txt'
         },
         'trials_params': [
-            {'iter': 0, 'eps': 'no_dp'},  # no dp
-            {'iter': 1, 'eps': 20},
-            {'iter': 2, 'eps': 30},
-            {'iter': 3, 'eps': 40},
-            {'iter': 4, 'eps': 50},
+            {'iter': 0, 'eps': 20},
+            {'iter': 1, 'eps': 30},
+            {'iter': 2, 'eps': 40},
+            {'iter': 3, 'eps': 50},
         ],
         'submodules': {
             'classifier': {

@@ -2,7 +2,7 @@ experiment = {
     'skip': 0,
     'random_seed': 27,
     'data_preparation': {
-        'skip': False,
+        'skip': 0,
         'module_name': 'study_cases.deeplog2.final_token',
         'class_name': 'CustomDataSplitter',
         'build_params': {
@@ -180,7 +180,7 @@ experiment = {
             },
             'network_fullpath': '{exp_path}/gen.h5',
             'network_params': {
-                'model_type': 'gen_autoencoder',
+                'model_type': 'dp_gen_autoencoder',
                 'model_params': {
                     'vocab_size': 31,
                     'window_size': 50,

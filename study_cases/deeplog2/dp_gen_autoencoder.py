@@ -23,9 +23,9 @@ class Gen:
         self.network_fullpath = network_fullpath.format(exp_path=self.exp_path)
         self.network_params = network_params
         
-        self.logger = get_logger('gen', self.exp_name, self.parent_trial)
-        wandb.config.network_params = network_params
-        wandb.config.parent_trial = self.parent_trial
+        #self.logger = get_logger('gen', self.exp_name, self.parent_trial)
+        #wandb.config.network_params = network_params
+        #wandb.config.parent_trial = self.parent_trial
 
         self.to_privatize_output_fullpath = to_privatize_output_fullpath.format(
             exp_path=self.exp_path)
@@ -67,7 +67,7 @@ class Gen:
         model = models.create_model(model_type, model_params.values())
 
         trainer = NNTrainer()
-        model = trainer.train(model, self.network_fullpath, train_x, train_y_oh, train_sessions, use_wandb=True)
+        model = trainer.train(model, self.network_fullpath, train_x, train_y_oh, train_sessions, use_wandb=False)
 
         return model
 

@@ -26,9 +26,9 @@ class Classifier:
         self.network_fullpath = network_fullpath.format(exp_path=self.exp_path, parent_trial=flat_trial(self.parent_trial))
         self.network_params = network_params
         
-        self.logger = get_logger('classifier_train', self.exp_name, self.parent_trial)
-        wandb.config.network_params = self.network_params
-        wandb.config.parent_trial = self.parent_trial
+        #self.logger = get_logger('classifier_train', self.exp_name, self.parent_trial)
+        #wandb.config.network_params = self.network_params
+        #wandb.config.parent_trial = self.parent_trial
 
 
         result_header = list(self.parent_trial.keys())
@@ -69,7 +69,7 @@ class Classifier:
  
         model = models.create_model(model_type, model_params.values())
         trainer = NNTrainer()
-        model = trainer.train(model, self.network_fullpath, train_x, train_y_oh, train_sessions, use_wandb=True)
+        model = trainer.train(model, self.network_fullpath, train_x, train_y_oh, train_sessions, use_wandb=False)
 
         return model
 
@@ -116,7 +116,7 @@ class Classifier:
     def _try_different_thresholds(self, probas, y, thresholds, result_writer):
         results = list(self.parent_trial.values())
         for ts in thresholds:
-            self._start_threshold_logger(ts)
+            #self._start_threshold_logger(ts)
             y_hat = self._classify(probas, ts)
             metrics = self._metrics(y, y_hat)
             tn, fp, fn, tp, acc = metrics
@@ -131,7 +131,7 @@ class Classifier:
                 "tpr": tp / (tp+fn),
                 "tnr": tn / (tn+fp)
             }
-            wandb.log({**self.parent_trial, **wandb_res})
+            #wandb.log({**self.parent_trial, **wandb_res})
 
     def _start_threshold_logger(self, ts):
         self.logger = get_logger(f'ts_{ts}', self.exp_name, self.parent_trial, 'classifier')
