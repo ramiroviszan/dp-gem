@@ -295,7 +295,7 @@ experiment = {
                 'skip': 0,  # the iterations are given by dp_gen iterations
                 'module_name': 'common.data_similarity',
                 'class_name': 'DataSimilarity',
-                'params': {
+                'build_params': {
                     'metrics': ['hamming', 'hamming_wise', 'cosine'],
                     'datasets_params': {
                         'normal': {

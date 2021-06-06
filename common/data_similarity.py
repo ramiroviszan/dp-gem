@@ -11,7 +11,7 @@ class DataSimilarity:
 
     def __init__(self, experiment, metrics, datasets_params, results_fullpath):
         self.exp_name, self.exp_path, self.parent_trial = experiment
-        self.logger = get_logger('similarity', self.exp_name, self.parent_trial)
+        #self.logger = get_logger('similarity', self.exp_name, self.parent_trial)
         self.metrics = metrics
         self.datasets_params = datasets_params
 
@@ -36,7 +36,7 @@ class DataSimilarity:
             for metric_name in self.metrics:
                 mean = self._calculate_mean_metric(metric_name, first, second)
                 self.result_line[metric_name].append(mean)
-                wandb.log({f"{metric_name}_{dataset_type}_mean": mean})
+                #wandb.log({f"{metric_name}_{dataset_type}_mean": mean})
 
         all_data_first = []
         all_data_second = []
@@ -48,7 +48,7 @@ class DataSimilarity:
             all_mean = self._calculate_mean_metric(metric_name, all_data_first, all_data_second)
             self.result_line[metric_name].append(all_mean)
             self.results.save_results(self.result_line[metric_name])
-            wandb.log({f"{metric_name}_all_mean": all_mean})
+            #wandb.log({f"{metric_name}_all_mean": all_mean})
         
 
     def _load_test(self, first_fullpath, second_fullpath, to_read, dtype):

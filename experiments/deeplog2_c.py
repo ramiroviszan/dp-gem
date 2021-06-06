@@ -217,7 +217,7 @@ experiment = {
                 'skip': 0,  # the iterations are given by dp_gen iterations
                 'module_name': 'study_cases.deeplog2.classifier',
                 'class_name': 'Classifier',
-                'params': {
+                'build_params': {
                     'datasets_params': {
                         'train': {
                             'normal': {
