@@ -94,7 +94,7 @@ class Gen:
         maxdelta = trial.get('maxdelta', 1)
         variable_eps = trial.get('variable_eps', False)
         if epsilon == 'no_dp':
-            scale: 1
+            scale = 1
         else:   
             if not variable_eps:
                 scale =  epsilon / (2 * maxdelta)
