@@ -84,7 +84,7 @@ class Gen:
             print('\n\nGenerating dataset:', dataset_name, '- Num seqs:', len(dataset))
             self._generate_synthetic(trial, dataset_name, dataset)
 
-    def _generate_synthetic(self, trial, iteration, dataset_name, dataset):
+    def _generate_synthetic(self, trial, dataset_name, dataset):
         padding = 0
         
         seq_x = np.array(data_utils.pad_dataset(dataset, self.max_len, 'pre'))
