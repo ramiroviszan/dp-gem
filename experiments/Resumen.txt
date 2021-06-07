@@ -27,6 +27,5 @@ deeplog2_6_2 - Como deeplog_6_2 pero con runner nuevo
 ---------------------------------------------------------------------------------
 deeplog2_a - dp_gen_exponential_class_emb pero con la softmax del generador sin padding ni endtoken
 deeplog2_b - dp_gen_autoencoder con la softmax del generador sin padding ni endtoken
-deeplog2_c - dp_gen_lap_autoencoder maxdelta 2, norm1clipping solo si supera 1,
-              pero sin argmax y con 5 samplings per seq original
+deeplog2_c - dp_gen_lap_autoencoder maxdelta 1, norm1clipping solo si supera 1,
 ---------------------------------------------------------------------------------

@@ -209,9 +209,14 @@ experiment = {
             },
             'to_privatize_output_fullpath': '{exp_path}/fake_{{to_privatize_name}}_{{trial}}.txt'
         },
-        'trials_params': [
-            {'eps': 'no_dp', 'maxdelta':0, 'trials_per_seq': 5},#no dp
-            {'eps': 1, 'maxdelta':1, 'trials_per_seq': 5},],
+        'trials_params': [{'eps': 'no_dp', 'maxdelta':0},#no dp
+            {'eps': 0.5, 'maxdelta':1},
+            {'eps': 1, 'maxdelta':1},
+            {'eps': 10, 'maxdelta':1},
+            {'eps': 20, 'maxdelta':1},
+            {'eps': 40, 'maxdelta':1},
+            {'eps': 50, 'maxdelta':1},
+            {'eps': 100, 'maxdelta':1}],
         'submodules': {
             'classifier': {
                 'skip': 0,  # the iterations are given by dp_gen iterations
@@ -250,7 +255,7 @@ experiment = {
                             }
                         }
                     },
-                    'network_fullpath': '{exp_path}/deeplog_utility_{parent_trial}.h5',
+                    'network_fullpath': '{exp_path}/utility_{parent_trial}.h5',
                     'network_params': {
                         'model_type': 'control_model',
                         'model_params': {
@@ -295,13 +300,13 @@ experiment = {
                     'datasets_params': {
                         'normal': {
                             'orig_fullpath': '{exp_path}/normal_test.txt',
-                            'privatized_fullpath': '{exp_path}/fake_normal_test_{trial}.txt',
+                            'privatized_fullpath': '{exp_path}/fake_normal_test_{parent_trial}.txt',
                             'to_read': 0,
                             'dtype': int
                         },
                         'abnormal': {
                             'orig_fullpath': '{exp_path}/abnormal_test.txt',
-                            'privatized_fullpath': '{exp_path}/fake_abnormal_test_{trial}.txt',
+                            'privatized_fullpath': '{exp_path}/fake_abnormal_test_{parent_trial}.txt',
                             'to_read': 0,
                             'dtype': int
                         }
