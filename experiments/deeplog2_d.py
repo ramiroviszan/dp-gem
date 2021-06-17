@@ -123,7 +123,7 @@ experiment = {
     },
     'dp_gen': {
         'skip': 0,
-        'module_name': 'study_cases.deeplog2.dp_gen_lap_autoencoder',
+        'module_name': 'study_cases.deeplog2.dp_gen_lap_end_autoencoder',
         'class_name': 'Gen',
         'mode': 'all',  # all, main_only, submodules_only
         'build_params': {
@@ -179,7 +179,7 @@ experiment = {
             },
             'network_fullpath': '{exp_path}/gen.h5',
             'network_params': {
-                'model_type': 'dp_gen_lap_autoencoder',
+                'model_type': 'dp_gen_lap_end_autoencoder',
                 'model_params': {
                     'vocab_size': 31,
                     'window_size': 20,

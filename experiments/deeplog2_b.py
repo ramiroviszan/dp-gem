@@ -12,7 +12,7 @@ experiment = {
                         'fullpath': 'data/deeplog/all_normal.txt',
                         'to_read': 4000,
                         'shuffle': True,
-                        'max_len': 50,
+                        'max_len': 20,
                         'dtype': int,
                         'split_token': '',
                         'encoding': 'ascii',
@@ -31,7 +31,7 @@ experiment = {
                         'fullpath': 'data/deeplog/all_abnormal.txt',
                         'to_read': 4000,
                         'shuffle': True,
-                        'max_len': 50,
+                        'max_len': 20,
                         'dtype': int,
                         'split_token': '',
                         'encoding': 'ascii',
@@ -91,7 +91,7 @@ experiment = {
                 'model_type': 'control_model',
                 'model_params': {
                     'vocab_size': 31, #this value considers padding, 30 without
-                    'window_size': 10,
+                    'window_size': 5,
                     'hidden_layers': [256]
                 },
                 'train_sessions': {
@@ -183,7 +183,7 @@ experiment = {
                 'model_type': 'dp_gen_autoencoder',
                 'model_params': {
                     'vocab_size': 31,
-                    'window_size': 50,
+                    'window_size': 20,
                     'emb_size': 4,
                 },
                 'train_sessions': {
@@ -211,12 +211,9 @@ experiment = {
         },
         'trials_params': [
             {'iter': 0, 'eps': 'no_dp', 'maxdelta':0},#no dp
-            {'iter': 1,'eps': 20, 'maxdelta':1},
-            {'iter': 2,'eps': 30, 'maxdelta':1},
-            {'iter': 3,'eps': 40, 'maxdelta':1},
-            {'iter': 4,'eps': 50, 'maxdelta':1},
-            {'iter': 5,'eps': 60, 'maxdelta':1},
-            {'iter': 6,'eps': 100, 'maxdelta':1}],
+            {'iter': 1,'eps': 0.05, 'maxdelta':1},
+            {'iter': 2,'eps': 0.5, 'maxdelta':1},
+            {'iter': 3,'eps': 1, 'maxdelta':1}],
         'submodules': {
             'classifier': {
                 'skip': 0,
@@ -260,7 +257,7 @@ experiment = {
                         'model_type': 'control_model',
                         'model_params': {
                             'vocab_size': 31, #this value considers padding, 30 without
-                            'window_size': 10,
+                            'window_size': 5,
                             'hidden_layers': [256]
                         },
                         'train_sessions': {

@@ -59,6 +59,20 @@ def dp_gen_lap_autoencoder(vocab_size, max_length, emb_size, hidden_state_size):
     model = Model(inputs=[inputSeq, inputNoise], outputs=x)
     return model
 
+def dp_gen_lap_end_autoencoder(vocab_size, max_length, emb_size, hidden_state_size):
+    inputSeq = Input(shape=(max_length,))
+    
+    x = Embedding(vocab_size, emb_size, input_length=max_length,
+                  mask_zero=True)(inputSeq)
+    x = LSTM(hidden_state_size, return_state=False, return_sequences=False)(x)
+    x = RepeatVector(max_length)(x)
+    x = LSTM(hidden_state_size, return_sequences=True)(x)
+    x = TimeDistributed(Dense(vocab_size, activation='softmax'))(x)
+
+    model = Model(inputs=[inputSeq], outputs=x)
+    return model
+
+
 #gen emb classifier
 def dp_gen_emb_classifier(vocab_size, emb_size, max_length, hidden_layers=[512]):
     model = Sequential()

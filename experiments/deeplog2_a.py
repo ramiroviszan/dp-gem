@@ -12,7 +12,7 @@ experiment = {
                         'fullpath': 'data/deeplog/all_normal.txt',
                         'to_read': 4000,
                         'shuffle': True,
-                        'max_len': 50,
+                        'max_len': 20,
                         'dtype': int,
                         'split_token': '',
                         'encoding': 'ascii',
@@ -31,7 +31,7 @@ experiment = {
                         'fullpath': 'data/deeplog/all_abnormal.txt',
                         'to_read': 4000,
                         'shuffle': True,
-                        'max_len': 50,
+                        'max_len': 20,
                         'dtype': int,
                         'split_token': '',
                         'encoding': 'ascii',
@@ -91,7 +91,7 @@ experiment = {
                 'model_type': 'control_model',
                 'model_params': {
                     'vocab_size': 31, #this value considers padding, 30 without
-                    'window_size': 10,
+                    'window_size': 5,
                     'hidden_layers': [256]
                 },
                 'train_sessions': {
@@ -212,10 +212,9 @@ experiment = {
             'to_privatize_output_fullpath': '{exp_path}/fake_{{to_privatize_name}}_{{trial}}.txt'
         },
         'trials_params': [
-            {'iter': 0, 'eps': 20},
-            {'iter': 1, 'eps': 30},
-            {'iter': 2, 'eps': 40},
-            {'iter': 3, 'eps': 50},
+            {'iter': 0, 'eps': 0.05},
+            {'iter': 1, 'eps': 0.5},
+            {'iter': 2, 'eps': 1},
         ],
         'submodules': {
             'classifier': {
@@ -260,7 +259,7 @@ experiment = {
                         'model_type': 'control_model',
                         'model_params': {
                             'vocab_size': 31, #this value considers padding, 30 without
-                            'window_size': 10,
+                            'window_size': 5,
                             'hidden_layers': [256]
                         },
                         'train_sessions': {
