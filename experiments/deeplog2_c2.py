@@ -12,7 +12,7 @@ experiment = {
                         'fullpath': 'data/deeplog/all_normal.txt',
                         'to_read': 4000,
                         'shuffle': True,
-                        'max_len': 50,
+                        'max_len': 20,
                         'dtype': int,
                         'split_token': '',
                         'encoding': 'ascii',
@@ -31,7 +31,7 @@ experiment = {
                         'fullpath': 'data/deeplog/all_abnormal.txt',
                         'to_read': 4000,
                         'shuffle': True,
-                        'max_len': 50,
+                        'max_len': 20,
                         'dtype': int,
                         'split_token': '',
                         'encoding': 'ascii',
@@ -90,7 +90,7 @@ experiment = {
                 'model_type': 'control_model',
                 'model_params': {
                     'vocab_size': 31, #this value considers padding, 30 without
-                    'window_size': 10,
+                    'window_size': 5,
                     'hidden_layers': [256]
                 },
                 'train_sessions': {
@@ -122,7 +122,7 @@ experiment = {
         }]
     },
     'dp_gen': {
-        'skup': 0,
+        'skip': 0,
         'module_name': 'study_cases.deeplog2.dp_gen_lap_autoencoder',
         'class_name': 'Gen',
         'mode': 'all',  # all, main_only, submodules_only
@@ -182,7 +182,7 @@ experiment = {
                 'model_type': 'dp_gen_lap_autoencoder',
                 'model_params': {
                     'vocab_size': 31,
-                    'window_size': 50,
+                    'window_size': 20,
                     'emb_size': 4,
                     'hidden_state_size': 1024,
                 },
@@ -210,13 +210,9 @@ experiment = {
             'to_privatize_output_fullpath': '{exp_path}/fake_{{to_privatize_name}}_{{trial}}.txt'
         },
         'trials_params': [{'eps': 'no_dp', 'maxdelta':0},#no dp
+            {'eps': 0.05, 'maxdelta':1},
             {'eps': 0.5, 'maxdelta':1},
-            {'eps': 1, 'maxdelta':1},
-            {'eps': 10, 'maxdelta':1},
-            {'eps': 20, 'maxdelta':1},
-            {'eps': 40, 'maxdelta':1},
-            {'eps': 50, 'maxdelta':1},
-            {'eps': 100, 'maxdelta':1}],
+            {'eps': 1, 'maxdelta':1}],
         'submodules': {
             'classifier': {
                 'skip': 0,  # the iterations are given by dp_gen iterations
@@ -260,7 +256,7 @@ experiment = {
                         'model_type': 'control_model',
                         'model_params': {
                             'vocab_size': 31, #this value considers padding, 30 without
-                            'window_size': 10,
+                            'window_size': 5,
                             'hidden_layers': [256]
                         },
                         'train_sessions': {
