@@ -1,6 +1,6 @@
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
-from wandb.keras import WandbCallback
+#from wandb.keras import WandbCallback
 
 import common.plot_utils as plot_utils
 
@@ -19,11 +19,11 @@ class NNTrainer:
             earlystopper = EarlyStopping(
                 monitor='val_loss', patience=patience, verbose=1, restore_best_weights=True)
             
-            if use_wandb:
-                logger = WandbCallback()
-                callbacks = [earlystopper, logger]
-            else:
-                callbacks = [earlystopper]
+            #if use_wandb:
+             #   logger = WandbCallback()
+              #  callbacks = [earlystopper, logger]
+            #else:
+            callbacks = [earlystopper]
 
             history = model.fit(train_x, train_y, epochs=epochs, batch_size=batch_size,
                                 validation_split=val_split, callbacks=callbacks, verbose=1)

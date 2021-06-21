@@ -2,7 +2,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.python.distribute.mirrored_strategy import MirroredStrategy
 
 import copy
-import wandb
+#import wandb
 import numpy as np
 from sklearn.metrics import confusion_matrix, accuracy_score, roc_curve
 
@@ -84,7 +84,7 @@ class Classifier:
         val_fullpath = probas_fullpath.format(dataset_type = 'val')
         val_probas = self._get_dataset_proba(val_fullpath, val_x, recalulate_probas)
 
-        thresholds = [0.5]
+        thresholds = []
         roc_ts, fpr, tpr = self._get_roc_threshold(val_y, val_probas)
         thresholds.append(roc_ts)
 
@@ -135,8 +135,8 @@ class Classifier:
 
     def _start_threshold_logger(self, ts):
         self.logger = get_logger(f'ts_{ts}', self.exp_name, self.parent_trial, 'classifier')
-        wandb.config.network_params = self.network_params
-        wandb.config.parent_trial = self.parent_trial
+        #wandb.config.network_params = self.network_params
+        #wandb.config.parent_trial = self.parent_trial
 
     def _classify(self, probas, threshold):
         return probas >= threshold

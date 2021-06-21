@@ -1,7 +1,7 @@
 from tensorflow.keras.models import load_model
 from tensorflow.python.distribute.mirrored_strategy import MirroredStrategy
 
-import wandb
+#import wandb
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.special import softmax
@@ -78,7 +78,7 @@ class Gen:
         for dataset_name, dataset in t_sets.items():
             path = dataset["fullpath"].format(exp_path=self.exp_path)
             self.datasets_to_privatize[dataset_name] = data_utils.load_file(
-                path, to_read=dataset["to_read"], shuffle=False, max_len=self.max_len, dtype=int, split_token='')
+                path, to_read=dataset["to_read"], shuffle=False, dtype=int, split_token='')
 
     def run(self, trial):
         for dataset_name, dataset in self.datasets_to_privatize.items():
@@ -89,46 +89,35 @@ class Gen:
         padding = 0
         
         seq_x = np.array(data_utils.pad_dataset(dataset, self.max_len, 'pre'))
-        lens = np.array([len(seq) for seq in dataset])
 
         epsilon = trial.get('eps', 'no_dp')
         if epsilon == 'no_dp':
             noise = np.zeros(shape=(len(dataset), self.hidden_state_size))
         else:
-            variable_eps = trial.get('variable_eps', False)
             maxdelta = trial.get('maxdelta', 0)
-            if not variable_eps:
-                scale =  maxdelta/epsilon
-            else:
-                epsilons = epsilon/lens
-                scale = maxdelta/epsilons
-                #scale = scale[:, np.newaxis, np.newaxis] #multiply each symbol proba for each position for each sequence by the scale
+            scale =  maxdelta/epsilon
+            #scale = scale[:, np.newaxis, np.newaxis] #multiply each symbol proba for each position for each sequence by the scale
             noise = np.random.laplace(0, scale, (len(dataset), self.hidden_state_size))
 
         probas = self.model.predict([seq_x, noise])
 
-        use_random_sampling = "trials_per_seq" in trial
-        trials_per_seq = trial.get('trials_per_seq', 1)
         fake_data = []
-        for seq_i, seq in enumerate(seq_x):
-            for i in range(0, trials_per_seq):
-                private_seq = []
-                last_index = len(seq) - 1
-                for index, real_symbol in enumerate(seq):
-                    if real_symbol != padding:#do not include padding
-                        if index == last_index:#do not privatize end token
-                            private_symbol = real_symbol
-                        else:
-                            #proba_vector = softmax(probas[seq_i][index][1:-1])
-                            #private_symbol = np.random.choice(self.vocab_range, p=proba_vector)
-                            proba_vector = softmax(probas[seq_i][index][1:-1])
-                            if use_random_sampling:
-                                private_symbol = np.random.choice(self.vocab_range, p=proba_vector)
-                            else:
-                                private_symbol = np.argmax(proba_vector) + 1 #+ 1 because padding is 0
+        for seq_i, seq in enumerate(dataset):
+            
+            private_seq = []
+            last_index = len(seq) - 1
+            
+            for index, real_symbol in enumerate(seq):
+                if real_symbol != padding:#do not include padding
+                    if index == last_index:#do not privatize end token
+                        private_symbol = real_symbol
+                    else:
+                        #Sacar la probalilidad de generar padding y endtoken
+                        proba_vector = softmax(probas[seq_i][index][1:-1])
+                        private_symbol = np.argmax(proba_vector) + 1 #+ 1 because padding is 0
+                    private_seq.append(private_symbol)
+            fake_data.append(private_seq)
 
-                        private_seq.append(private_symbol)
-                fake_data.append(private_seq)
-
-        filename_fullpath = self.to_privatize_output_fullpath.format(to_privatize_name=dataset_name, trial=flat_trial(trial))
+        filename_fullpath = self.to_privatize_output_fullpath.format(
+            to_privatize_name=dataset_name, trial=flat_trial(trial))
         data_utils.write_file(fake_data, filename_fullpath)

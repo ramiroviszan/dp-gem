@@ -1,8 +1,6 @@
 import random
 import numpy as np
 
-from sklearn.model_selection import train_test_split
-
 import common.data_utils as data_utils
 from common.data_splitter import DataSplitter
 

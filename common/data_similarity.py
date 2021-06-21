@@ -1,4 +1,4 @@
-import wandb
+#import wandb
 import numpy as np
 from sklearn.metrics.pairwise import pairwise_distances
 
@@ -57,7 +57,7 @@ class DataSimilarity:
         
         first = data_utils.load_file(first_fullpath, to_read, shuffle=False, dtype=dtype)
         second= data_utils.load_file(second_fullpath, to_read, shuffle=False, dtype=dtype)
-
+        
         return first, second
         
     def _calculate_mean_metric(self, metric_name, first, second):

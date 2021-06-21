@@ -1,7 +1,7 @@
 from tensorflow.keras.models import load_model
 from tensorflow.python.distribute.mirrored_strategy import MirroredStrategy
 
-import wandb
+#import wandb
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.special import softmax
@@ -23,9 +23,9 @@ class Gen:
         self.network_fullpath = network_fullpath.format(exp_path=self.exp_path)
         self.network_params = network_params
 
-        self.logger = get_logger('gen', self.exp_name, self.parent_trial)
-        wandb.config.network_params = network_params
-        wandb.config.parent_trial = self.parent_trial
+        #self.logger = get_logger('gen', self.exp_name, self.parent_trial)
+        #wandb.config.network_params = network_params
+        #wandb.config.parent_trial = self.parent_trial
         
         
         self.to_privatize_output_fullpath = to_privatize_output_fullpath.format(

@@ -1,7 +1,7 @@
 from tensorflow.keras.models import load_model
 from tensorflow.python.distribute.mirrored_strategy import MirroredStrategy
 
-import wandb
+#import wandb
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.special import softmax
@@ -77,7 +77,7 @@ class Gen:
         for dataset_name, dataset in t_sets.items():
             path = dataset["fullpath"].format(exp_path=self.exp_path)
             self.datasets_to_privatize[dataset_name] = data_utils.load_file(
-                path, to_read=dataset["to_read"], shuffle=False, max_len=self.max_len, dtype=int, split_token='')
+                path, to_read=dataset["to_read"], shuffle=False, dtype=int, split_token='') #max_len=self.max_len, 
 
     def run(self, trial):
         for dataset_name, dataset in self.datasets_to_privatize.items():
@@ -86,70 +86,41 @@ class Gen:
 
     def _generate_synthetic(self, trial, dataset_name, dataset):
         padding = 0
-        
-        seq_x = np.array(data_utils.pad_dataset(dataset, self.max_len, 'pre'))
-        lens = np.array([len(seq) for seq in dataset])
 
+        #if dataset_name == "abnormal_test":
+        #    print("Before pad", dataset[0])
+        seq_x = np.array(data_utils.pad_dataset(dataset, self.max_len, 'pre'))
+        
+        #if dataset_name == "abnormal_test":
+        #    print("After pad", seq_x[0])
+        
         epsilon = trial.get('eps', 'no_dp')
         maxdelta = trial.get('maxdelta', 1)
-        variable_eps = trial.get('variable_eps', False)
         if epsilon == 'no_dp':
             scale = 1
         else:   
-            if not variable_eps:
-                scale =  epsilon / (2 * maxdelta)
-            else:
-                epsilons = epsilon/lens
-                scale = epsilons / (2 * maxdelta)
-                scale = scale[:, np.newaxis, np.newaxis] #multiply each symbol proba for each position for each sequence by the scale
+            scale =  epsilon / (2 * maxdelta)
 
         probas = self.model.predict(seq_x) * scale
       
         fake_data = []
-        for seq_i, seq in enumerate(seq_x):
+        for seq_i, seq in enumerate(dataset):
+            
             private_seq = []
             last_index = len(seq) - 1
- 
+
             for index, real_symbol in enumerate(seq):
                 if real_symbol != padding:#do not include padding
                     if index == last_index:#do not privatize end token
                         private_symbol = real_symbol
                     else:
-                        #print("Proba:", i, "-", pre_proba_matrix[i], "\n")
                         #Sacar la probalilidad de generar padding y endtoken
-                        #proba_vector = softmax(probas[seq_i][index])
-                      # private_symbol = np.random.choice(np.arange(0, self.vocab_size), p=proba_vector)
                         proba_vector = softmax(probas[seq_i][index][1:-1])
                         private_symbol = np.random.choice(self.vocab_range, p=proba_vector)
-                    private_seq.append(private_symbol)
+                    private_seq.append(private_symbol)         
             fake_data.append(private_seq)
             #print("\nOriginal:", seq, "\nPrivate:", np.array(private_seq))
-
+     
         filename_fullpath = self.to_privatize_output_fullpath.format(
             to_privatize_name=dataset_name, trial=flat_trial(trial))
-        data_utils.write_file(fake_data, filename_fullpath)
-
-    def _generate_synthetic_no_dp(self, trial, iteration, dataset_name, dataset):
-        padding = 0
-        seq_x = np.array(data_utils.pad_dataset(dataset, self.max_len, 'pre'))
-        probas = self.model.predict(seq_x) 
-        fake_data = []
-        for seq_i, seq in enumerate(seq_x):
-            private_seq = []
-            last_index = len(seq) - 1
-         
-            for index, real_symbol in enumerate(seq):
-                if real_symbol != padding:#do not include padding
-                    if index == last_index:#do not privatize end token
-                        private_symbol = real_symbol
-                    else:
-                        #Sacar la probalilidad de generar padding y endtoken
-                        #private_symbol = np.argmax(probas[seq_i][index])
-                        proba_vector = softmax(probas[seq_i][index][1:-1])
-                        private_symbol = np.argmax(proba_vector) + 1#0 is padding so we need to shift +1
-                    private_seq.append(private_symbol)
-            fake_data.append(private_seq)
-
-        filename_fullpath = self.to_privatize_output_fullpath.format(
-            to_privatize_name=dataset_name, iteration=iteration, **trial)
         data_utils.write_file(fake_data, filename_fullpath)
