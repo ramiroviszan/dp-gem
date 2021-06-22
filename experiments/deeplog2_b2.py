@@ -10,7 +10,7 @@ experiment = {
                 'normal': {
                     'original': {
                         'fullpath': 'data/deeplog/all_normal.txt',
-                        'to_read': 100,#4000,
+                        'to_read': 4000,
                         'shuffle': True,
                         'max_len': 20,
                         'dtype': int,
@@ -29,7 +29,7 @@ experiment = {
                 'abnormal': {
                     'original': {
                         'fullpath': 'data/deeplog/all_abnormal.txt',
-                        'to_read': 100,#4000,
+                        'to_read': 4000,
                         'shuffle': True,
                         'max_len': 20,
                         'dtype': int,
@@ -96,7 +96,7 @@ experiment = {
                 },
                 'train_sessions': {
                     'first': {
-                        'epochs': 1,#100,
+                        'epochs': 100,
                         'batch_size': 100,
                         'lr': 0.001,
                         'loss': 'categorical_crossentropy',
@@ -105,7 +105,7 @@ experiment = {
                         'save_model': False
                     },
                     'second': {
-                        'epochs': 1,#50,
+                        'epochs': 50,
                         'batch_size': 30,
                         'lr': 0.001,
                         'loss': 'categorical_crossentropy',
@@ -188,7 +188,7 @@ experiment = {
                 },
                 'train_sessions': {
                     'first': {
-                        'epochs': 1,#1000,
+                        'epochs': 1000,
                         'batch_size': 500,
                         'lr': 0.0001,
                         'loss': 'binary_crossentropy',
@@ -197,7 +197,7 @@ experiment = {
                         'save_model': False
                     },
                     'second': {
-                        'epochs': 1,#1000,
+                        'epochs': 1000,
                         'batch_size': 100,
                         'lr': 0.00001,
                         'loss': 'binary_crossentropy',
@@ -262,7 +262,7 @@ experiment = {
                         },
                         'train_sessions': {
                             'first': {
-                                'epochs': 1,#100,
+                                'epochs': 100,
                                 'batch_size': 100,
                                 'lr': 0.001,
                                 'loss': 'categorical_crossentropy',
@@ -271,7 +271,7 @@ experiment = {
                                 'save_model': False
                             },
                             'second': {
-                                'epochs': 1,#50,
+                                'epochs': 50,
                                 'batch_size': 30,
                                 'lr': 0.001,
                                 'loss': 'categorical_crossentropy',
