@@ -96,6 +96,8 @@ class Gen:
         probas = self.model.predict([seq_x])
 
         fake_data = []
+        printed = False
+        
         for seq_i, seq in enumerate(dataset):
             private_seq = []
             last_index = len(seq) - 1
@@ -108,11 +110,17 @@ class Gen:
                         #private_symbol = np.random.choice(self.vocab_range, p=proba_vector)
                         proba_vector = softmax(probas[seq_i][index][1:-1])
                         if epsilon == 'no_dp':
-                            noise = np.zeros(shape=(len(dataset), len(proba_vector)))
+                            noise = np.zeros(shape=len(proba_vector))
                         else:
                             scale =  maxdelta/epsilon
-                            noise = np.random.laplace(0, scale, (len(dataset), len(proba_vector)))
-                        private_symbol = np.argmax(proba_vector + noise) + 1 #+ 1 because padding is 0
+                            noise = np.random.laplace(0, scale, len(proba_vector))
+                        #if not printed:
+                        #    print("Noise", len(noise), noise)
+                        #    print("Proba", len(proba_vector), proba_vector)
+                        #    print("Sum", proba_vector + noise) 
+                        #    print("Max", np.argmax(softmax(proba_vector + noise)) + 1)
+                        #    printed = True
+                        private_symbol = np.argmax(softmax(proba_vector + noise)) + 1 #+ 1 because padding is 0
 
                     private_seq.append(private_symbol)
             fake_data.append(private_seq)
