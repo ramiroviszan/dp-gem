@@ -72,6 +72,25 @@ def dp_gen_lap_end_autoencoder(vocab_size, max_length, emb_size, hidden_state_si
     model = Model(inputs=[inputSeq], outputs=x)
     return model
 
+def dp_gen_lap_autoencoder_class(vocab_size, max_length, emb_size, hidden_layers=[256]):
+    inputSeq = Input(shape=(max_length,))
+    inputNoise = Input(shape=(hidden_layers[0],))
+    x = Embedding(vocab_size, emb_size, input_length=max_length,
+                  mask_zero=True)(inputSeq)
+    x = LSTM(hidden_layers[0], return_state=False, return_sequences=False)(x)
+    x = Norm1Clipping()(x)
+    x = Add()([x, inputNoise])
+    x = RepeatVector(max_length)(x)
+    x = LSTM(hidden_layers[0], return_sequences=True)(x)
+    x = TimeDistributed(Dense(vocab_size, activation='softmax'))(x)
+    
+    y = LSTM(hidden_layers[1], return_sequences=True)(x)
+    y = LSTM(hidden_layers[2], return_sequences=False)(y)
+    y = Dense(1, activation='sigmoid')(y)
+
+    model_gen = Model(inputs=[inputSeq, inputNoise], outputs=x)
+    model_class = Model(inputs=[inputSeq, inputNoise], outputs=y)
+    return model_gen, model_class
 
 #gen emb classifier
 def dp_gen_emb_classifier(vocab_size, emb_size, max_length, hidden_layers=[512]):

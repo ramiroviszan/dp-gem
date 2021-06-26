@@ -210,12 +210,9 @@ experiment = {
             'to_privatize_output_fullpath': '{exp_path}/fake_{{to_privatize_name}}_{{trial}}.txt'
         },
         'trials_params': [{'eps': 'no_dp', 'maxdelta':0},#no dp
-            {'eps': 10, 'maxdelta':1},
-            {'eps': 20, 'maxdelta':1},
-            {'eps': 30, 'maxdelta':1},
-            {'eps': 40, 'maxdelta':1},
-            {'eps': 50, 'maxdelta':1},
-            {'eps': 100, 'maxdelta':1}],
+            {'eps': 0.05, 'maxdelta':1},
+            {'eps': 0.5, 'maxdelta':1},
+            {'eps': 1, 'maxdelta':1}],
         'submodules': {
             'classifier': {
                 'skip': 0,  # the iterations are given by dp_gen iterations

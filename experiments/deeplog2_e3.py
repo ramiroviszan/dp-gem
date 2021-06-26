@@ -123,7 +123,7 @@ experiment = {
     },
     'dp_gen': {
         'skip': 0,
-        'module_name': 'study_cases.deeplog2.dp_gen_lap_end_autoencoder',
+        'module_name': 'study_cases.deeplog2.dp_gen_lap_autoencoder_class',
         'class_name': 'Gen',
         'mode': 'all',  # all, main_only, submodules_only
         'build_params': {
@@ -179,12 +179,12 @@ experiment = {
             },
             'network_fullpath': '{exp_path}/gen.h5',
             'network_params': {
-                'model_type': 'dp_gen_lap_end_autoencoder',
+                'model_type': 'dp_gen_lap_autoencoder_class',
                 'model_params': {
                     'vocab_size': 31,
                     'window_size': 20,
                     'emb_size': 4,
-                    'hidden_state_size': 1024,
+                    'hidden_layers': [512, 256, 256]
                 },
                 'train_sessions': {
                     'first': {
@@ -205,17 +205,19 @@ experiment = {
                         'patience': 5,
                         'save_model': True
                     }
-                }
+                },
+                "epsilon_train": {'eps': 0.5, 'maxdelta':1},
             },
             'to_privatize_output_fullpath': '{exp_path}/fake_{{to_privatize_name}}_{{trial}}.txt'
         },
-        'trials_params': [{'eps': 'no_dp', 'maxdelta':0},#no dp
-            {'eps': 10, 'maxdelta':1},
-            {'eps': 20, 'maxdelta':1},
-            {'eps': 30, 'maxdelta':1},
-            {'eps': 40, 'maxdelta':1},
-            {'eps': 50, 'maxdelta':1},
-            {'eps': 100, 'maxdelta':1}],
+        'trials_params': [
+            {'iter': 0, 'eps': 'no_dp', 'maxdelta':0},#no dp
+            {'iter': 1, 'eps': 0.05, 'maxdelta':1},
+            {'iter': 2, 'eps': 0.5, 'maxdelta':1},
+            {'iter': 3, 'eps': 1, 'maxdelta':1},
+            {'iter': 4, 'eps': 10, 'maxdelta':1},
+            {'iter': 5, 'eps': 50, 'maxdelta':1},
+            {'iter': 6, 'eps': 100, 'maxdelta':1}],
         'submodules': {
             'classifier': {
                 'skip': 0,  # the iterations are given by dp_gen iterations

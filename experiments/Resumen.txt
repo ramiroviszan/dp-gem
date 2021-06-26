@@ -29,3 +29,10 @@ deeplog2_a - dp_gen_exponential_class_emb pero con la softmax del generador sin 
 deeplog2_b - dp_gen_autoencoder con la softmax del generador sin padding ni endtoken
 deeplog2_c - dp_gen_lap_autoencoder maxdelta 1, norm1clipping solo si supera 1,
 ---------------------------------------------------------------------------------
+deeplog2_a2 - deeplog2_a con eps chicos - local
+deeplog2_b2 - deeplog2_b con eps chicos - global (Aplicaria Moment pero de una exponencial que no sabemos) eps=gamma
+deeplog2_c2 - deeplog2_c con eps chicos - local - aplica el tail bound
+deeplog2_d2 - con ruido lap en el softmax de salida - global (Moment) eps=gamma - aplica el tail bound
+---------------------------------------------------------------------------------
+deeplog2_x3 - deeplog2_a + deeplog2_a2
+deeplog2_e3 - Generador entrenado con ruido lap y como clasificador, al generar usa lap tambien

@@ -39,38 +39,41 @@ class Gen:
     def _get_model(self):
         self.vocab_size = self.network_params['model_params']['vocab_size'] 
         self.vocab_range = np.arange(1, self.vocab_size-1)
-        self.hidden_state_size = self.network_params['model_params']['hidden_state_size']
+        self.hidden_state_size = self.network_params['model_params']['hidden_layers'][0]
         
-        try:
-            self.model = models.load_model_adapter(self.network_fullpath)
-        except:
-            print("\nModel", self.network_fullpath,
-                  "not found. Training started...")
-            self.model = self._train_model(*self.network_params.values())
+        #try:
+        #    self.model_class = models.load_model_adapter(self.network_fullpath)
+        #except:
+        print("\nModel", self.network_fullpath,
+                "not found. Training started...")
+        self.model_gen, self.model_class = self._train_model(*self.network_params.values())
 
-        self.max_len = self.model.layers[0].input_shape[0][1]
+        self.max_len = self.model_class.layers[0].input_shape[0][1]
 
         return
 
-    def _train_model(self, model_type, model_params, train_sessions):
+    def _train_model(self, model_type, model_params, train_sessions, epsilon_train):
 
         window_size = model_params.get('window_size', 0)
-        all_data = data_utils.load_multiple_files(self.datasets_params['train'], shuffle=True, dtype=int, max_len=window_size, exp_path=self.exp_path)
+        all_data, all_classes = data_utils.load_multiple_files_with_class(self.datasets_params['train'], shuffle=True, dtype=int, max_len=window_size, exp_path=self.exp_path)
         if window_size == 0:
             max_len, _ = data_utils.dataset_longest_seq(all_data)
             window_size = max_len
             model_params['window_size'] = window_size
 
         train_x = np.array(data_utils.pad_dataset(all_data, window_size, 'pre'))
-        noise_x = np.zeros(shape=(len(train_x), self.hidden_state_size))
-        train_y_oh = data_utils.to_onehot(train_x, self.vocab_size)
-
-        model = models.create_model(model_type, model_params.values())
+        #noise_x = np.zeros(shape=(len(train_x), self.hidden_state_size))
+        scale =  epsilon_train["maxdelta"]/epsilon_train["eps"]
+        noise_x = np.random.laplace(0, scale, (len(train_x), self.hidden_state_size))
+        
+        train_y = np.array(all_classes) #data_utils.to_onehot(all_classes, 2)
+            
+        model_gen, model_class = models.create_model(model_type, model_params.values())
 
         trainer = NNTrainer()
-        model = trainer.train(model, self.network_fullpath, [train_x, noise_x], train_y_oh, train_sessions, use_wandb=False)
+        model_class = trainer.train(model_class, self.network_fullpath, [train_x, noise_x], train_y, train_sessions, use_wandb=False)
 
-        return model
+        return model_gen, model_class
 
     def _load_data_to_privatize(self):
         t_sets = self.datasets_params['to_privatize']
@@ -89,39 +92,32 @@ class Gen:
         padding = 0
         
         seq_x = np.array(data_utils.pad_dataset(dataset, self.max_len, 'pre'))
-        #lens = np.array([len(seq) for seq in dataset])
 
         epsilon = trial.get('eps', 'no_dp')
-        maxdelta = trial.get('maxdelta', 0)
-        probas = self.model.predict([seq_x])
+        if epsilon == 'no_dp':
+            noise = np.zeros(shape=(len(dataset), self.hidden_state_size))
+        else:
+            maxdelta = trial.get('maxdelta', 0)
+            scale =  maxdelta/epsilon
+            #scale = scale[:, np.newaxis, np.newaxis] #multiply each symbol proba for each position for each sequence by the scale
+            noise = np.random.laplace(0, scale, (len(dataset), self.hidden_state_size))
+
+        probas = self.model_gen.predict([seq_x, noise])
 
         fake_data = []
-        #printed = False
-        
         for seq_i, seq in enumerate(dataset):
+            
             private_seq = []
             last_index = len(seq) - 1
+            
             for index, real_symbol in enumerate(seq):
                 if real_symbol != padding:#do not include padding
                     if index == last_index:#do not privatize end token
                         private_symbol = real_symbol
                     else:
-                        #proba_vector = softmax(probas[seq_i][index][1:-1])
-                        #private_symbol = np.random.choice(self.vocab_range, p=proba_vector)
+                        #Sacar la probalilidad de generar padding y endtoken
                         proba_vector = softmax(probas[seq_i][index][1:-1])
-                        if epsilon == 'no_dp':
-                            noise = np.zeros(shape=len(proba_vector))
-                        else:
-                            scale =  maxdelta/epsilon
-                            noise = np.random.laplace(0, scale, len(proba_vector))
-                        #if not printed:
-                        #    print("Noise", len(noise), noise)
-                        #    print("Proba", len(proba_vector), proba_vector)
-                        #    print("Sum", proba_vector + noise) 
-                        #    print("Max", np.argmax(softmax(proba_vector + noise)) + 1)
-                        #    printed = True
-                        private_symbol = np.argmax(softmax(proba_vector + noise)) + 1 #+ 1 because padding is 0
-
+                        private_symbol = np.argmax(proba_vector) + 1 #+ 1 because padding is 0
                     private_seq.append(private_symbol)
             fake_data.append(private_seq)
 

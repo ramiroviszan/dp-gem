@@ -104,7 +104,7 @@ experiment = {
                         'save_model': False
                     },
                     'second': {
-                        'epochs': 1,#50,
+                        'epochs': 50,
                         'batch_size': 30,
                         'lr': 0.001,
                         'loss': 'categorical_crossentropy',
