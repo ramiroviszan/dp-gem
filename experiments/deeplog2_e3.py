@@ -193,7 +193,7 @@ experiment = {
                         'lr': 0.0001,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 5,
+                        'patience': 10,
                         'save_model': False
                     },
                     'second': {
@@ -202,7 +202,7 @@ experiment = {
                         'lr': 0.00001,
                         'loss': 'binary_crossentropy',
                         'validation_split': 0.3,
-                        'patience': 5,
+                        'patience': 10,
                         'save_model': True
                     }
                 },
